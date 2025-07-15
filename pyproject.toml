@@ -1,6 +1,6 @@
 [project]
-name = "nomore"
-version = "1.0.0a1"
+name = "nm"
+version = "1.0.0a3"
 description = "Add your description here"
 readme = "README.md"
 authors = [
