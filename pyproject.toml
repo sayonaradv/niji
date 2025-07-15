@@ -1,0 +1,56 @@
+[project]
+name = "nm"
+version = "1.0.0a1"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Cozmo", email = "107803920+Cozmo18@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "datasets>=4.0.0",
+    "jsonargparse[signatures]>=4.40.0",
+    "lightning==2.4",
+    "numpy<2",
+    "torch==2.2.2",
+    "transformers>=4.53.2",
+]
+
+[project.scripts]
+nm = "nm:main"
+trainer = "nm.trainer:cli_main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.3",
+    "ty>=0.0.1a14",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle (error)
+    "F",   # pyflakes
+    "B",   # bugbear
+    "B9",
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "I",   # isort
+    "UP",  # pyupgrade
+    "PIE", # flake8-pie
+    "PGH", # pygrep-hooks
+    "PYI", # flake8-pyi
+    "RUF",
+]
+
+ignore = [
+    # only relevant if you run a script with `python -0`,
+    # which seems unlikely for any of the scripts in this repo
+    "B011",
+    # Leave it to the formatter to split long lines and
+    # the judgement of all of us.
+    "E501",
+]
