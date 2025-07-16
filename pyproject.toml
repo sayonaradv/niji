@@ -1,5 +1,5 @@
 [project]
-name = "stormy"
+name = "stormy-ai"
 version = "1.0.0a8"
 description = "Add your description here"
 readme = "README.md"
@@ -17,8 +17,8 @@ dependencies = [
 ]
 
 [project.scripts]
-stormy = "stormy:main"
-trainer = "stormy.trainer:cli_main"
+stormy = "stormy_ai:main"
+trainer = "stormy_ai.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]

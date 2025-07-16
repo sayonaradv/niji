@@ -1271,7 +1271,7 @@ wheels = [
 ]
 
 [[package]]
-name = "stormy"
+name = "stormy-ai"
 version = "1.0.0a8"
 source = { editable = "." }
 dependencies = [
