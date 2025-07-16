@@ -18,6 +18,8 @@ from datasets import DatasetDict, load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
+LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+
 
 class JigsawDataModule(pl.LightningDataModule):
     """
@@ -54,19 +56,13 @@ class JigsawDataModule(pl.LightningDataModule):
         self,
         model_name_or_path: str = "distilbert-base-cased",
         cache_dir: str = "data",
-        labels: list[str] = [
-            "toxic",
-            "severe_toxic",
-            "obscene",
-            "threat",
-            "insult",
-            "identity_hate",
-        ],
+        labels: list[str] = LABELS,
         val_size: float = 0.2,
         max_token_len: int = 128,
         batch_size: int = 32,
     ) -> None:
         super().__init__()
+
         self.save_hyperparameters()
         self.model_name_or_path = model_name_or_path
         self.cache_dir = cache_dir
