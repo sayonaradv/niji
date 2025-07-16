@@ -61,18 +61,10 @@ class JigsawDataModule(pl.LightningDataModule):
         max_token_len: int = 128,
         batch_size: int = 32,
     ) -> None:
-        
-        
-        
-        
-        
         super().__init__()
 
         self.save_hyperparameters()
-        
-        
-        
-        
+
         self.model_name_or_path = model_name_or_path
         self.cache_dir = cache_dir
         self.labels = labels
