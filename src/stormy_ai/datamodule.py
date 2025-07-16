@@ -64,6 +64,10 @@ class JigsawDataModule(pl.LightningDataModule):
         super().__init__()
 
         self.save_hyperparameters()
+        
+        
+        
+        
         self.model_name_or_path = model_name_or_path
         self.cache_dir = cache_dir
         self.labels = labels
