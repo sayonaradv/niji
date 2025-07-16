@@ -701,7 +701,7 @@ wheels = [
 
 [[package]]
 name = "nm"
-version = "1.0.0a5"
+version = "1.0.0a6"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
