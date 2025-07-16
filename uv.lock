@@ -1272,7 +1272,7 @@ wheels = [
 
 [[package]]
 name = "stormy-ai"
-version = "1.0"
+version = "1.0.1a1"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
