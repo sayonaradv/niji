@@ -98,7 +98,8 @@ class JigsawDataModule(pl.LightningDataModule):
         """
         dataset = load_dataset(self.dataset_name, cache_dir=self.cache_dir)
         train_val = dataset["train"].train_test_split(
-            test_size=self.val_size, seed=18,
+            test_size=self.val_size,
+            seed=18,
         )
         self.dataset = DatasetDict(
             {
