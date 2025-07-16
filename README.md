@@ -1,7 +1,7 @@
 <!-- LOGO -->
 <h1>
 <p align="center">
-  <img src="/images/nm-high-resolution-logo.png" alt="nm logo" width="128">
+  <img src="/images/nomore-high-resolution-logo.png" alt="nomore logo" width="128">
 </h1>
   <p align="center">
     AI-powered Discord bot for automated content moderation and toxicity detection.
@@ -18,9 +18,9 @@
 
 ## About
 
-nm (short for "no more") is a powerful Discord bot that leverages machine learning to automatically detect and moderate toxic content in your server. Built with modern AI technologies and best practices, nm helps maintain a healthy and positive community environment by identifying and handling inappropriate messages in real-time.
+nomore (short for "no more") is a powerful Discord bot that leverages machine learning to automatically detect and moderate toxic content in your server. Built with modern AI technologies and best practices, nomore helps maintain a healthy and positive community environment by identifying and handling inappropriate messages in real-time.
 
-Unlike other moderation bots that rely on simple keyword matching, nm uses advanced natural language processing to understand context and nuance, providing more accurate and fair moderation decisions.
+Unlike other moderation bots that rely on simple keyword matching, nomore uses advanced natural language processing to understand context and nuance, providing more accurate and fair moderation decisions.
 
 ## Features
 
@@ -72,8 +72,8 @@ Unlike other moderation bots that rely on simple keyword matching, nm uses advan
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/nm.git
-cd nm
+git clone https://github.com/yourusername/nomore.git
+cd nomore
 ```
 
 2. Install dependencies:

@@ -1,5 +1,5 @@
 [project]
-name = "nm"
+name = "nomore"
 version = "1.0.0a6"
 description = "Add your description here"
 readme = "README.md"
@@ -17,8 +17,8 @@ dependencies = [
 ]
 
 [project.scripts]
-nm = "nm:main"
-trainer = "nm.trainer:cli_main"
+nomore = "nomore:main"
+trainer = "nomore.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]

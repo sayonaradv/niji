@@ -13,8 +13,8 @@ import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.cli import LightningCLI
 
-from nm.datamodule import JigsawDataModule
-from nm.module import JigsawTransformer
+from .datamodule import JigsawDataModule
+from .module import JigsawTransformer
 
 # see https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
