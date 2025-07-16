@@ -8,8 +8,8 @@ on:
 
 
 jobs:
-  test-pypi:
-    name: Publish to test PyPI
+  pypi:
+    name: Publish to PyPI
     runs-on: ubuntu-latest
     # Environment and permissions trusted publishing.
     environment:
