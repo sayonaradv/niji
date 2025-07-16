@@ -27,7 +27,7 @@
 
 **Stormy** is an open-source Python library that detects hateful or offensive language. Stormy models are trained to predict toxic comments on the Jigsaw Toxic Comment Classification challenge. Unlike traditional keyword-based approaches, Stormy leverages advanced natural language processing to understand context and nuance, providing more accurate and fair toxicity detection.
 
-Stormy is designed to help maintain healthy and positive online environments by identifying and handling inappropriate messages in real-time, with customizable rules and actionable analytics.
+**Stormy** is designed to help maintain healthy and positive online environments by identifying and handling inappropriate messages in real-time, with customizable rules and actionable analytics.
 
 ---
 
