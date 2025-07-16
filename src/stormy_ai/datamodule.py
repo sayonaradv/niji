@@ -21,7 +21,7 @@ from transformers import AutoTokenizer
 
 class JigsawDataModule(pl.LightningDataModule):
     """
-    PyTorch LightningDataModule for the Jigsaw Toxic Comment Classification dataset.
+    Custom PyTorch LightningDataModule for the Jigsaw Toxic Comment Classification dataset.
 
     Handles data preparation, setup, and DataLoader creation for training, validation,
     and testing.
