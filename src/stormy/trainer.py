@@ -14,13 +14,13 @@ from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.cli import LightningCLI
 
 from .datamodule import JigsawDataModule
-from .module import JigsawTransformer
+from .module import StormyTransformer
 
 # see https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
 
-class MyLightningCLI(LightningCLI):
+class StormyCLI(LightningCLI):
     """Custom LightningCLI with additional arguments for callbacks.
 
     Adds support for configuring EarlyStopping and ModelCheckpoint via CLI arguments.
@@ -57,8 +57,8 @@ def cli_main():
 
     Instantiates MyLightningCLI with ToxicModel and JigsawDataModule, using TrainerConfig defaults.
     """
-    MyLightningCLI(
-        JigsawTransformer,
+    StormyCLI(
+        StormyTransformer,
         JigsawDataModule,
         trainer_defaults={"max_epochs": 10, "deterministic": True},
         seed_everything_default=18,

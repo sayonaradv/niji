@@ -1,6 +1,6 @@
 [project]
-name = "nomore"
-version = "1.0.0a6"
+name = "stormy"
+version = "1.0.0a7"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -17,8 +17,8 @@ dependencies = [
 ]
 
 [project.scripts]
-nomore = "nomore:main"
-trainer = "nomore.trainer:cli_main"
+stormy = "stormy:main"
+trainer = "stormy.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]

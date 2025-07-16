@@ -16,7 +16,7 @@ from transformers import (
 )
 
 
-class JigsawTransformer(pl.LightningModule):
+class StormyTransformer(pl.LightningModule):
     """A custom LightningModule for multilabel toxic comment classification.
 
     Args:
