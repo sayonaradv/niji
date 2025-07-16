@@ -12,9 +12,8 @@ jobs:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     # Environment and permissions trusted publishing.
-    environment:
-        # Create this environment in the GitHub repository under Settings -> Environments
-        name: release
+    environment: pypi
+    # Create this environment in the GitHub repository under Settings -> Environments
     permissions:
         id-token: write
     steps:
