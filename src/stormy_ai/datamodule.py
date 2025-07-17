@@ -42,7 +42,6 @@ class JigsawDataModule(pl.LightningDataModule):
     """
 
     dataset_name: ClassVar[str] = "mat55555/jigsaw_toxic_comment"
-
     loader_columns: ClassVar[list[str]] = [
         "datasets_idx",
         "input_ids",
