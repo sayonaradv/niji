@@ -17,8 +17,8 @@ dependencies = [
 ]
 
 [project.scripts]
-stormy = "stormy_ai:main"
-trainer = "stormy_ai.trainer:cli_main"
+stormy = "stormy:main"
+trainer = "stormy.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]
