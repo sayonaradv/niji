@@ -33,6 +33,7 @@ dev = [
 [tool.ruff.lint]
 select = [
     "E",   # pycodestyle (error)
+    "W",   # pycdoestyle (warnings)
     "F",   # pyflakes
     "B",   # bugbear
     "B9",
