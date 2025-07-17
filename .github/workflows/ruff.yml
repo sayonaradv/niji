@@ -13,3 +13,5 @@ jobs:
       - run: ruff check --fix
       - run: ruff format
       - uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: 'ruff lint and format'
