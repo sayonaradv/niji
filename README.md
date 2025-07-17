@@ -1,7 +1,7 @@
 <!-- LOGO -->
 <h1>
 <p align="center">
-  <img src="/images/logo.png" alt="stormy logo" width="128">
+  <img src="images/icon/web/icon-512.png" alt="stormy logo" width="128">
   <br>Stormy
 </h1>
   <p align="center">
