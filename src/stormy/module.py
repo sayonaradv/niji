@@ -23,7 +23,6 @@ class StormyTransformer(pl.LightningModule):
         model_name_or_path (str): Name or path of the pretrained model.
         num_labels (int): Number of output classes.
         learning_rate (float): Learning rate for the optimizer.
-        cache_dir (str): Directory to cache the model and tokenizer.
     """
 
     def __init__(
@@ -31,10 +30,10 @@ class StormyTransformer(pl.LightningModule):
         model_name_or_path: str = "distilbert-base-cased",
         num_labels: int = 6,
         learning_rate: float = 2e-5,
-        cache_dir: str = "data",
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+
         self.config = AutoConfig.from_pretrained(
             model_name_or_path,
             num_labels=num_labels,
