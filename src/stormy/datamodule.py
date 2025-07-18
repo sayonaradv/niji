@@ -24,18 +24,7 @@ LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate
 class JigsawDataModule(pl.LightningDataModule):
     """
     Custom PyTorch LightningDataModule for the Jigsaw Toxic Comment Classification dataset.
-
-    Handles data preparation, setup, and DataLoader creation for training, validation,
-    and testing.
-
-    Args:
-        model_name_or_path: Name or path of the pretrained model for tokenization.
-        cache_dir: Path to the directory for caching datasets and tokenizers.
-        labels: List of class/label names.
-        val_size: Fraction of training data to use for validation (default: 0.2).
-        max_token_len: Maximum token length for tokenization (default: 128).
-        batch_size: Batch size for DataLoaders (default: 32).
-        seed: Random seed for splitting the data (default: 18).
+    Handles data preparation, setup, and DataLoader creation for training, validation, and testing.
 
     Notes:
         https://lightning.ai/docs/pytorch/stable/data/datamodule.html
@@ -55,16 +44,24 @@ class JigsawDataModule(pl.LightningDataModule):
     def __init__(
         self,
         model_name_or_path: str = "distilbert-base-cased",
-        cache_dir: str = "data",
+        cache_dir: str | None = "data",
         labels: list[str] = LABELS,
         val_size: float = 0.2,
         max_token_len: int = 128,
         batch_size: int = 32,
+        seed: int = 18,
     ) -> None:
+        """
+        Args:
+            model_name_or_path: Name or path of the pretrained model for tokenization.
+            cache_dir: Path to the directory for caching datasets and tokenizers. If None, uses the default HuggingFace cache directories (usually ~/.cache/huggingface/datasets and ~/.cache/huggingface/transformers).
+            labels: List of class/label names.
+            val_size: Fraction of training data to use for validation (default: 0.2).
+            max_token_len: Maximum token length for tokenization (default: 128).
+            batch_size: Batch size for DataLoaders (default: 32).
+            seed: Random seed for splitting the data (default: 18).
+        """
         super().__init__()
-
-        self.save_hyperparameters()
-
         self.model_name_or_path = model_name_or_path
         self.cache_dir = cache_dir
         self.labels = labels
@@ -72,6 +69,7 @@ class JigsawDataModule(pl.LightningDataModule):
         self.val_size = val_size
         self.max_token_len = max_token_len
         self.batch_size = batch_size
+        self.seed = seed
         self.num_workers = os.cpu_count()
         self.persistent_workers = True
 
@@ -96,7 +94,7 @@ class JigsawDataModule(pl.LightningDataModule):
         dataset = load_dataset(self.dataset_name, cache_dir=self.cache_dir)
         train_val = dataset["train"].train_test_split(
             test_size=self.val_size,
-            seed=18,
+            seed=self.seed,
         )
         self.dataset = DatasetDict(
             {
@@ -127,6 +125,8 @@ class JigsawDataModule(pl.LightningDataModule):
         Downloads and caches the Jigsaw dataset and tokenizer if not already present.
 
         Also disables parallelism for tokenizers to avoid deadlocks in some environments.
+
+        If cache_dir is None, uses the default HuggingFace cache directories (usually ~/.cache/huggingface/datasets and ~/.cache/huggingface/transformers).
         """
         # disable parrelism to avoid deadlocks
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
