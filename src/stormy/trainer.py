@@ -1,12 +1,14 @@
 """
-Trainer module for running the ToxicModel with PyTorch Lightning CLI.
+Trainer module for running the StormyTransformer with PyTorch Lightning CLI.
 
-Provides a CLI entry point for training and evaluating the ToxicModel using the JigsawDataModule, with support for early stopping and model checkpointing callbacks.
+This module provides a CLI entry point for training and evaluating the StormyTransformer model using the JigsawDataModule.
+It supports configuration of early stopping and model checkpointing callbacks, as well as experiment logging with MLFlowLogger.
 
-Notes:
-    - PyTorch Lightning CLI: https://lightning.ai/docs/pytorch/stable/cli/lightning_cli.html
-    - EarlyStopping: https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.EarlyStopping.html
-    - ModelCheckpoint: https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html
+Features:
+    - PyTorch Lightning CLI integration: https://lightning.ai/docs/pytorch/stable/cli/lightning_cli.html
+    - EarlyStopping callback: https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.EarlyStopping.html
+    - ModelCheckpoint callback: https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.callbacks.ModelCheckpoint.html
+    - MLFlowLogger for experiment tracking: https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.loggers.MLFlowLogger.html
 """
 
 import torch
@@ -21,27 +23,33 @@ torch.set_float32_matmul_precision("medium")
 
 
 class StormyCLI(LightningCLI):
-    """Custom LightningCLI with additional arguments for callbacks.
+    """Custom LightningCLI with support for EarlyStopping, ModelCheckpoint, and argument linking.
 
-    Adds support for configuring EarlyStopping and ModelCheckpoint via CLI arguments.
+    This CLI allows configuration of EarlyStopping and ModelCheckpoint callbacks via command-line arguments. It also links certain arguments between the data and model modules for consistency.
 
-    Notes:
-        - EarlyStopping and ModelCheckpoint are added as configurable forced callbacks.
-        - https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_expert.html#configure-forced-callbacks
+    - EarlyStopping and ModelCheckpoint are added as configurable forced callbacks.
+    - Argument linking ensures num_labels and model_name_or_path are consistent between modules.
+    - See: https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_expert.html#configure-forced-callbacks
     """
 
     def add_arguments_to_parser(self, parser):
         parser.add_lightning_class_args(EarlyStopping, "early_stopping")
         parser.set_defaults(
-            {"early_stopping.monitor": "val_loss", "early_stopping.patience": 3}
+            {
+                "early_stopping.monitor": "val_loss",
+                "early_stopping.patience": 3,
+                "early_stopping.mode": "min",
+                "early_stopping.verbose": True,
+            }
         )
 
         parser.add_lightning_class_args(ModelCheckpoint, "checkpoint")
         parser.set_defaults(
             {
                 "checkpoint.monitor": "val_loss",
-                "checkpoint.filename": "jigsaw-{epoch:02d}-{val_loss:.2f}",
+                "checkpoint.filename": "jigsaw-{epoch:02d}-{val_loss:.3f}",
                 "checkpoint.verbose": True,
+                "checkpoint.save_top_k": 3,
             }
         )
 
@@ -53,14 +61,30 @@ class StormyCLI(LightningCLI):
 
 
 def cli_main():
-    """Entry point for running training or evaluation via LightningCLI.
+    """Entry point for training or evaluating StormyTransformer with LightningCLI.
 
-    Instantiates MyLightningCLI with ToxicModel and JigsawDataModule, using TrainerConfig defaults.
+    Sets up the CLI with StormyTransformer and JigsawDataModule, configures MLFlowLogger for experiment tracking, and applies default trainer settings.
+
+    Notes:
+        https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.loggers.MLFlowLogger.html
     """
+
+    mlf_logger = {
+        "class_path": "lightning.pytorch.loggers.MLFlowLogger",
+        "init_args": {
+            "experiment_name": "lightning_logs",
+            "save_dir": "./mlruns",
+            "log_model": True,
+        },
+    }
     StormyCLI(
         StormyTransformer,
         JigsawDataModule,
-        trainer_defaults={"max_epochs": 10, "deterministic": True},
+        trainer_defaults={
+            "max_epochs": 10,
+            "deterministic": True,
+            "logger": mlf_logger,
+        },
         seed_everything_default=18,
     )
 
