@@ -12,6 +12,7 @@ wheels/
 # Data and logs
 data/
 lightning_logs/
+mlruns/
 
 # Env vars
 .env
