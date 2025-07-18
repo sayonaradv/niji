@@ -32,7 +32,12 @@ class StormyTransformer(pl.LightningModule):
         learning_rate: float = 2e-5,
     ) -> None:
         super().__init__()
+
         self.save_hyperparameters()
+
+        self.model_name_or_path = model_name_or_path
+        self.num_labels = num_labels
+        self.learning_rate = learning_rate
 
         self.config = AutoConfig.from_pretrained(
             model_name_or_path,
@@ -93,12 +98,13 @@ class StormyTransformer(pl.LightningModule):
         val_loss, logits = outputs[:2]
         self.log("val_loss", val_loss, prog_bar=True)
 
-        if self.hparams.num_labels > 1:
+        if self.num_labels > 1:
             preds = torch.sigmoid(logits)
-        elif self.hparams.num_labels == 1:
+        elif self.num_labels == 1:
             preds = logits.squeeze()
 
         labels = batch["labels"]
+
         self.accuracy(preds, labels)
         self.log("val_acc", self.accuracy, on_epoch=True, prog_bar=True)
 
@@ -111,4 +117,4 @@ class StormyTransformer(pl.LightningModule):
         Notes:
             https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#configure-optimizers
         """
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
