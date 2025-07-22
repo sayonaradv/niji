@@ -8,8 +8,9 @@ from typing import Any
 
 import lightning.pytorch as pl
 import torch
-import torchmetrics
 from lightning.pytorch.utilities.types import STEP_OUTPUT
+from torch import Tensor
+from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
@@ -17,13 +18,7 @@ from transformers import (
 
 
 class StormyTransformer(pl.LightningModule):
-    """A custom LightningModule for multilabel toxic comment classification.
-
-    Args:
-        model_name_or_path (str): Name or path of the pretrained model.
-        num_labels (int): Number of output classes.
-        learning_rate (float): Learning rate for the optimizer.
-    """
+    """A custom LightningModule for multilabel toxic comment classification."""
 
     def __init__(
         self,
@@ -31,8 +26,14 @@ class StormyTransformer(pl.LightningModule):
         num_labels: int = 6,
         learning_rate: float = 2e-5,
     ) -> None:
-        super().__init__()
+        """Initialize the StormyTransformer module.
 
+        Args:
+            model_name_or_path (str): Name or path to the pretrained HuggingFace model.
+            num_labels (int): Number of output labels for multilabel classification.
+            learning_rate (float): Learning rate for the optimizer.
+        """
+        super().__init__()
         self.save_hyperparameters()
 
         self.model_name_or_path = model_name_or_path
@@ -47,7 +48,6 @@ class StormyTransformer(pl.LightningModule):
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name_or_path, config=self.config
         )
-        self.accuracy = torchmetrics.Accuracy(task="multilabel", num_labels=num_labels)
 
     def forward(self, **inputs: Any) -> Any:
         """Forward pass through the HuggingFace model.
@@ -82,31 +82,58 @@ class StormyTransformer(pl.LightningModule):
         return loss
 
     def validation_step(self, batch: dict, batch_idx: int) -> STEP_OUTPUT:
-        """Performs a single validation step.
+        """Performs a single validation step using shared evaluation logic.
 
         Args:
             batch (dict): Batch containing tokenized inputs and labels.
             batch_idx (int): Index of the batch.
 
         Returns:
-            None
+            dict: Dictionary containing validation loss and accuracy metrics.
 
         Notes:
             https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#validation_step
         """
-        outputs = self(**batch)
-        val_loss, logits = outputs[:2]
-        self.log("val_loss", val_loss, prog_bar=True)
+        loss, acc = self._shared_eval_step(batch, batch_idx)
+        metrics = {"val_acc": acc, "val_loss": loss}
+        self.log_dict(metrics)
+        return metrics
 
-        if self.num_labels > 1:
-            preds = torch.sigmoid(logits)
-        elif self.num_labels == 1:
-            preds = logits.squeeze()
+    def test_step(self, batch: dict, batch_idx: int) -> STEP_OUTPUT:
+        """Performs a single test step using shared evaluation logic.
 
+        Args:
+            batch (dict): Batch containing tokenized inputs and labels.
+            batch_idx (int): Index of the batch.
+
+        Returns:
+            dict: Dictionary containing test loss and accuracy metrics.
+
+        Notes:
+            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#test_step
+        """
+        loss, acc = self._shared_eval_step(batch, batch_idx)
+        metrics = {"test_acc": acc, "test_loss": loss}
+        self.log_dict(metrics)
+        return metrics
+
+    def _shared_eval_step(self, batch: dict, batch_idx: int) -> tuple[Tensor, Tensor]:
+        """Shared logic for validation and test steps.
+
+        Args:
+            batch (dict): Batch containing tokenized inputs and labels.
+            batch_idx (int): Index of the batch.
+
+        Returns:
+            tuple[torch.Tensor, torch.Tensor]: A tuple containing:
+                - loss (torch.Tensor): Evaluation loss.
+                - acc (torch.Tensor): Multilabel accuracy score.
+        """
         labels = batch["labels"]
-
-        self.accuracy(preds, labels)
-        self.log("val_acc", self.accuracy, on_epoch=True, prog_bar=True)
+        outputs = self(**batch)
+        loss, logits = outputs[:2]
+        acc = multilabel_accuracy(logits, labels, num_labels=self.num_labels)
+        return loss, acc
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         """Set up the optimizer for training.
