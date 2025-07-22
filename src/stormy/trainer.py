@@ -69,12 +69,12 @@ def cli_main():
         https://lightning.ai/docs/pytorch/stable/api/lightning.pytorch.loggers.MLFlowLogger.html
     """
 
-    mlf_logger = {
+    mlflow = {
         "class_path": "lightning.pytorch.loggers.MLFlowLogger",
         "init_args": {
             "experiment_name": "lightning_logs",
-            "save_dir": "./mlruns",
-            "log_model": True,
+            "tracking_uri": "file:./ml-runs",
+            "log_model": "all",
         },
     }
     StormyCLI(
@@ -83,7 +83,7 @@ def cli_main():
         trainer_defaults={
             "max_epochs": 10,
             "deterministic": True,
-            "logger": mlf_logger,
+            "logger": mlflow,
         },
         seed_everything_default=18,
     )

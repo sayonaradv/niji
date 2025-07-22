@@ -14,7 +14,7 @@ from typing import ClassVar
 
 import lightning.pytorch as pl
 import numpy as np
-from datasets import DatasetDict, load_dataset
+from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
@@ -91,34 +91,40 @@ class JigsawDataModule(pl.LightningDataModule):
         Notes:
             https://lightning.ai/docs/pytorch/stable/data/datamodule.html#setup
         """
-        dataset = load_dataset(self.dataset_name, cache_dir=self.cache_dir)
-        train_val = dataset["train"].train_test_split(
-            test_size=self.val_size,
-            seed=self.seed,
-        )
-        self.dataset = DatasetDict(
-            {
-                "train": train_val["train"],
-                "validation": train_val["test"],
-                "test": dataset["test"],
-            }
-        )
+        if stage == "fit" or stage is None:
+            dataset = load_dataset(
+                self.dataset_name, cache_dir=self.cache_dir, split="train"
+            )
+            dataset = dataset.train_test_split(test_size=self.val_size, seed=self.seed)
+            for split in dataset:
+                dataset[split] = dataset[split].map(
+                    self.convert_to_features,
+                    remove_columns=["label"],
+                    batched=True,
+                    num_proc=self.num_workers,
+                )
+                columns = [
+                    c for c in dataset[split].column_names if c in self.loader_columns
+                ]
+                dataset[split].set_format(type="torch", columns=columns)
+            self.train_data = dataset["train"]
+            self.val_data = dataset["test"]
+            del dataset
 
-        for split in self.dataset:
-            self.dataset[split] = self.dataset[split].map(
+        if stage == "test" or stage is None:
+            self.test_data = load_dataset(
+                self.dataset_name, cache_dir=self.cache_dir, split="test"
+            )
+            self.test_data.map(
                 self.convert_to_features,
                 remove_columns=["label"],
                 batched=True,
                 num_proc=self.num_workers,
             )
-            self.columns = [
-                c for c in self.dataset[split].column_names if c in self.loader_columns
+            columns = [
+                c for c in self.test_data.column_names if c in self.loader_columns
             ]
-            self.dataset[split].set_format(type="torch", columns=self.columns)
-
-        # free up memory
-        del dataset
-        del train_val
+            self.test_data.set_format(type="torch", columns=columns)
 
     def prepare_data(self) -> None:
         """
@@ -176,7 +182,7 @@ class JigsawDataModule(pl.LightningDataModule):
             https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
         """
         return DataLoader(
-            self.dataset["train"],
+            self.train_data,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
@@ -192,7 +198,7 @@ class JigsawDataModule(pl.LightningDataModule):
             https://lightning.ai/docs/pytorch/stable/data/datamodule.html#val-dataloader
         """
         return DataLoader(
-            self.dataset["validation"],
+            self.val_data,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
@@ -207,7 +213,7 @@ class JigsawDataModule(pl.LightningDataModule):
             https://lightning.ai/docs/pytorch/stable/data/datamodule.html#test-dataloader
         """
         return DataLoader(
-            self.dataset["test"],
+            self.test_data,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
