@@ -144,4 +144,4 @@ class StormyTransformer(pl.LightningModule):
         Notes:
             https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#configure-optimizers
         """
-        return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
