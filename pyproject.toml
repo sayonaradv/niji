@@ -8,12 +8,12 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "datasets>=4.0.0",
-    "jsonargparse[signatures]>=4.40.0",
-    "lightning==2.4",
-    "mlflow>=3.1.1",
     "numpy<2",
     "torch==2.2.2",
+    "lightning==2.4",
+    "datasets>=4.0.0",
+    "jsonargparse[signatures]>=4.40.0",
+    "mlflow>=3.1.1",
     "transformers==4.49",
 ]
 
