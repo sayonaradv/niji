@@ -1,1 +1,4 @@
-Only generate test dataloader in test or predict mode
+- Warmup learning rate
+- Build server
+- Link server / deployment to production MLFlow logs
+
