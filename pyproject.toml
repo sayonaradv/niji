@@ -1,6 +1,6 @@
 [project]
 name = "stormy-ai"
-version = "1.0.1a8"
+version = "1.0.1a9"
 description = "Add your description here"
 readme = "README.md"
 authors = [
