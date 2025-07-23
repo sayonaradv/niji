@@ -47,7 +47,7 @@ class JigsawDataModule(pl.LightningDataModule):
         cache_dir: str | None = "data",
         labels: list[str] = LABELS,
         val_size: float = 0.2,
-        max_token_len: int = 128,
+        max_token_len: int = 256,
         batch_size: int = 32,
         seed: int = 18,
     ) -> None:
