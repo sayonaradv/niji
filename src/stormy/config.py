@@ -7,6 +7,7 @@ from typing import ClassVar
 @dataclass
 class Config:
     cache_dir: str | Path = "./data"
+    log_dir: str | Path = "./mlruns"
     seed: int = 1234
 
 
@@ -43,5 +44,7 @@ class TrainerConfig:
     accelerator: str = "auto"
     devices: int | str = "auto"
     strategy: str = "auto"
-    precision: str | None = None
+    precision: str | int = "auto"
     max_epochs: int = 5
+    deterministic: bool = True
+    log_model: str | bool = "all"

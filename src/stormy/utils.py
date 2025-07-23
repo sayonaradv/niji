@@ -96,15 +96,9 @@ def unzip_directory(
             file_path.unlink()
 
 
-def resolve_num_workers(num_workers):
-    """Resolves the number of workers for DataLoader.
-
-    Args:
-        num_workers: 'auto', None, or an integer. If 'auto' or None, uses all available CPU cores.
-
-    Returns:
-        int: The number of workers to use.
-    """
-    if num_workers in (None, "auto"):
-        return os.cpu_count()
-    return int(num_workers)
+def get_num_workers() -> int:
+    num_workers = os.cpu_count()
+    if num_workers is not None:
+        return num_workers
+    else:
+        return 0

@@ -1,3 +1,7 @@
+- Finish base module and datamodule
+- Create different DMs (Jigsaw, Jigsaw Bias?)
+- Fix where config.yaml is saved (SaveConfigCallback)
+- Check if dataset exists and log
 - Warmup learning rate
 - Build server
 - Link server / deployment to production MLFlow logs

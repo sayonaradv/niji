@@ -1,147 +1,77 @@
-"""
-LightningModule for multilabel toxic comment classification using HuggingFace Transformers.
-
-Implements a PyTorch LightningModule for toxic comment classification with a HuggingFace model.
-"""
-
-from typing import Any
-
 import lightning.pytorch as pl
 import torch
-from lightning.pytorch.utilities.types import STEP_OUTPUT
+from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor
 from torchmetrics.functional.classification import multilabel_accuracy
-from transformers import (
-    AutoConfig,
-    AutoModelForSequenceClassification,
-)
+from transformers import AutoModelForSequenceClassification
+
+from stormy.config import DataModuleConfig, ModuleConfig
 
 
-class StormyTransformer(pl.LightningModule):
-    """A custom LightningModule for multilabel toxic comment classification."""
-
+class LitTextClassification(pl.LightningModule):
     def __init__(
         self,
-        model_name_or_path: str = "distilbert-base-cased",
-        num_labels: int = 6,
-        learning_rate: float = 2e-5,
+        model_name: str = ModuleConfig.model_name,
+        num_labels: int = len(DataModuleConfig.label_cols),
+        learning_rate: float = ModuleConfig.learning_rate,
     ) -> None:
-        """Initialize the StormyTransformer module.
+        """A custom LightningModule for multi-label sequence classification.
 
         Args:
-            model_name_or_path (str): Name or path to the pretrained HuggingFace model.
-            num_labels (int): Number of output labels for multilabel classification.
-            learning_rate (float): Learning rate for the optimizer.
+            model_name: the name of the model and accompanying tokenizer
+            num_labels: the number of target labels in the training dataset.
+                        This value determines the size of the output layer of the model.
+            learning_rate: learning rate passed to optimizer
         """
         super().__init__()
+
         self.save_hyperparameters()
 
-        self.model_name_or_path = model_name_or_path
+        self.model_name_or_path = model_name
         self.num_labels = num_labels
         self.learning_rate = learning_rate
 
-        self.config = AutoConfig.from_pretrained(
-            model_name_or_path,
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            model_name,
             num_labels=num_labels,
             problem_type="multi_label_classification",
         )
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_name_or_path, config=self.config
-        )
+        self.model.train()
 
-    def forward(self, **inputs: Any) -> Any:
-        """Forward pass through the HuggingFace model.
-
-        Args:
-            **inputs: Tokenized input data as keyword arguments (e.g., input_ids, attention_mask, etc.).
-
-        Returns:
-            transformers.modeling_outputs.SequenceClassifierOutput: Model outputs including loss (if labels provided) and logits.
-
-        Notes:
-            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#forward
-        """
+    def forward(self, **inputs) -> Tensor:
         return self.model(**inputs)
 
-    def training_step(self, batch: dict, batch_idx: int) -> STEP_OUTPUT:
-        """Performs a single training step.
-
-        Args:
-            batch (dict): Batch containing tokenized inputs and labels.
-            batch_idx (int): Index of the batch.
-
-        Returns:
-            torch.Tensor: Training loss.
-
+    def training_step(self, batch: dict[str, Tensor], batch_idx: int) -> Tensor:
+        """
         Notes:
-            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#training_step
+            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#training
         """
         outputs = self(**batch)
         loss = outputs[0]
         self.log("train_loss", loss, prog_bar=True)
         return loss
 
-    def validation_step(self, batch: dict, batch_idx: int) -> STEP_OUTPUT:
-        """Performs a single validation step using shared evaluation logic.
-
-        Args:
-            batch (dict): Batch containing tokenized inputs and labels.
-            batch_idx (int): Index of the batch.
-
-        Returns:
-            dict: Dictionary containing validation loss and accuracy metrics.
-
+    def validation_step(self, batch: dict[str, Tensor], batch_idx: int) -> None:
+        """
         Notes:
-            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#validation_step
+            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#validation
         """
-        loss, acc = self._shared_eval_step(batch, batch_idx)
-        metrics = {"val_acc": acc, "val_loss": loss}
-        self.log_dict(metrics)
-        return metrics
+        self._shared_eval_step(batch, stage="val")
 
-    def test_step(self, batch: dict, batch_idx: int) -> STEP_OUTPUT:
-        """Performs a single test step using shared evaluation logic.
-
-        Args:
-            batch (dict): Batch containing tokenized inputs and labels.
-            batch_idx (int): Index of the batch.
-
-        Returns:
-            dict: Dictionary containing test loss and accuracy metrics.
-
+    def test_step(self, batch: dict[str, Tensor], batch_idx: int) -> None:
+        """
         Notes:
-            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#test_step
+            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#testing
         """
-        loss, acc = self._shared_eval_step(batch, batch_idx)
-        metrics = {"test_acc": acc, "test_loss": loss}
-        self.log_dict(metrics)
-        return metrics
+        self._shared_eval_step(batch, stage="test")
 
-    def _shared_eval_step(self, batch: dict, batch_idx: int) -> tuple[Tensor, Tensor]:
-        """Shared logic for validation and test steps.
-
-        Args:
-            batch (dict): Batch containing tokenized inputs and labels.
-            batch_idx (int): Index of the batch.
-
-        Returns:
-            tuple[torch.Tensor, torch.Tensor]: A tuple containing:
-                - loss (torch.Tensor): Evaluation loss.
-                - acc (torch.Tensor): Multilabel accuracy score.
-        """
-        labels = batch["labels"]
+    def _shared_eval_step(self, batch: dict[str, Tensor], stage: str) -> None:
+        """Shared logic between validation and test steps. Computes and logs the model loss and accuracy."""
         outputs = self(**batch)
         loss, logits = outputs[:2]
-        acc = multilabel_accuracy(logits, labels, num_labels=self.num_labels)
-        return loss, acc
+        acc = multilabel_accuracy(logits, batch["labels"], num_labels=self.num_labels)
+        self.log(f"{stage}_loss", loss, prog_bar=True)
+        self.log(f"{stage}_acc", acc, prog_bar=True)
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        """Set up the optimizer for training.
-
-        Returns:
-            torch.optim.Optimizer: Adam optimizer instance with the specified learning rate.
-
-        Notes:
-            https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#configure-optimizers
-        """
+    def configure_optimizers(self) -> OptimizerLRScheduler:
         return torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)

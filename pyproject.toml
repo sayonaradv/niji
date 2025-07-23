@@ -10,11 +10,12 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy<2",
     "torch==2.2.2",
-    "lightning==2.4",
     "datasets>=4.0.0",
     "jsonargparse[signatures]>=4.40.0",
     "mlflow>=3.1.1",
     "transformers==4.49",
+    "lightning==2.5.0",
+    "rich>=14.0.0",
 ]
 
 [project.scripts]

@@ -15,12 +15,14 @@ from typing import cast
 
 import lightning.pytorch as pl
 import numpy as np
+import torch
 from datasets import Dataset, load_dataset
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset as TorchDataset
 from transformers import AutoTokenizer
 
 from stormy.config import Config, DataModuleConfig, ModuleConfig
+from stormy.utils import get_num_workers
 
 
 class AutoTokenizerDataModule(pl.LightningDataModule):
@@ -37,8 +39,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         loader_columns: list[str] = DataModuleConfig.loader_columns,
         train_split: str = DataModuleConfig.train_split,
         test_split: str = DataModuleConfig.test_split,
-        num_workers: int | None = DataModuleConfig.num_workers,
-        persistent_workers: bool = DataModuleConfig.persistent_workers,
         seed: int = Config.seed,
     ) -> None:
         """ "A custom PyTorch Lightning DataModule for HuggingFace datasets with AutoTokenizer support."
@@ -55,8 +55,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             loader_columns: the list of column names to pass to the HF dataset's .set_format method
             train_split: the name of the training split as given on HF Hub
             test_split: the name of the test split as given on HF Hub
-            num_workers: corresponds to torch.utils.data.DataLoader
-            persistent_workers: whether to keep workers alive between epochs
             seed: the seed used for data splitting
 
         Notes:
@@ -75,9 +73,12 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         self.loader_columns = loader_columns
         self.train_split = train_split
         self.test_split = test_split
-        self.num_workers = num_workers if num_workers is not None else 0
-        self.persistent_workers = persistent_workers
         self.seed = seed
+
+        # speed up training
+        self.num_workers = get_num_workers()
+        self.persistent_workers = True
+        self.pin_memory = torch.cuda.is_available()
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.model_name, cache_dir=cache_dir, use_fast=True
@@ -170,6 +171,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         return DataLoader(
             cast(TorchDataset, self.train_data),
             batch_size=self.batch_size,
+            pin_memory=self.pin_memory,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
             shuffle=True,
@@ -183,8 +185,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         return DataLoader(
             cast(TorchDataset, self.val_data),
             batch_size=self.batch_size,
+            pin_memory=self.pin_memory,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
+            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -195,8 +199,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         return DataLoader(
             cast(TorchDataset, self.test_data),
             batch_size=self.batch_size,
+            pin_memory=self.pin_memory,
             num_workers=self.num_workers,
             persistent_workers=self.persistent_workers,
+            shuffle=False,
         )
 
 
