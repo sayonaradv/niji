@@ -1,15 +1,30 @@
 import os
-import zipfile
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 from torch import Tensor
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    PreTrainedModel,
-    PreTrainedTokenizer,
-)
+
+
+def combine_labels(batch: dict[str, list[Any]], label_columns: list[str]) -> np.ndarray:
+    """
+    Combine multiple binary label columns into a single Numpy array.
+
+    Args:
+        batch: Dictionary containing batched examples where each key maps to a list of values
+        label_columns: List of column names to combine into the labels tensor
+
+    Returns:
+        Combined Numpy array of shape (batch_size, num_labels)
+
+    Raises:
+        KeyError: If any of the specified label columns are not found in the dataset
+    """
+    missing_columns = [col for col in label_columns if col not in batch]
+    if missing_columns:
+        raise KeyError(f"Label columns not found in dataset: {missing_columns}")
+
+    return np.stack([batch[col] for col in label_columns if col in batch], axis=1)
 
 
 def move_to(obj: Any, device: str) -> Any:
@@ -47,53 +62,6 @@ def create_dirs(dirs: list[str | Path]) -> None:
         path = Path(d) if isinstance(d, str) else d
         if not path.is_dir():
             path.mkdir()
-
-
-def get_model_and_tokenizer(
-    model_name: str,
-    num_labels: int,
-    cache_dir: str | None,
-) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
-    """Loads a model and tokenizer for sequence classification.
-
-    Args:
-        model_name: Name or path of the pretrained model.
-        num_labels: Number of labels for classification.
-        cache_dir: Directory to cache the model and tokenizer.
-    """
-    tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name,
-        num_labels=num_labels,
-        cache_dir=cache_dir,
-        problem_type="multi_label_classification",
-        return_dict=True,
-    )
-    return model, tokenizer
-
-
-def unzip_directory(
-    directory: str | Path,
-    *,
-    extract_to: str | Path | None = None,
-    delete_existing: bool = False,
-) -> None:
-    """Extracts all .zip files in a directory.
-
-    Args:
-        directory: Directory containing .zip files.
-        extract_to: Directory to extract files to. Defaults to the input directory.
-        delete_existing: Whether to delete zip files after extraction.
-    """
-    extract_to = extract_to or directory
-    zip_files = [f for f in Path(directory).iterdir() if f.suffix == ".zip"]
-    if len(zip_files) == 0:
-        return
-    for file_path in zip_files:
-        with zipfile.ZipFile(file_path, "r") as z:
-            z.extractall(extract_to)
-        if delete_existing:
-            file_path.unlink()
 
 
 def get_num_workers() -> int:
