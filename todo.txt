@@ -1,4 +1,4 @@
-- Create different DMs (Jigsaw, Jigsaw Bias?)
+- Use pydnatic in module
 - Fix where config.yaml is saved (SaveConfigCallback)
 - Check if dataset exists and log
 - Warmup learning rate

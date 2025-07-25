@@ -1,4 +1,3 @@
-import lightning.pytorch as pl
 import torch
 from jsonargparse import lazy_instance
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
@@ -6,12 +5,10 @@ from lightning.pytorch.cli import ArgsType, LightningCLI
 from lightning.pytorch.loggers import MLFlowLogger
 
 from stormy.datamodule import AutoTokenizerDataModule
-from stormy.module import LitTextClassification
+from stormy.module import SequenceClassificationModule
 
 # see https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
-
-pl.seed_everything(1234, workers=True)
 
 
 class MyLightningCLI(LightningCLI):
@@ -37,16 +34,16 @@ class MyLightningCLI(LightningCLI):
         )
 
         parser.link_arguments(
-            "data.label_cols",
+            "data.label_columns",
             "model.num_labels",
-            compute_fn=lambda label_cols: len(label_cols),
+            compute_fn=lambda label_columns: len(label_columns),
         )
         parser.link_arguments("model.model_name", "data.model_name")
 
 
 def cli_main(args: ArgsType = None):
     MyLightningCLI(
-        LitTextClassification,
+        SequenceClassificationModule,
         AutoTokenizerDataModule,
         args=args,
         seed_everything_default=1234,

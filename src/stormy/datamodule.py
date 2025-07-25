@@ -10,90 +10,63 @@ Notes:
 """
 
 import os
-from pathlib import Path
 from typing import Any, cast
 
 import lightning.pytorch as pl
 import torch
 from datasets import Dataset, load_dataset
+from pydantic import ValidationError
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset as TorchDataset
 from transformers import AutoTokenizer
 
+from stormy.config import DataModuleConfig
 from stormy.utils import combine_labels, get_num_workers
-
-pl.seed_everything(1234, workers=True)
 
 
 class AutoTokenizerDataModule(pl.LightningDataModule):
-    def __init__(
-        self,
-        dataset_name: str,
-        model_name: str,
-        train_split: str,
-        test_split: str,
-        text_column: str,
-        label_columns: list[str],
-        loader_columns: list[str] | None = None,
-        max_token_len: int = 256,
-        val_size: float = 0.2,
-        batch_size: int = 32,
-        cache_dir: str | Path = "data",
-    ) -> None:
-        """Initialize the AutoTokenizerDataModule.
+    def __init__(self, **kwargs: Any) -> None:
+        """Initializes the Lightning DataModule and validates configuration with Pydantic.
 
         Args:
-            dataset_name: The name of the dataset as given on HF datasets
-            model_name: The name of the model and accompanying tokenizer
-            train_split: The name of the training split as given on HF Hub
-            test_split: The name of the test split as given on HF Hub
-            text_column: The name of the text column in the dataset
-            label_columns: List of label column names for multi-label classification
-            loader_columns: The list of column names to pass to the HF dataset's .set_format method
-            max_token_len: Maximum token length for tokenization
-            val_size: The size of the validation split to create from training data
-            batch_size: The batch size to pass to the PyTorch DataLoaders
-            cache_dir: Directory to cache datasets and tokenizers
-
-        Raises:
-            ValueError: If val_size is not between 0 and 1
-            ValueError: If max_token_len is not positive
-            ValueError: If batch_size is not positive
+            model_name (str): Name of the pretrained Hugging Face model to use (e.g., 'bert-base-uncased').
+            dataset_name (str): Name of the Hugging Face dataset to load (e.g., 'imdb', 'ag_news').
+            train_split (str): Name of the split to use for training.
+            test_split (str): Name of the split to use for testing.
+            text_column (str): Name of the column in the dataset that contains input text.
+            label_columns (list[str]): List of column names containing the classification labels (must contain at least one)
+            loader_columns (list[str], optional): List of dataset columns to be in the dataloaders. Defaults to ["input_ids", "attention_mask", "labels"].
+            max_token_len (int, optional): Maximum number of tokens per input sequence (must be positive). Defaults to 128.
+            val_size (float, optional): Proportion of training data to use for validation (must be between 0 and 1). Defaults to 0.2.
+            batch_size (int, optional): Batch size to use for training and evaluation (must be positive)". Defaults to 32.
+            cache_dir (str | Path, optional): Directory path to cache the dataset and tokenizer files. Defaults to `./data`.
 
         Notes:
             https://lightning.ai/docs/pytorch/stable/data/datamodule.html
         """
         super().__init__()
+        try:
+            config = DataModuleConfig(**kwargs)
+        except ValidationError as e:
+            raise ValueError(
+                f"Invalid configuration for AutoTokenizerDataModule: {e}"
+            ) from e
 
-        # Validation
-        if not 0 < val_size < 1:
-            raise ValueError(f"val_size must be between 0 and 1, got {val_size}")
-        if max_token_len <= 0:
-            raise ValueError(f"max_token_len must be positive, got {max_token_len}")
-        if batch_size <= 0:
-            raise ValueError(f"batch_size must be positive, got {batch_size}")
-        if not label_columns:
-            raise ValueError("label_columns cannot be empty")
+        self.dataset_name = config.dataset_name
+        self.model_name = config.model_name
+        self.train_split = config.train_split
+        self.test_split = config.test_split
+        self.text_column = config.text_column
+        self.label_columns = config.label_columns
+        self.loader_columns = config.loader_columns
+        self.max_token_len = config.max_token_len
+        self.val_size = config.val_size
+        self.batch_size = config.batch_size
+        self.cache_dir = config.cache_dir
 
-        self.dataset_name = dataset_name
-        self.cache_dir = str(cache_dir) if isinstance(cache_dir, Path) else cache_dir
-        self.text_column = text_column
-        self.label_columns = label_columns
-        self.num_labels = len(label_columns)
-        self.model_name = model_name
-        self.val_size = val_size
-        self.max_token_len = max_token_len
-        self.batch_size = batch_size
-        self.train_split = train_split
-        self.test_split = test_split
-
-        self.loader_columns = (
-            ["input_ids", "attention_mask", "labels"]
-            if loader_columns is None
-            else loader_columns
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            config.model_name, cache_dir=config.cache_dir
         )
-
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
 
         # Performance optimizations
         self.num_workers = get_num_workers()
@@ -186,7 +159,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         )
 
         # Combine labels
-        if self.num_labels > 1:
+        if len(self.label_columns) > 1:
             inputs["labels"] = combine_labels(batch, self.label_columns)
         else:
             inputs["labels"] = batch[self.label_columns[0]]
