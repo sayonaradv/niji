@@ -1,15 +1,17 @@
+import lightning.pytorch as pl
 import torch
 from jsonargparse import lazy_instance
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from lightning.pytorch.cli import ArgsType, LightningCLI
 from lightning.pytorch.loggers import MLFlowLogger
 
-from stormy.config import Config, TrainerConfig
 from stormy.datamodule import AutoTokenizerDataModule
 from stormy.module import LitTextClassification
 
 # see https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
+
+pl.seed_everything(1234, workers=True)
 
 
 class MyLightningCLI(LightningCLI):
@@ -47,13 +49,10 @@ def cli_main(args: ArgsType = None):
         LitTextClassification,
         AutoTokenizerDataModule,
         args=args,
-        seed_everything_default=Config.seed,
+        seed_everything_default=1234,
         trainer_defaults={
-            "accelerator": TrainerConfig.accelerator,
-            "devices": TrainerConfig.devices,
-            "strategy": TrainerConfig.strategy,
-            "max_epochs": TrainerConfig.max_epochs,
-            "deterministic": TrainerConfig.deterministic,
+            "max_epochs": 5,
+            "deterministic": True,
             "logger": lazy_instance(
                 MLFlowLogger,
                 save_dir="./mlflow",

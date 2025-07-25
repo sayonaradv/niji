@@ -24,7 +24,6 @@ class LitTextClassification(pl.LightningModule):
             learning_rate: learning rate passed to optimizer
         """
         super().__init__()
-
         self.save_hyperparameters()
 
         self.model_name_or_path = model_name
@@ -47,9 +46,8 @@ class LitTextClassification(pl.LightningModule):
             https://lightning.ai/docs/pytorch/stable/common/lightning_module.html#training
         """
         outputs = self(**batch)
-        loss = outputs[0]
-        self.log("train_loss", loss, prog_bar=True)
-        return loss
+        self.log("train_loss", outputs.loss)
+        return outputs.loss
 
     def validation_step(self, batch: dict[str, Tensor], batch_idx: int) -> None:
         """
@@ -68,7 +66,7 @@ class LitTextClassification(pl.LightningModule):
     def _shared_eval_step(self, batch: dict[str, Tensor], stage: str) -> None:
         """Shared logic between validation and test steps. Computes and logs the model loss and accuracy."""
         outputs = self(**batch)
-        loss, logits = outputs[:2]
+        loss, logits = outputs.loss, outputs.logits
         acc = multilabel_accuracy(logits, batch["labels"], num_labels=self.num_labels)
         self.log(f"{stage}_loss", loss, prog_bar=True)
         self.log(f"{stage}_acc", acc, prog_bar=True)

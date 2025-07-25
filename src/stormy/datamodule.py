@@ -22,6 +22,8 @@ from transformers import AutoTokenizer
 
 from stormy.utils import combine_labels, get_num_workers
 
+pl.seed_everything(1234, workers=True)
+
 
 class AutoTokenizerDataModule(pl.LightningDataModule):
     def __init__(
@@ -36,7 +38,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         max_token_len: int = 256,
         val_size: float = 0.2,
         batch_size: int = 32,
-        seed: int = 1234,
         cache_dir: str | Path = "data",
     ) -> None:
         """Initialize the AutoTokenizerDataModule.
@@ -52,7 +53,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             max_token_len: Maximum token length for tokenization
             val_size: The size of the validation split to create from training data
             batch_size: The batch size to pass to the PyTorch DataLoaders
-            seed: The seed used for data splitting
             cache_dir: Directory to cache datasets and tokenizers
 
         Raises:
@@ -86,7 +86,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.train_split = train_split
         self.test_split = test_split
-        self.seed = seed
 
         self.loader_columns = (
             ["input_ids", "attention_mask", "labels"]
@@ -132,9 +131,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
                 raise ValueError(f"Expected Dataset, got {type(dataset)}")
 
             # Split into train/validation
-            dataset_dict = dataset.train_test_split(
-                test_size=self.val_size, seed=self.seed
-            )
+            dataset_dict = dataset.train_test_split(test_size=self.val_size)
 
             # Preprocess both splits
             for split_name, split_dataset in dataset_dict.items():
@@ -247,15 +244,51 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
 
 
 def create_jigsaw_datamodule(**kwargs) -> AutoTokenizerDataModule:
-    """Create a Jigsaw toxic comment classification DataModule with sensible defaults."""
+    """Create a Jigsaw toxic comment classification DataModule with sensible defaults.
+
+    This function provides default configurations for the Jigsaw Toxic Comment dataset
+    while allowing users to override any parameters they need to customize.
+
+    Args:
+        **kwargs: Any parameters to override the defaults. Common ones include:
+            - model_name: The transformer model to use (default: "prajjwal1/bert-tiny")
+            - max_token_len: Maximum token length (default: 256)
+            - val_size: Validation split size (default: 0.2)
+            - batch_size: Batch size for DataLoaders (default: 32)
+            - seed: Random seed for reproducibility (default: 1234)
+            - cache_dir: Directory to cache datasets (default: "data")
+
+    Returns:
+        AutoTokenizerDataModule: Configured data module for Jigsaw dataset
+
+    Example:
+        # Use all defaults
+        dm = create_jigsaw_datamodule()
+
+        # Override specific parameters
+        dm = create_jigsaw_datamodule(
+            model_name="distilbert-base-uncased",
+            max_token_len=512,
+            batch_size=16
+        )
+    """
     default_config = {
         "dataset_name": "mat55555/jigsaw_toxic_comment",
         "model_name": "prajjwal1/bert-tiny",
         "train_split": "train",
         "test_split": "test",
         "text_column": "text",
-        "label_columns": ["toxic", "severe_toxic", "threat"],
+        "label_columns": [
+            "toxic",
+            "severe_toxic",
+            "obscene",
+            "threat",
+            "insult",
+            "identity_hate",
+        ],
     }
+
+    # Update defaults with any user-provided overrides
     default_config.update(kwargs)
     return AutoTokenizerDataModule(**default_config)
 
@@ -276,3 +309,5 @@ if __name__ == "__main__":
             print(f"  {key}: {val.shape}")
         else:
             print(f"  {key}: {type(val)}")
+
+    print(batch)
