@@ -1,6 +1,18 @@
 from pathlib import Path
+from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, BeforeValidator, Field
+
+
+def validate_cache_dir(value: str | Path) -> str:
+    """Convert Path objects to strings, keep strings as-is."""
+    if isinstance(value, Path):
+        return str(value)
+    return value
+
+
+# Create the custom type
+CacheDir = Annotated[str, BeforeValidator(validate_cache_dir)]
 
 
 class DataModuleConfig(BaseModel):
@@ -44,19 +56,12 @@ class DataModuleConfig(BaseModel):
         description="Batch size to use for training and evaluation (must be positive)",
         validate_default=True,
     )
-    cache_dir: str | Path = Field(
-        default=Path("./data"),
+    cache_dir: CacheDir = Field(
+        default="./data",
         description="Directory path to cache the dataset and tokenizer files",
         validate_default=True,
     )
 
-    @field_validator("cache_dir")
-    @classmethod
-    def convert_path_to_str(cls, v):
-        """Convert Path objects to strings for consistency."""
-        return str(v) if isinstance(v, Path) else v
-
     model_config = {
-        "arbitrary_types_allowed": True,  # Allow Path objects
         "validate_assignment": True,  # Validate on attribute assignment
     }
