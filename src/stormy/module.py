@@ -1,10 +1,15 @@
+from typing import Any
+
 import lightning.pytorch as pl
 import torch
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
+from pydantic import ValidationError
 from torch import Tensor
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import AutoModelForSequenceClassification
 from transformers.modeling_outputs import SequenceClassifierOutput
+
+from stormy.config import ModuleConfig
 
 
 class SequenceClassificationModule(pl.LightningModule):
@@ -14,30 +19,31 @@ class SequenceClassificationModule(pl.LightningModule):
     tasks and provides training, validation, and testing steps with appropriate metrics logging.
     """
 
-    def __init__(
-        self,
-        model_name: str,
-        num_labels: int,
-        learning_rate: float = 3e-5,
-    ) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """A custom LightningModule for multi-label sequence classification.
 
         Args:
-            model_name: the name of the model and accompanying tokenizer
-            num_labels: the number of target labels in the training dataset.
-                        This value determines the size of the output layer of the model.
-            learning_rate: learning rate passed to optimizer
+            model_name (str): Name of the pretrained Hugging Face model to use (e.g., 'bert-base-uncased').
+            num_labels (int): Number of target labels in the training dataset (must be positive).
+            learning_rate (float, optional): Learning rate for the optimizer (must be positive). Defaults to 3e-5.
         """
         super().__init__()
+        try:
+            config = ModuleConfig(**kwargs)
+        except ValidationError as e:
+            raise ValueError(
+                f"Invalid configuration for SequenceClassificationModule: {e}"
+            ) from e
+
         self.save_hyperparameters()
 
-        self.model_name_or_path = model_name
-        self.num_labels = num_labels
-        self.learning_rate = learning_rate
+        self.model_name_or_path = config.model_name
+        self.num_labels = config.num_labels
+        self.learning_rate = config.learning_rate
 
         self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_name,
-            num_labels=num_labels,
+            config.model_name,
+            num_labels=config.num_labels,
             problem_type="multi_label_classification",
         )
         self.model.train()

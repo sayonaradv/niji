@@ -65,3 +65,23 @@ class DataModuleConfig(BaseModel):
     model_config = {
         "validate_assignment": True,  # Validate on attribute assignment
     }
+
+
+class ModuleConfig(BaseModel):
+    model_name: str = Field(
+        description="Name of the pretrained Hugging Face model to use (e.g., 'bert-base-uncased')"
+    )
+    num_labels: int = Field(
+        gt=0,
+        description="Number of target labels in the training dataset (must be positive)",
+    )
+    learning_rate: float = Field(
+        default=3e-5,
+        gt=0,
+        description="Learning rate for the optimizer (must be positive)",
+        validate_default=True,
+    )
+
+    model_config = {
+        "validate_assignment": True,  # Validate on attribute assignment
+    }
