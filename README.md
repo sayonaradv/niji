@@ -93,13 +93,13 @@ We plan to build **Stormy-Bot**, a Discord bot that leverages Stormy models to d
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/stormy.git
-   cd stormy
+   git clone https://github.com/dbozbay/stormy-ai.git
+   cd stormy-ai
    ```
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   uv sync --no-dev
    ```
 
 3. **Set up environment variables (if needed):**
@@ -110,7 +110,7 @@ We plan to build **Stormy-Bot**, a Discord bot that leverages Stormy models to d
 
 4. **Run example usage:**
    ```bash
-   python -m src.stormy.module  # Or see example scripts in the documentation
+   uv run trainer fit --config configs/jigsaw-config.yaml  # Or see example scripts in the documentation
    ```
 
 ---
@@ -119,25 +119,25 @@ We plan to build **Stormy-Bot**, a Discord bot that leverages Stormy models to d
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - GPU (recommended for model training)
 
 ### Setting Up Development Environment
 
-1. **Create a virtual environment:**
+1. **Clone the repository:**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   git clone https://github.com/dbozbay/stormy-ai.git
+   cd stormy-ai
    ```
 
 2. **Install development dependencies:**
    ```bash
-   pip install -r requirements-dev.txt
+   uv sync --dev
    ```
 
 3. **Run tests:**
    ```bash
-   pytest
+   uv run pytest
    ```
 
 ---
@@ -167,6 +167,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-**stormy** is in active development. Stay tuned for updates and new features!
+**stormy-ai** is in active development. Stay tuned for updates and new features!
 
 ---
