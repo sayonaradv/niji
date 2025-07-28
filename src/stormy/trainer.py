@@ -27,7 +27,7 @@ class MyLightningCLI(LightningCLI):
         parser.set_defaults(
             {
                 "checkpoint.monitor": "val_loss",
-                "checkpoint.filename": "jigsaw-{epoch:02d}-{val_loss:.4f}",
+                "checkpoint.filename": "finetuned-{epoch:02d}-{val_loss:.4f}",
                 "checkpoint.verbose": True,
                 "checkpoint.save_top_k": 3,
             }
@@ -48,11 +48,10 @@ def cli_main(args: ArgsType = None):
         args=args,
         seed_everything_default=1234,
         trainer_defaults={
-            "max_epochs": 5,
+            "max_epochs": 10,
             "deterministic": True,
             "logger": lazy_instance(
                 MLFlowLogger,
-                save_dir="./mlflow",
                 experiment_name="lightning_logs",
                 log_model="all",
             ),

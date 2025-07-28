@@ -6,25 +6,35 @@ import numpy as np
 from torch import Tensor
 
 
-def combine_labels(batch: dict[str, list[Any]], label_columns: list[str]) -> np.ndarray:
+def combine_labels(
+    batch: dict[str, list[Any]], label_columns: list[str]
+) -> list[list[float]]:
     """
-    Combine multiple binary label columns into a single Numpy array.
+    Combine multiple binary label columns into a single list of float lists.
 
     Args:
         batch: Dictionary containing batched examples where each key maps to a list of values
         label_columns: List of column names to combine into the labels tensor
 
     Returns:
-        Combined Numpy array of shape (batch_size, num_labels)
+        Combined list of float lists of shape (batch_size, num_labels)
 
     Raises:
         KeyError: If any of the specified label columns are not found in the dataset
+        ValueError: If label_columns is empty
     """
     missing_columns = [col for col in label_columns if col not in batch]
     if missing_columns:
         raise KeyError(f"Label columns not found in dataset: {missing_columns}")
 
-    return np.stack([batch[col] for col in label_columns if col in batch], axis=1)
+    if not label_columns:
+        raise ValueError("label_columns cannot be empty")
+
+    return (
+        np.stack([batch[col] for col in label_columns if col in batch], axis=1)
+        .astype(float)
+        .tolist()
+    )
 
 
 def move_to(obj: Any, device: str) -> Any:

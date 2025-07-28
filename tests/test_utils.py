@@ -1,6 +1,4 @@
-import numpy as np
 import pytest
-from numpy.testing import assert_array_equal
 
 from stormy.utils import combine_labels
 
@@ -20,14 +18,41 @@ class TestCombineLabels:
         """Test basic label combination functionality."""
         result = combine_labels(sample_batch, ["label1", "label2"])
 
-        assert isinstance(result, np.ndarray)
-        assert result.shape == (4, 2)  # batch_size=4, num_labels=2
+        assert isinstance(result, list)
+        assert len(result) == 4  # batch_size=4
+        assert len(result[0]) == 2  # num_labels=2
 
         # Check actual values
-        expected = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [0.0, 0.0]])
-        assert_array_equal(result, expected)
+        expected = [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [0.0, 0.0]]
+        assert result == expected
 
-    def missing_column(self, sample_batch):
+    def test_missing_column(self, sample_batch):
         """Test error handling for a single missing column."""
-        with pytest.raises(KeyError):
+        with pytest.raises(
+            KeyError, match="Label columns not found in dataset: \\['missing_label'\\]"
+        ):
             combine_labels(sample_batch, ["label1", "missing_label"])
+
+    def test_all_labels(self, sample_batch):
+        """Test combining all label columns."""
+        result = combine_labels(sample_batch, ["label1", "label2", "label3"])
+
+        assert isinstance(result, list)
+        assert len(result) == 4  # batch_size=4
+        assert len(result[0]) == 3  # num_labels=3
+
+        expected = [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        assert result == expected
+
+    def test_empty_label_list(self, sample_batch):
+        """Test with empty label list."""
+        with pytest.raises(ValueError, match="label_columns cannot be empty"):
+            combine_labels(sample_batch, [])
+
+    def test_multiple_missing_columns(self, sample_batch):
+        """Test error handling for multiple missing columns."""
+        with pytest.raises(
+            KeyError,
+            match="Label columns not found in dataset: \\['missing1', 'missing2'\\]",
+        ):
+            combine_labels(sample_batch, ["label1", "missing1", "missing2"])
