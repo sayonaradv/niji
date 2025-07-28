@@ -19,7 +19,7 @@ jobs:
         run: uv run ruff check --output-format github
 
       - name: Check formatting
-        run: uv run ruff format --preview --diff
+        run: uv run ruff format --diff
 
       - name: Run tests
         run: uv run pytest
