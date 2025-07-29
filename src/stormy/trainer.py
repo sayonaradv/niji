@@ -37,12 +37,16 @@ def cli_main(args: ArgsType = None):
             "deterministic": True,
             "callbacks": [
                 EarlyStopping(monitor="val_loss", mode="min"),
-                ModelCheckpoint(monitor="val_loss", mode="min", filename="{epoch:02d}-{val_loss:.4f}"),
+                ModelCheckpoint(
+                    monitor="val_loss",
+                    mode="min",
+                    filename="{epoch:02d}-{val_loss:.4f}",
+                ),
                 RichModelSummary(max_depth=-1),
                 RichProgressBar(),
             ],
             "logger": True,
-            "precision": "16-mixed"
+            "precision": "16-mixed",
         },
     )
 
