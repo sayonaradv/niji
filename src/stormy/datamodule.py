@@ -168,10 +168,8 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             if not isinstance(dataset, Dataset):
                 raise ValueError(f"Expected HuggingFace Dataset, got {type(dataset)}")
 
-            # Split into train/validation using the configured ratio
             dataset_dict = dataset.train_test_split(test_size=self.val_size)
 
-            # Preprocess both splits with multiprocessing
             for split_name, split_dataset in dataset_dict.items():
                 processed_dataset = split_dataset.map(
                     self.preprocess_data,
@@ -222,21 +220,17 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             Uses the configured max_token_len for truncation/padding and combines
             multiple label columns for multi-label classification scenarios.
         """
-        # Tokenize text with the configured parameters
         inputs = self.tokenizer(
             batch[self.text_column],
             max_length=self.max_token_len,
             padding="max_length",
             truncation=True,
-            return_tensors=None,  # Return as lists for dataset compatibility
+            return_tensors=None,
         )
 
-        # Handle single-label vs multi-label scenarios
         if len(self.label_columns) > 1:
-            # Multi-label: combine all label columns (already converted to float)
             inputs["labels"] = combine_labels(batch, self.label_columns)
         else:
-            # Single-label: use the single label column directly and convert to float
             inputs["labels"] = np.array(
                 batch[self.label_columns[0]], dtype=float
             ).tolist()
@@ -351,18 +345,15 @@ def create_jigsaw_datamodule(**kwargs) -> AutoTokenizerDataModule:
         ],
     }
 
-    # Update defaults with any user-provided overrides
     default_config.update(kwargs)
     return AutoTokenizerDataModule(**default_config)
 
 
 if __name__ == "__main__":
-    # Example usage and testing
     jigsaw_dm = create_jigsaw_datamodule()
     jigsaw_dm.prepare_data()
     jigsaw_dm.setup("fit")
 
-    # Test train dataloader
     train_loader = jigsaw_dm.train_dataloader()
     batch = next(iter(train_loader))
 

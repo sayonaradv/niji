@@ -66,7 +66,6 @@ class SequenceClassificationModule(pl.LightningModule):
         """
         super().__init__()
 
-        # Validate parameters using Pydantic model
         try:
             config = ModuleConfig(
                 model_name=model_name,
@@ -78,22 +77,18 @@ class SequenceClassificationModule(pl.LightningModule):
                 f"Invalid configuration for SequenceClassificationModule: {e}"
             ) from e
 
-        # Save hyperparameters for Lightning checkpointing and logging
         self.save_hyperparameters()
 
-        # Store validated configuration values
         self.model_name_or_path = config.model_name
         self.num_labels = config.num_labels
         self.learning_rate = config.learning_rate
 
-        # Load pretrained model with classification head
         self.model = AutoModelForSequenceClassification.from_pretrained(
             config.model_name,
             num_labels=config.num_labels,
-            problem_type="multi_label_classification",  # Configure for multi-label
+            problem_type="multi_label_classification",
         )
 
-        # Ensure model is in training mode
         self.model.train()
 
     def forward(self, **inputs) -> SequenceClassifierOutput:
@@ -164,10 +159,8 @@ class SequenceClassificationModule(pl.LightningModule):
         outputs = self(**batch)
         loss, logits = outputs.loss, outputs.logits
 
-        # Compute multi-label accuracy using torchmetrics
         acc = multilabel_accuracy(logits, batch["labels"], num_labels=self.num_labels)
 
-        # Log metrics with progress bar for real-time monitoring
         self.log(f"{stage}_loss", loss, prog_bar=True)
         self.log(f"{stage}_acc", acc, prog_bar=True)
 

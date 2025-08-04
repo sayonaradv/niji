@@ -18,7 +18,6 @@ def validate_cache_dir(value: str | Path) -> str:
     return value
 
 
-# Create the custom type
 CacheDir = Annotated[str, BeforeValidator(validate_cache_dir)]
 
 
@@ -88,7 +87,7 @@ class DataModuleConfig(BaseModel):
     )
 
     model_config = {
-        "validate_assignment": True,  # Validate on attribute assignment
+        "validate_assignment": True,
     }
 
 

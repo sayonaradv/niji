@@ -128,16 +128,13 @@ def combine_labels(
         - numpy.stack: The underlying function used for tensor stacking
         - PyTorch BCEWithLogitsLoss: Expects the output format from this function
     """
-    # Validate that all required columns exist in the batch
     missing_columns = [col for col in label_columns if col not in batch]
     if missing_columns:
         raise KeyError(f"Label columns not found in dataset: {missing_columns}")
 
-    # Ensure at least one label column is provided
     if not label_columns:
         raise ValueError("label_columns cannot be empty")
 
-    # Stack label columns and convert to float for PyTorch compatibility
     return (
         np.stack([batch[col] for col in label_columns if col in batch], axis=1)
         .astype(float)
@@ -252,7 +249,6 @@ def move_to(obj: Any, device: str) -> Any:
             res.append(move_to(v, device))
         return res
 
-    # Raise error for unsupported types
     msg = f"Invalid type for device movement: {type(obj)}. Supported types: Tensor, dict, list"
     raise TypeError(msg)
 
@@ -361,13 +357,9 @@ def create_dirs(dirs: list[str | Path]) -> None:
         - tempfile.mkdtemp(): For creating temporary directories
     """
     for d in dirs:
-        # Convert string paths to Path objects for consistent handling
         path = Path(d) if isinstance(d, str) else d
 
-        # Create directory only if it doesn't exist (mkdir is idempotent)
         if not path.is_dir():
-            # parents=True creates parent directories, exist_ok=True prevents errors
-            # if directory is created between the check and mkdir call
             path.mkdir(parents=True, exist_ok=True)
 
 
@@ -479,12 +471,9 @@ def get_num_workers() -> int:
         - os.cpu_count(): The underlying system call for CPU detection
         - PyTorch DataLoader performance guide: https://pytorch.org/docs/stable/data.html#single-and-multi-process-data-loading
     """
-    # Attempt to detect the number of CPU cores
     num_workers = os.cpu_count()
 
     if num_workers is not None:
         return num_workers
     else:
-        # Fallback to single-threaded data loading if CPU count is unavailable
-        # This can happen in some containerized environments or restricted systems
         return 0

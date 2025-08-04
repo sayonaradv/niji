@@ -98,14 +98,12 @@ class MyLightningCLI(LightningCLI):
         Note:
             Called automatically by the Lightning CLI framework during initialization.
         """
-        # Link the number of labels to the length of label columns list
         parser.link_arguments(
             "data.label_columns",
             "model.num_labels",
             compute_fn=lambda label_columns: len(label_columns),
         )
 
-        # Ensure model and data module use the same transformer model
         parser.link_arguments("model.model_name", "data.model_name")
 
 
@@ -163,41 +161,30 @@ def cli_main(args: ArgsType = None) -> None:
         model_class=SequenceClassificationModule,
         datamodule_class=AutoTokenizerDataModule,
         trainer_class=pl.Trainer,
-        seed_everything_default=1234,  # Fixed seed for reproducible experiments
+        seed_everything_default=1234,
         args=args,
         trainer_defaults={
             "max_epochs": 10,
             "deterministic": True,
-
-            # Performance optimizations
-            "precision": "16-mixed",  # Mixed precision for memory efficiency
-
-            # Callbacks for better training experience
+            "precision": "16-mixed",
             "callbacks": [
-                # Stop training when validation loss stops improving
                 EarlyStopping(
                     monitor="val_loss",
                     mode="min",
-                    patience=3,  # Wait 3 epochs before stopping
+                    patience=3,
                     verbose=True
                 ),
-
-                # Save the best model based on validation loss
                 ModelCheckpoint(
                     monitor="val_loss",
                     mode="min",
                     filename="{epoch:02d}-{val_loss:.4f}",
-                    save_top_k=1,  # Keep only the best checkpoint
+                    save_top_k=1,
                     verbose=True
                 ),
-
-                # Rich terminal UI for better user experience
-                RichModelSummary(max_depth=-1),  # Show full model architecture
-                RichProgressBar(),  # Colored progress bars with metrics
+                RichModelSummary(max_depth=-1),
+                RichProgressBar(),
             ],
-
-            # Experiment tracking
-            "logger": True,  # Enable TensorBoard logging
+            "logger": True,
         },
     )
 
