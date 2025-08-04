@@ -53,7 +53,7 @@ class SequenceClassificationModule(pl.LightningModule):
         learning_rate: float = 3e-5,
         warmup_epochs: int = 5,
         max_epochs: int = 10,
-        start_factor: float = 1./3,
+        start_factor: float = 1.0 / 3,
     ) -> None:
         """Initialize the SequenceClassificationModule.
 
