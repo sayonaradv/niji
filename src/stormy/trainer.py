@@ -168,18 +168,13 @@ def cli_main(args: ArgsType = None) -> None:
             "deterministic": True,
             "precision": "16-mixed",
             "callbacks": [
-                EarlyStopping(
-                    monitor="val_loss",
-                    mode="min",
-                    patience=3,
-                    verbose=True
-                ),
+                EarlyStopping(monitor="val_loss", mode="min", patience=3, verbose=True),
                 ModelCheckpoint(
                     monitor="val_loss",
                     mode="min",
                     filename="{epoch:02d}-{val_loss:.4f}",
                     save_top_k=1,
-                    verbose=True
+                    verbose=True,
                 ),
                 RichModelSummary(max_depth=-1),
                 RichProgressBar(),

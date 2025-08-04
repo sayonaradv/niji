@@ -14,7 +14,9 @@ class TestCombineLabels:
             "text": ["sample1", "sample2", "sample", "sample4"],
         }
 
-    def test_basic_functionality(self, sample_batch: dict[str, list[int | str]]) -> None:
+    def test_basic_functionality(
+        self, sample_batch: dict[str, list[int | str]]
+    ) -> None:
         """Test basic label combination functionality."""
         result = combine_labels(sample_batch, ["label1", "label2"])
 
@@ -49,7 +51,9 @@ class TestCombineLabels:
         with pytest.raises(ValueError, match="label_columns cannot be empty"):
             combine_labels(sample_batch, [])
 
-    def test_multiple_missing_columns(self, sample_batch: dict[str, list[int | str]]) -> None:
+    def test_multiple_missing_columns(
+        self, sample_batch: dict[str, list[int | str]]
+    ) -> None:
         """Test error handling for multiple missing columns."""
         with pytest.raises(
             KeyError,
