@@ -9,7 +9,6 @@ trainer:
   logger: true
   callbacks: null
   fast_dev_run: false
-  max_epochs: 10
   min_epochs: null
   max_steps: -1
   min_steps: null
@@ -43,18 +42,21 @@ trainer:
 model:
   model_name: gaunernst/bert-tiny-uncased
   learning_rate: 3.0e-05
+  warmup_epochs: 5
+  max_epochs: 20
+  start_factor: 0.3333333333333333
 data:
   dataset_name: mat55555/jigsaw_toxic_comment
-  train_split: train
+  train_split: train[:10000]
   test_split: test
   text_column: text
   label_columns:
-    - toxic
-    - severe_toxic
-    - obscene
-    - threat
-    - insult
-    - identity_hate
+  - toxic
+  - severe_toxic
+  - obscene
+  - threat
+  - insult
+  - identity_hate
   loader_columns: null
   max_token_len: 128
   val_size: 0.2

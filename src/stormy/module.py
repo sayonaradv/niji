@@ -9,10 +9,11 @@ References:
 """
 
 import lightning.pytorch as pl
-import torch
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from pydantic import ValidationError
 from torch import Tensor
+from torch.optim import Adam
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import AutoModelForSequenceClassification
 from transformers.modeling_outputs import SequenceClassifierOutput
@@ -50,6 +51,9 @@ class SequenceClassificationModule(pl.LightningModule):
         model_name: str,
         num_labels: int,
         learning_rate: float = 3e-5,
+        warmup_epochs: int = 5,
+        max_epochs: int = 10,
+        start_factor: float = 1./3,
     ) -> None:
         """Initialize the SequenceClassificationModule.
 
@@ -71,6 +75,9 @@ class SequenceClassificationModule(pl.LightningModule):
                 model_name=model_name,
                 num_labels=num_labels,
                 learning_rate=learning_rate,
+                warmup_epochs=warmup_epochs,
+                max_epochs=max_epochs,
+                start_factor=start_factor,
             )
         except ValidationError as e:
             raise ValueError(
@@ -82,6 +89,10 @@ class SequenceClassificationModule(pl.LightningModule):
         self.model_name_or_path = config.model_name
         self.num_labels = config.num_labels
         self.learning_rate = config.learning_rate
+        self.warmup_epochs = config.warmup_epochs
+        self.max_epochs = config.max_epochs
+        self.start_factor = config.start_factor
+        self.t_max = config.max_epochs - config.warmup_epochs
 
         self.model = AutoModelForSequenceClassification.from_pretrained(
             config.model_name,
@@ -116,7 +127,7 @@ class SequenceClassificationModule(pl.LightningModule):
             Training loss tensor for backpropagation.
         """
         outputs = self(**batch)
-        self.log("train_loss", outputs.loss)
+        self.log("train_loss", outputs.loss, prog_bar=True)
         return outputs.loss
 
     def validation_step(self, batch: dict[str, Tensor], batch_idx: int) -> None:
@@ -174,4 +185,19 @@ class SequenceClassificationModule(pl.LightningModule):
         Note:
             Lightning automatically handles optimizer.step() and optimizer.zero_grad().
         """
-        return torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        optimizer = Adam(self.model.parameters(), lr=self.learning_rate)
+        schedule1 = LinearLR(
+            optimizer, start_factor=self.start_factor, total_iters=self.warmup_epochs
+        )
+        schedule2 = CosineAnnealingLR(optimizer, T_max=self.t_max)
+        scheduler = SequentialLR(
+            optimizer,
+            schedulers=[schedule1, schedule2],
+            milestones=[self.warmup_epochs],
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+            },
+        }

@@ -117,6 +117,22 @@ class ModuleConfig(BaseModel):
         description="Learning rate for the Adam optimizer. Should be a small positive value.",
         examples=[1e-5, 3e-5, 5e-5, 1e-4],
     )
+    warmup_epochs: int = Field(
+        gt=0,
+        description="",
+        examples=[5, 10, 20],
+    )
+    max_epochs: int = Field(
+        gt=0,
+        description="",
+        examples=[10, 50, 100],
+    )
+    start_factor: float = Field(
+        gt=0,
+        lt=1,
+        description="",
+        examples=[0.1, 0.333, 0.5],
+    )
 
     model_config = {
         "validate_assignment": True,

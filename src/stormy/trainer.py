@@ -41,6 +41,7 @@ import lightning.pytorch as pl
 import torch
 from lightning.pytorch.callbacks import (
     EarlyStopping,
+    LearningRateMonitor,
     ModelCheckpoint,
     RichModelSummary,
     RichProgressBar,
@@ -103,8 +104,8 @@ class MyLightningCLI(LightningCLI):
             "model.num_labels",
             compute_fn=lambda label_columns: len(label_columns),
         )
-
         parser.link_arguments("model.model_name", "data.model_name")
+        parser.link_arguments("trainer.max_epochs", "model.max_epochs")
 
 
 def cli_main(args: ArgsType = None) -> None:
@@ -166,7 +167,7 @@ def cli_main(args: ArgsType = None) -> None:
         trainer_defaults={
             "max_epochs": 10,
             "deterministic": True,
-            "precision": "16-mixed",
+            # "precision": "16-mixed",
             "callbacks": [
                 EarlyStopping(monitor="val_loss", mode="min", patience=3, verbose=True),
                 ModelCheckpoint(
@@ -176,6 +177,7 @@ def cli_main(args: ArgsType = None) -> None:
                     save_top_k=1,
                     verbose=True,
                 ),
+                LearningRateMonitor(logging_interval="epoch"),
                 RichModelSummary(max_depth=-1),
                 RichProgressBar(),
             ],

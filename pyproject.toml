@@ -14,7 +14,7 @@ dependencies = [
     "jsonargparse[signatures]>=4.40.0",
     "transformers==4.49",
     "lightning==2.5.0",
-    "rich>=14.0.0",
+    "rich==14.0",
     "tensorboard>=2.20.0",
     "pydantic>=2.11.7",
 ]
