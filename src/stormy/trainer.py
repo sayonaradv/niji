@@ -167,7 +167,6 @@ def cli_main(args: ArgsType = None) -> None:
         trainer_defaults={
             "max_epochs": 10,
             "deterministic": True,
-            # "precision": "16-mixed",
             "callbacks": [
                 EarlyStopping(monitor="val_loss", mode="min", patience=3, verbose=True),
                 ModelCheckpoint(

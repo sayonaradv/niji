@@ -127,7 +127,7 @@ class SequenceClassificationModule(pl.LightningModule):
             Training loss tensor for backpropagation.
         """
         outputs = self(**batch)
-        self.log("train_loss", outputs.loss, prog_bar=True)
+        self.log("train_loss", outputs.loss, prog_bar=True, on_step=True, on_epoch=True)
         return outputs.loss
 
     def validation_step(self, batch: dict[str, Tensor], batch_idx: int) -> None:
@@ -172,8 +172,8 @@ class SequenceClassificationModule(pl.LightningModule):
 
         acc = multilabel_accuracy(logits, batch["labels"], num_labels=self.num_labels)
 
-        self.log(f"{stage}_loss", loss, prog_bar=True)
-        self.log(f"{stage}_acc", acc, prog_bar=True)
+        self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
         """Configure the optimizer for training.

@@ -47,8 +47,8 @@ model:
   start_factor: 0.3333333333333333
 data:
   dataset_name: mat55555/jigsaw_toxic_comment
-  train_split: train[:10000]
-  test_split: test[:10000]
+  train_split: train
+  test_split: test
   text_column: text
   label_columns:
     - toxic
