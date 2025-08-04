@@ -1,10 +1,10 @@
-"""
-Custom PyTorch Lightning DataModule for HuggingFace datasets with AutoTokenizer support.
+"""PyTorch Lightning DataModule for HuggingFace datasets with AutoTokenizer support.
 
-This module provides:
-- AutoTokenizerDataModule: a pl.LightningDataModule for managing splits and DataLoaders for any HuggingFace dataset.
+This module provides AutoTokenizerDataModule, a Lightning DataModule for managing
+dataset splits and DataLoaders for any HuggingFace dataset used in sequence
+classification tasks.
 
-Notes:
+References:
     - https://lightning.ai/docs/pytorch/stable/data/datamodule.html
     - https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset
 """
@@ -28,12 +28,11 @@ from stormy.utils import combine_labels, get_num_workers
 class AutoTokenizerDataModule(pl.LightningDataModule):
     """PyTorch Lightning DataModule for HuggingFace datasets with AutoTokenizer support.
 
-    This DataModule provides a standardized interface for loading, preprocessing, and creating
-    DataLoaders for any HuggingFace dataset that can be used for sequence classification tasks.
-    It automatically handles tokenization using HuggingFace's AutoTokenizer, creates train/validation
-    splits, and supports both single-label and multi-label classification scenarios.
+    Provides a standardized interface for loading, preprocessing, and creating DataLoaders
+    for HuggingFace datasets used in sequence classification tasks. Supports both single-label
+    and multi-label classification with automatic tokenization and data splitting.
 
-    Key Features:
+    Features:
         - Automatic dataset downloading and caching
         - Flexible train/validation/test split configuration
         - Built-in tokenization with customizable parameters
@@ -41,24 +40,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         - Performance optimizations (multiprocessing, pin memory, persistent workers)
         - Comprehensive parameter validation using Pydantic
 
-    Common Use Cases:
+    Use cases:
         - Text classification (sentiment analysis, spam detection)
-        - Multi-label classification (toxic comment detection)
+        - Multi-label classification (toxicity detection)
         - Fine-tuning transformer models on custom datasets
-        - Research experiments with different tokenization strategies
-
-        Args:
-            model_name (str): Name of the pretrained Hugging Face model to use (e.g., 'bert-base-uncased').
-            dataset_name (str): Name of the Hugging Face dataset to load (e.g., 'imdb', 'ag_news').
-            train_split (str): Name of the split to use for training.
-            test_split (str): Name of the split to use for testing.
-            text_column (str): Name of the column in the dataset that contains input text.
-            label_columns (list[str]): List of column names containing the classification labels (must contain at least one)
-            loader_columns (list[str], optional): List of dataset columns to be in the dataloaders. Defaults to ["input_ids", "attention_mask", "labels"].
-            max_token_len (int, optional): Maximum number of tokens per input sequence (must be positive). Defaults to 128.
-            val_size (float, optional): Proportion of training data to use for validation (must be between 0 and 1). Defaults to 0.2.
-            batch_size (int, optional): Batch size to use for training and evaluation (must be positive)". Defaults to 32.
-            cache_dir (str | Path, optional): Directory path to cache the dataset and tokenizer files. Defaults to `./data`.
     """
 
     def __init__(
@@ -75,13 +60,25 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         batch_size: int = 32,
         cache_dir: str = "./data",
     ) -> None:
-        """Initialize the AutoTokenizerDataModule with comprehensive parameter validation.
+        """Initialize the AutoTokenizerDataModule.
 
-        All parameters are validated using Pydantic models to ensure type safety and
-        provide clear error messages for invalid configurations.
+        Args:
+            dataset_name: Name of the HuggingFace dataset to load.
+            model_name: Name of the pretrained HuggingFace model to use.
+            train_split: Name of the dataset split to use for training.
+            test_split: Name of the dataset split to use for testing.
+            text_column: Name of the column containing input text data.
+            label_columns: List of column names containing classification labels.
+            loader_columns: List of dataset columns to include in DataLoaders.
+                Defaults to ["input_ids", "attention_mask", "labels"].
+            max_token_len: Maximum number of tokens per input sequence. Defaults to 128.
+            val_size: Proportion of training data to use for validation. Defaults to 0.2.
+            batch_size: Batch size for training and evaluation DataLoaders. Defaults to 32.
+            cache_dir: Directory path where datasets and tokenizer files will be cached.
+                Defaults to "./data".
 
-        For detailed parameter specifications, validation rules, and examples,
-        see the class docstring above and DataModuleConfig field definitions.
+        Raises:
+            ValueError: If any parameter fails validation.
         """
         super().__init__()
 
@@ -133,16 +130,12 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
     def prepare_data(self) -> None:
         """Download and cache the dataset.
 
-        This method is called only once per node and is responsible for downloading
-        the dataset to the cache directory. It's safe to call multiple times.
+        Called only once per node to download the dataset to the cache directory.
+        Disables tokenizer parallelism to avoid potential deadlocks during
+        multiprocessing.
 
-        Notes:
-            - Disables tokenizer parallelism to avoid potential deadlocks
-            - Only downloads data, does not assign to instance variables
-            - Called automatically by PyTorch Lightning trainer
-
-        See Also:
-            https://lightning.ai/docs/pytorch/stable/data/datamodule.html#prepare-data
+        Note:
+            Called automatically by PyTorch Lightning trainer.
         """
         # Disable parallelism to avoid deadlocks during multiprocessing
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -152,27 +145,18 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
     def setup(self, stage: str | None) -> None:
         """Set up datasets for training, validation, and testing.
 
-        This method is called on every GPU/process and is responsible for:
-        - Loading and splitting datasets
-        - Applying preprocessing (tokenization)
-        - Setting up data for the specified stage
+        Called on every GPU/process to load datasets, apply preprocessing,
+        and set up data for the specified stage.
 
         Args:
             stage: Either 'fit' (for train/val), 'test', or None (for all stages).
-                - 'fit': Sets up training and validation datasets
-                - 'test': Sets up test dataset
-                - None: Sets up all datasets
 
         Raises:
-            ValueError: If the loaded dataset is not a HuggingFace Dataset object
+            ValueError: If the loaded dataset is not a HuggingFace Dataset object.
 
-        Notes:
-            - Training data is automatically split into train/validation using val_size
-            - All datasets are tokenized and formatted for PyTorch tensors
-            - Preprocessing is done with multiprocessing for efficiency
-
-        See Also:
-            https://lightning.ai/docs/pytorch/stable/data/datamodule.html#setup
+        Note:
+            Training data is automatically split into train/validation using val_size.
+            All datasets are tokenized and formatted for PyTorch tensors.
         """
         if stage == "fit" or stage is None:
             dataset = load_dataset(
@@ -226,11 +210,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
     def preprocess_data(self, batch: dict[str, Any]) -> dict[str, list[Any]]:
         """Preprocess a batch of data by tokenizing text and combining labels.
 
-        This method is applied to each batch during dataset preprocessing and handles:
-        - Tokenizing input text using the configured tokenizer
-        - Combining multiple label columns for multi-label classification
-        - Ensuring consistent output format for DataLoaders
-
         Args:
             batch: A batch dictionary from the HuggingFace dataset containing
                 text data and labels according to the configured column names.
@@ -239,10 +218,9 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             Processed batch dictionary with tokenized inputs and combined labels.
             Contains keys like "input_ids", "attention_mask", and "labels".
 
-        Notes:
-            - Uses the configured max_token_len for truncation/padding
-            - Combines multiple label columns using the combine_labels utility
-            - Returns lists (not tensors) for compatibility with HuggingFace datasets
+        Note:
+            Uses the configured max_token_len for truncation/padding and combines
+            multiple label columns for multi-label classification scenarios.
         """
         # Tokenize text with the configured parameters
         inputs = self.tokenizer(
@@ -268,15 +246,12 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
     def _create_dataloader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
         """Create a DataLoader with consistent configuration.
 
-        This internal method ensures all DataLoaders use the same configuration
-        for performance optimization and consistency.
-
         Args:
-            dataset: The HuggingFace dataset to wrap in a DataLoader
-            shuffle: Whether to shuffle the data (True for training, False for eval)
+            dataset: The HuggingFace dataset to wrap in a DataLoader.
+            shuffle: Whether to shuffle the data. Defaults to False.
 
         Returns:
-            Configured PyTorch DataLoader with performance optimizations enabled
+            Configured PyTorch DataLoader with performance optimizations enabled.
         """
         return DataLoader(
             cast(TorchDataset, dataset),
@@ -291,13 +266,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         """Return the training DataLoader.
 
         Returns:
-            DataLoader for training data with shuffling enabled
+            DataLoader for training data with shuffling enabled.
 
         Raises:
-            RuntimeError: If called before setup('fit')
-
-        Notes:
-            https://lightning.ai/docs/pytorch/stable/data/datamodule.html#train-dataloader
+            RuntimeError: If called before setup('fit').
         """
         if not hasattr(self, "train_data") or self.train_data is None:
             raise RuntimeError("Training data not setup. Call setup('fit') first.")
@@ -307,13 +279,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         """Return the validation DataLoader.
 
         Returns:
-            DataLoader for validation data without shuffling
+            DataLoader for validation data without shuffling.
 
         Raises:
-            RuntimeError: If called before setup('fit')
-
-        Notes:
-            https://lightning.ai/docs/pytorch/stable/data/datamodule.html#val-dataloader
+            RuntimeError: If called before setup('fit').
         """
         if not hasattr(self, "val_data") or self.val_data is None:
             raise RuntimeError("Validation data not setup. Call setup('fit') first.")
@@ -323,13 +292,10 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         """Return the test DataLoader.
 
         Returns:
-            DataLoader for test data without shuffling
+            DataLoader for test data without shuffling.
 
         Raises:
-            RuntimeError: If called before setup('test')
-
-        Notes:
-            https://lightning.ai/docs/pytorch/stable/data/datamodule.html#test-dataloader
+            RuntimeError: If called before setup('test').
         """
         if not hasattr(self, "test_data") or self.test_data is None:
             raise RuntimeError("Test data not setup. Call setup('test') first.")
@@ -339,53 +305,35 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
 def create_jigsaw_datamodule(**kwargs) -> AutoTokenizerDataModule:
     """Create a Jigsaw toxic comment classification DataModule with sensible defaults.
 
-    This convenience function provides pre-configured defaults for the Jigsaw Toxic Comment
-    Classification dataset, making it easy to get started with toxic comment detection tasks.
-    All parameters can be overridden by passing them as keyword arguments.
-
-    The Jigsaw dataset contains Wikipedia comments labeled for various types of toxicity
-    including toxic, severe_toxic, obscene, threat, insult, and identity_hate. This makes
-    it ideal for multi-label classification experiments.
+    Convenience function providing pre-configured defaults for the Jigsaw Toxic Comment
+    Classification dataset. The dataset contains Wikipedia comments labeled for various
+    types of toxicity, making it ideal for multi-label classification experiments.
 
     Args:
-        **kwargs: Any parameters to override the defaults. Common overrides include:
-            - model_name: Change the transformer model (default: "prajjwal1/bert-tiny")
-            - max_token_len: Adjust max sequence length (default: uses DataModule default)
-            - val_size: Change validation split size (default: uses DataModule default)
-            - batch_size: Adjust batch size (default: uses DataModule default)
-            - cache_dir: Change cache directory (default: uses DataModule default)
+        **kwargs: Parameters to override the defaults. Common overrides include:
+            - model_name: Transformer model (default: "prajjwal1/bert-tiny")
+            - max_token_len: Max sequence length
+            - val_size: Validation split size
+            - batch_size: Batch size
+            - cache_dir: Cache directory
 
     Returns:
-        AutoTokenizerDataModule: Fully configured data module for Jigsaw dataset
-        ready for training toxic comment classifiers.
+        AutoTokenizerDataModule configured for the Jigsaw dataset with all 6 toxicity
+        labels (toxic, severe_toxic, obscene, threat, insult, identity_hate).
 
     Examples:
-        Use with all defaults:
-
+        Use with defaults:
         >>> dm = create_jigsaw_datamodule()
-        >>> dm.prepare_data()
-        >>> dm.setup("fit")
 
-        Override specific parameters:
-
+        Override parameters:
         >>> dm = create_jigsaw_datamodule(
         ...     model_name="distilbert-base-uncased",
         ...     max_token_len=256,
-        ...     batch_size=16,
-        ...     val_size=0.15
+        ...     batch_size=16
         ... )
 
-        Use with custom cache directory:
-
-        >>> dm = create_jigsaw_datamodule(
-        ...     cache_dir="/fast_storage/huggingface_cache"
-        ... )
-
-    Notes:
-        - Uses the bert-tiny model by default for fast experimentation
-        - Configured for all 6 toxicity labels (multi-label classification)
-        - Perfect for research and experimentation with toxic comment detection
-        - All AutoTokenizerDataModule features are available
+    Note:
+        Uses bert-tiny model by default for fast experimentation.
     """
     default_config: dict[str, Any] = {
         "dataset_name": "mat55555/jigsaw_toxic_comment",

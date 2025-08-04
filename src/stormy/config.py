@@ -5,7 +5,14 @@ from pydantic import BaseModel, BeforeValidator, Field
 
 
 def validate_cache_dir(value: str | Path) -> str:
-    """Convert Path objects to strings, keep strings as-is."""
+    """Convert Path objects to strings, keep strings as-is.
+
+    Args:
+        value: A string or Path object representing a cache directory.
+
+    Returns:
+        A string representation of the cache directory path.
+    """
     if isinstance(value, Path):
         return str(value)
     return value
@@ -16,7 +23,11 @@ CacheDir = Annotated[str, BeforeValidator(validate_cache_dir)]
 
 
 class DataModuleConfig(BaseModel):
-    """Configuration model for AutoTokenizerDataModule."""
+    """Configuration for AutoTokenizerDataModule.
+
+    Validates parameters for dataset loading, tokenization, and data processing
+    in sequence classification tasks.
+    """
 
     dataset_name: str = Field(
         description="Name of the Hugging Face dataset to load",
@@ -82,7 +93,11 @@ class DataModuleConfig(BaseModel):
 
 
 class ModuleConfig(BaseModel):
-    """Configuration model for SequenceClassificationModule."""
+    """Configuration for SequenceClassificationModule.
+
+    Validates parameters for model initialization, training, and optimization
+    in sequence classification tasks.
+    """
 
     model_name: str = Field(
         description="Name of the pretrained Hugging Face model to use for sequence classification",
@@ -105,31 +120,5 @@ class ModuleConfig(BaseModel):
     )
 
     model_config = {
-        "validate_assignment": True,  # Validate on attribute assignment
+        "validate_assignment": True,
     }
-
-
-# Design Philosophy: Validation Models
-#
-# These Pydantic models serve as internal validation models for:
-# 1. Parameter validation with detailed error messages
-# 2. Type safety and runtime checking
-# 3. Auto-generated API documentation with examples and validation rules
-#
-# Default Value Strategy:
-# - Default values are defined in the PUBLIC API constructors (e.g., AutoTokenizerDataModule.__init__)
-# - This makes defaults visible to users in function signatures and IDE autocomplete
-# - Pydantic models focus purely on validation, not defaults
-# - This separates concerns: public API handles UX, Pydantic handles validation
-#
-# Benefits of this approach:
-# - Users can clearly see default values in the public API
-# - IDE autocomplete shows default values naturally
-# - No confusion between explicit None vs missing parameters
-# - Pydantic models stay focused on validation logic
-# - Public APIs remain intuitive and discoverable
-#
-# Tools that can generate docs from these models:
-# - mkdocs + mkdocstrings-python
-# - Sphinx + pydantic extensions
-# - Custom documentation generators using model.model_json_schema()
