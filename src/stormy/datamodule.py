@@ -387,7 +387,7 @@ def create_jigsaw_datamodule(**kwargs) -> AutoTokenizerDataModule:
         - Perfect for research and experimentation with toxic comment detection
         - All AutoTokenizerDataModule features are available
     """
-    default_config = {
+    default_config: dict[str, Any] = {
         "dataset_name": "mat55555/jigsaw_toxic_comment",
         "model_name": "prajjwal1/bert-tiny",
         "train_split": "train",

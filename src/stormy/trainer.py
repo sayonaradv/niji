@@ -6,7 +6,7 @@ from lightning.pytorch.callbacks import (
     RichModelSummary,
     RichProgressBar,
 )
-from lightning.pytorch.cli import ArgsType, LightningCLI
+from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
 from stormy.datamodule import AutoTokenizerDataModule
 from stormy.module import SequenceClassificationModule
@@ -16,7 +16,7 @@ torch.set_float32_matmul_precision("medium")
 
 
 class MyLightningCLI(LightningCLI):
-    def add_arguments_to_parser(self, parser):
+    def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
         parser.link_arguments(
             "data.label_columns",
             "model.num_labels",
@@ -25,7 +25,7 @@ class MyLightningCLI(LightningCLI):
         parser.link_arguments("model.model_name", "data.model_name")
 
 
-def cli_main(args: ArgsType = None):
+def cli_main(args: ArgsType = None) -> None:
     MyLightningCLI(
         model_class=SequenceClassificationModule,
         datamodule_class=AutoTokenizerDataModule,
