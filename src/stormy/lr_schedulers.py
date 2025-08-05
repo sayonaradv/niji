@@ -59,7 +59,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
     def step(self, epoch=None):
         """Step the underlying scheduler."""
-        self.scheduler.step(epoch)
+        self.scheduler.step()
 
     def state_dict(self):
         """Return state dict for checkpointing."""
@@ -68,6 +68,10 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
     def load_state_dict(self, state_dict):
         """Load state dict from checkpoint."""
         self.scheduler.load_state_dict(state_dict)
+
+    def get_lr(self):
+        """Get the current learning rate."""
+        return self.scheduler.get_lr()
 
     def get_last_lr(self):
         """Get the last computed learning rate."""
