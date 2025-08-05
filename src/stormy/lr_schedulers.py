@@ -54,25 +54,25 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
 
         super().__init__(optimizer)
 
-    def _initial_step(self):
+    def _initial_step(self) -> None:
         """Override to prevent warning during initialization."""
 
-    def step(self, epoch=None):
+    def step(self, epoch=None) -> None:
         """Step the underlying scheduler."""
         self.scheduler.step()
 
-    def state_dict(self):
+    def state_dict(self) -> dict:
         """Return state dict for checkpointing."""
         return self.scheduler.state_dict()
 
-    def load_state_dict(self, state_dict):
+    def load_state_dict(self, state_dict) -> None:
         """Load state dict from checkpoint."""
         self.scheduler.load_state_dict(state_dict)
 
-    def get_lr(self):
+    def get_lr(self) -> float:
         """Get the current learning rate."""
         return self.scheduler.get_lr()
 
-    def get_last_lr(self):
+    def get_last_lr(self) -> list[float]:
         """Get the last computed learning rate."""
         return self.scheduler.get_last_lr()
