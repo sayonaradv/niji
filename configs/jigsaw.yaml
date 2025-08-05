@@ -42,13 +42,10 @@ trainer:
   default_root_dir: null
 model:
   model_name: gaunernst/bert-tiny-uncased
-  learning_rate: 3.0e-05
-  warmup_epochs: 5
-  start_factor: 0.3333333333333333
 data:
   dataset_name: mat55555/jigsaw_toxic_comment
-  train_split: train
-  test_split: test
+  train_split: train[:1000]
+  test_split: test[:1000]
   text_column: text
   label_columns:
     - toxic
@@ -62,6 +59,21 @@ data:
   val_size: 0.2
   batch_size: 32
   cache_dir: ./data
-optimizer: null
-lr_scheduler: null
+optimizer:
+  lr: 3.0e-05
+  betas:
+    - 0.9
+    - 0.999
+  eps: 1.0e-08
+  weight_decay: 0
+  amsgrad: false
+  foreach: null
+  maximize: false
+  capturable: false
+  differentiable: false
+  fused: null
+lr_scheduler:
+  warmup_epochs: 5
+  warmup_start_factor: 0.3333333333333333
+  eta_min: 0.0
 ckpt_path: null

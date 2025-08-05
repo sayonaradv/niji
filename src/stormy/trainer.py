@@ -49,6 +49,7 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
 from stormy.datamodule import AutoTokenizerDataModule
+from stormy.lr_schedulers import LinearWarmupCosineAnnealingLR
 from stormy.module import SequenceClassificationModule
 
 # Optimize tensor operations for better performance on modern hardware
@@ -99,13 +100,28 @@ class MyLightningCLI(LightningCLI):
         Note:
             Called automatically by the Lightning CLI framework during initialization.
         """
+        parser.add_optimizer_args(torch.optim.Adam)
+        parser.set_defaults({"optimizer.lr": 3e-5})
+
+        parser.add_lr_scheduler_args(LinearWarmupCosineAnnealingLR)
+        parser.set_defaults(
+            {
+                "lr_scheduler.warmup_epochs": 5,
+                "lr_scheduler.warmup_start_factor": 1.0 / 3,
+                "lr_scheduler.eta_min": 0.0,
+            }
+        )
+
+        # Link max_epochs to scheduler (scheduler needs to know total epochs)
+        parser.link_arguments("trainer.max_epochs", "lr_scheduler.max_epochs")
+
+        # Keep existing useful links
         parser.link_arguments(
             "data.label_columns",
             "model.num_labels",
             compute_fn=lambda label_columns: len(label_columns),
         )
         parser.link_arguments("model.model_name", "data.model_name")
-        parser.link_arguments("trainer.max_epochs", "model.max_epochs")
 
 
 def cli_main(args: ArgsType = None) -> None:
@@ -164,8 +180,9 @@ def cli_main(args: ArgsType = None) -> None:
         trainer_class=pl.Trainer,
         seed_everything_default=1234,
         args=args,
+        # auto_configure_optimizers=False,
         trainer_defaults={
-            "max_epochs": 10,
+            "max_epochs": 20,
             "deterministic": True,
             "callbacks": [
                 EarlyStopping(monitor="val_loss", mode="min", patience=3, verbose=True),
