@@ -49,8 +49,8 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
 from stormy.datamodule import AutoTokenizerDataModule
-from stormy.lr_schedulers import LinearWarmupCosineAnnealingLR
 from stormy.module import SequenceClassificationModule
+from stormy.schedulers import LinearWarmupCosineAnnealingLR
 
 # Optimize tensor operations for better performance on modern hardware
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
@@ -70,6 +70,8 @@ class MyLightningCLI(LightningCLI):
           based on the number of label columns in the dataset
         - model.model_name → data.model_name: Ensures both components use the
           same pretrained transformer model
+        - trainer.max_epochs → lr_scheduler.max_epochs: Synchronizes training
+          duration with learning rate scheduler
 
     Examples:
         With parameter linking, you only need:
@@ -89,33 +91,28 @@ class MyLightningCLI(LightningCLI):
     """
 
     def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
-        """Add automatic parameter linking to the CLI parser.
+        """Add automatic parameter linking and optimizer configuration to the CLI parser.
 
         Sets up automatic parameter linking between data module and model
-        configurations to ensure related parameters stay synchronized.
+        configurations, configures default optimizer and learning rate scheduler
+        settings, and ensures related parameters stay synchronized.
 
         Args:
-            parser: The Lightning argument parser to configure with parameter links.
+            parser: The Lightning argument parser to configure with parameter links,
+                optimizer defaults, and learning rate scheduler settings.
 
         Note:
             Called automatically by the Lightning CLI framework during initialization.
+            Sets Adam optimizer with 3e-5 learning rate and LinearWarmupCosineAnnealingLR
+            scheduler with 5 warmup epochs as defaults.
         """
         parser.add_optimizer_args(torch.optim.Adam)
         parser.set_defaults({"optimizer.lr": 3e-5})
 
         parser.add_lr_scheduler_args(LinearWarmupCosineAnnealingLR)
-        parser.set_defaults(
-            {
-                "lr_scheduler.warmup_epochs": 5,
-                "lr_scheduler.warmup_start_factor": 1.0 / 3,
-                "lr_scheduler.eta_min": 0.0,
-            }
-        )
+        parser.set_defaults({"lr_scheduler.warmup_epochs": 5})
 
-        # Link max_epochs to scheduler (scheduler needs to know total epochs)
         parser.link_arguments("trainer.max_epochs", "lr_scheduler.max_epochs")
-
-        # Keep existing useful links
         parser.link_arguments(
             "data.label_columns",
             "model.num_labels",
@@ -136,12 +133,19 @@ def cli_main(args: ArgsType = None) -> None:
             from sys.argv. Mainly used for testing or programmatic invocation.
 
     Trainer defaults:
-        - max_epochs: 10 (prevents overfitting)
+        - max_epochs: 20 (sufficient training duration)
         - deterministic: True (ensures reproducible results)
-        - precision: "16-mixed" (memory efficient mixed precision)
         - seed_everything_default: 1234 (fixed seed for reproducibility)
-        - callbacks: Early stopping, model checkpointing, rich UI components
+        - callbacks: Early stopping, model checkpointing, learning rate monitoring,
+          rich UI components
         - logger: TensorBoard logging enabled
+
+    Callbacks configured:
+        - EarlyStopping: Monitors validation loss, stops after 3 epochs without improvement
+        - ModelCheckpoint: Saves best model based on validation loss
+        - LearningRateMonitor: Logs learning rate changes each epoch
+        - RichModelSummary: Displays detailed model architecture
+        - RichProgressBar: Enhanced progress visualization
 
     Examples:
         Train with configuration file:
@@ -180,7 +184,6 @@ def cli_main(args: ArgsType = None) -> None:
         trainer_class=pl.Trainer,
         seed_everything_default=1234,
         args=args,
-        # auto_configure_optimizers=False,
         trainer_defaults={
             "max_epochs": 20,
             "deterministic": True,

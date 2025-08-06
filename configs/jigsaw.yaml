@@ -74,6 +74,7 @@ optimizer:
   fused: null
 lr_scheduler:
   warmup_epochs: 5
-  warmup_start_factor: 0.3333333333333333
+  warmup_start_lr: 0.0
   eta_min: 0.0
+  last_epoch: -1
 ckpt_path: null

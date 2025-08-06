@@ -44,11 +44,7 @@ class SequenceClassificationModule(pl.LightningModule):
         All parameters are validated using Pydantic models for type safety.
     """
 
-    def __init__(
-        self,
-        model_name: str,
-        num_labels: int,
-    ) -> None:
+    def __init__(self, model_name: str, num_labels: int) -> None:
         """Initialize the SequenceClassificationModule.
 
         Loads a pretrained transformer model and configures it for multi-label
@@ -57,7 +53,6 @@ class SequenceClassificationModule(pl.LightningModule):
         Args:
             model_name: Name of the pretrained HuggingFace model to use.
             num_labels: Number of target labels in the classification task.
-            learning_rate: Learning rate for the Adam optimizer. Defaults to 3e-5.
 
         Raises:
             ValueError: If any parameter fails validation.
@@ -151,8 +146,9 @@ class SequenceClassificationModule(pl.LightningModule):
         """
         outputs = self(**batch)
         loss, logits = outputs.loss, outputs.logits
-
-        acc = multilabel_accuracy(logits, batch["labels"], num_labels=self.num_labels)
+        acc = multilabel_accuracy(
+            logits, batch["labels"], num_labels=self.num_labels, threshold=0.5
+        )
 
         self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
