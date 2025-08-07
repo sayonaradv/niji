@@ -62,3 +62,10 @@ ignore = [
     # the judgement of all of us.
     "E501",
 ]
+
+[tool.pyright]
+exclude = [
+  ".venv"
+]
+venvPath = "."
+venv = ".venv"
