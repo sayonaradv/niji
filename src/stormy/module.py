@@ -3,7 +3,6 @@ from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import Tensor
 from torch.nn import functional as F
 from torchmetrics.functional.classification import multilabel_accuracy
-from transformers.modeling_outputs import SequenceClassifierOutput
 
 from stormy.utils import get_model_and_tokenizer
 
@@ -15,7 +14,7 @@ class SequenceClassificationModule(pl.LightningModule):
         *,
         num_labels: int,
         max_token_len: int = 128,
-        cache_dir: str = "data",
+        cache_dir: str | None = "data",
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -26,7 +25,7 @@ class SequenceClassificationModule(pl.LightningModule):
         )
         self.model.train()
 
-    def forward(self, x: str | list[str]) -> SequenceClassifierOutput:
+    def forward(self, x: str | list[str]) -> Tensor:
         inputs = self.tokenizer(
             x,
             max_length=self.hparams["max_token_len"],

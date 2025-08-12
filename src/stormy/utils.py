@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 from torch import Tensor
 from transformers import (
     AutoModelForSequenceClassification,
@@ -25,23 +24,6 @@ def get_model_and_tokenizer(
         model_name, cache_dir=cache_dir, use_fast=True
     )
     return model, tokenizer
-
-
-def combine_labels(
-    batch: dict[str, list[Any]], label_columns: list[str]
-) -> list[list[float]]:
-    missing_columns = [col for col in label_columns if col not in batch]
-    if missing_columns:
-        raise KeyError(f"Label columns not found in dataset: {missing_columns}")
-
-    if not label_columns:
-        raise ValueError("label_columns cannot be empty")
-
-    return (
-        np.stack([batch[col] for col in label_columns if col in batch], axis=1)
-        .astype(float)
-        .tolist()
-    )
 
 
 def move_to(obj: Any, device: str) -> Any:

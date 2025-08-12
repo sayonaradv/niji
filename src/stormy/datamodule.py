@@ -20,7 +20,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         label_columns: list[str],
         val_size: float = 0.2,
         batch_size: int = 32,
-        cache_dir: str = "data",
+        cache_dir: str | None = "data",
     ) -> None:
         super().__init__()
 
