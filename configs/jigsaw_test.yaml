@@ -42,8 +42,8 @@ trainer:
   default_root_dir: null
   model_registry: null
 model:
-  model_name: gaunernst/bert-tiny-uncased
-  max_token_len: 128
+  model_name: distilbert/distilbert-base-uncased
+  max_token_len: 256
   cache_dir: data
 data:
   dataset_name: mat55555/jigsaw_toxic_comment
@@ -63,8 +63,8 @@ data:
 optimizer:
   lr: 3.0e-05
   betas:
-  - 0.9
-  - 0.999
+    - 0.9
+    - 0.999
   eps: 1.0e-08
   weight_decay: 0
   amsgrad: false
