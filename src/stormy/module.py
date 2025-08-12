@@ -37,7 +37,7 @@ class SequenceClassificationModule(pl.LightningModule):
         return self.model(**inputs)[0]
 
     def training_step(self, batch: dict, batch_idx: int) -> Tensor:
-        x, y = batch.values()
+        x, y = batch["text"], batch["labels"]
         y_hat = self(x)
         loss = F.binary_cross_entropy_with_logits(y_hat, y)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
@@ -50,7 +50,7 @@ class SequenceClassificationModule(pl.LightningModule):
         self._shared_eval_step(batch, stage="test")
 
     def _shared_eval_step(self, batch: dict, stage: str) -> None:
-        x, y = batch.values()
+        x, y = batch["text"], batch["labels"]
         y_hat = self(x)
         loss = F.binary_cross_entropy_with_logits(y_hat, y)
         acc = multilabel_accuracy(
