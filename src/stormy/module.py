@@ -14,8 +14,8 @@ class SequenceClassificationModule(pl.LightningModule):
         model_name: str,
         *,
         num_labels: int,
-        max_token_len: int,
-        cache_dir: str,
+        max_token_len: int = 128,
+        cache_dir: str = "data",
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -24,6 +24,7 @@ class SequenceClassificationModule(pl.LightningModule):
             num_labels=self.hparams["num_labels"],
             cache_dir=self.hparams["cache_dir"],
         )
+        self.model.train()
 
     def forward(self, x: str | list[str]) -> SequenceClassifierOutput:
         inputs = self.tokenizer(
@@ -35,24 +36,26 @@ class SequenceClassificationModule(pl.LightningModule):
         )
         return self.model(**inputs)[0]
 
-    def training_step(self, batch: tuple, batch_idx: int) -> Tensor:
-        x, y = batch
-        y_hat = self.model(x)
+    def training_step(self, batch: dict, batch_idx: int) -> Tensor:
+        x, y = batch.values()
+        y_hat = self(x)
         loss = F.binary_cross_entropy_with_logits(y_hat, y)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
-    def validation_step(self, batch: tuple, batch_idx: int) -> None:
+    def validation_step(self, batch: dict, batch_idx: int) -> None:
         self._shared_eval_step(batch, stage="val")
 
-    def test_step(self, batch: tuple, batch_idx: int) -> None:
+    def test_step(self, batch: dict, batch_idx: int) -> None:
         self._shared_eval_step(batch, stage="test")
 
-    def _shared_eval_step(self, batch: tuple, stage: str) -> None:
-        x, y = batch
-        y_hat = self.model(x)
+    def _shared_eval_step(self, batch: dict, stage: str) -> None:
+        x, y = batch.values()
+        y_hat = self(x)
         loss = F.binary_cross_entropy_with_logits(y_hat, y)
-        acc = multilabel_accuracy(y_hat, y, num_labels=self.num_labels, threshold=0.5)
+        acc = multilabel_accuracy(
+            y_hat, y, num_labels=self.hparams["num_labels"], threshold=0.5
+        )
         self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 
@@ -66,8 +69,6 @@ if __name__ == "__main__":
     lit_module = SequenceClassificationModule(
         "gaunernst/bert-tiny-uncased",
         num_labels=6,
-        max_token_len=128,
-        cache_dir="data",
     )
     x = ["Fuck you nigga!", "cunt", "bitch"]
     y_hat = lit_module(x)

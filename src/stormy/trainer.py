@@ -1,4 +1,3 @@
-import lightning.pytorch as pl
 import torch
 from lightning.pytorch.callbacks import (
     EarlyStopping,
@@ -32,16 +31,12 @@ class MyLightningCLI(LightningCLI):
             "model.num_labels",
             compute_fn=lambda label_columns: len(label_columns),
         )
-        parser.link_arguments("model.model_name", "data.model_name")
 
 
 def cli_main(args: ArgsType = None) -> None:
     MyLightningCLI(
         model_class=SequenceClassificationModule,
         datamodule_class=AutoTokenizerDataModule,
-        trainer_class=pl.Trainer,
-        seed_everything_default=1234,
-        args=args,
         trainer_defaults={
             "max_epochs": 20,
             "deterministic": True,
@@ -60,6 +55,8 @@ def cli_main(args: ArgsType = None) -> None:
             ],
             "logger": True,
         },
+        seed_everything_default=1234,
+        args=args,
     )
 
 

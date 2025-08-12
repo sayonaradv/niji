@@ -1,3 +1,4 @@
+import gc
 import os
 from typing import cast
 
@@ -19,7 +20,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
         label_columns: list[str],
         val_size: float = 0.2,
         batch_size: int = 32,
-        cache_dir: str = "./data",
+        cache_dir: str = "data",
     ) -> None:
         super().__init__()
 
@@ -53,21 +54,22 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
                 raise ValueError(f"Expected HuggingFace Dataset, got {type(dataset)}")
 
             dataset_dict = dataset.train_test_split(test_size=self.val_size)
+            val_ds = dataset_dict.pop("test")
+            dataset_dict["val"] = val_ds
 
             for split, ds in dataset_dict.items():
-                processed_dataset = ds.map(
+                ds = ds.map(
                     self.preprocess_data,
                     batched=True,
                     num_proc=self.num_workers,
                     remove_columns=ds.column_names,
                     desc=f"Preprocessing {split} split",
                 )
-                processed_dataset.set_format(type="torch")
-
+                ds.set_format(type="torch", columns=["text", "labels"])
                 if split == "train":
-                    self.train_data = processed_dataset
-                else:  # "test" becomes validation in this context
-                    self.val_data = processed_dataset
+                    self.train_data = ds
+                else:
+                    self.val_data = ds
 
         if stage == "test" or stage is None:
             ds = load_dataset(
@@ -87,9 +89,11 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
                 desc="Tokenizing test split",
             )
 
-            self.test_data.set_format(type="torch")
+            self.test_data.set_format(type="torch", columns=["text", "labels"])
 
-    def preprocess_data(self, batch):
+        gc.collect()
+
+    def preprocess_data(self, batch: dict) -> dict:
         # Combine the binary label columns into one tensor per example
         labels = torch.tensor(
             list(zip(*[batch[col] for col in self.label_columns], strict=False)),
@@ -107,6 +111,7 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=torch.cuda.is_available(),
             persistent_workers=True,
+            drop_last=True,
             shuffle=shuffle,
         )
 
@@ -154,9 +159,10 @@ if __name__ == "__main__":
     jigsaw_dm.setup(stage="fit")
 
     train_ds = jigsaw_dm.train_data
-    print(train_ds)
+    val_ds = jigsaw_dm.val_data
 
     train_dl = jigsaw_dm.train_dataloader()
+    val_dl = jigsaw_dm.val_dataloader()
+
     batch = next(iter(train_dl))
-    print(len(batch["text"]))
-    print(batch["labels"].shape)
+    print(batch)
