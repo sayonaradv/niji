@@ -32,7 +32,8 @@ class SequenceClassificationModule(pl.LightningModule):
             padding="max_length",
             truncation=True,
             return_tensors="pt",
-        )
+        ).to(self.device)
+
         return self.model(**inputs)[0]
 
     def training_step(self, batch: dict, batch_idx: int) -> Tensor:
@@ -72,3 +73,5 @@ if __name__ == "__main__":
     x = ["Fuck you nigga!", "cunt", "bitch"]
     y_hat = lit_module(x)
     print(y_hat)
+
+    print(lit_module.device)
