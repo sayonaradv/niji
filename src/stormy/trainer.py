@@ -34,7 +34,7 @@ class MyLightningCLI(LightningCLI):
         )
 
 
-def cli_main(args: ArgsType = None) -> None:
+def main(args: ArgsType = None) -> None:
     MyLightningCLI(
         model_class=SequenceClassificationModule,
         datamodule_class=AutoTokenizerDataModule,
@@ -62,4 +62,4 @@ def cli_main(args: ArgsType = None) -> None:
 
 
 if __name__ == "__main__":
-    cli_main()
+    main()

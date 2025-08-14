@@ -22,7 +22,7 @@ dependencies = [
 
 [project.scripts]
 stormy = "stormy:main"
-train = "stormy.trainer:cli_main"
+train = "stormy.trainer:main"
 predict = "stormy.predictor:main"
 
 [build-system]
