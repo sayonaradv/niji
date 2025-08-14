@@ -3,6 +3,15 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, Field
 
+JIGSAW_LABELS: list[str] = [
+    "toxic",
+    "severe_toxic",
+    "obscene",
+    "threat",
+    "insult",
+    "identity_hate",
+]
+
 
 def validate_cache_dir(value: str | Path) -> str:
     """Convert Path objects to strings, keep strings as-is.

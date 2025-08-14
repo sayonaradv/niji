@@ -22,7 +22,8 @@ dependencies = [
 
 [project.scripts]
 stormy = "stormy:main"
-trainer = "stormy.trainer:cli_main"
+train = "stormy.trainer:cli_main"
+predict = "stormy.predictor:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -34,8 +35,8 @@ packages = ["src/stormy"]
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
-    "ruff>=0.12.5",
-    "ty>=0.0.1a16",
+    "ruff>=0.12.8",
+    "ty>=0.0.1a18",
 ]
 
 [tool.ruff.lint]
