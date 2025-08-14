@@ -13,7 +13,7 @@ class SequenceClassificationModule(pl.LightningModule):
         model_name: str,
         *,
         num_labels: int,
-        max_token_len: int = 128,
+        max_token_len: int = 256,
         cache_dir: str | None = "data",
     ) -> None:
         super().__init__()

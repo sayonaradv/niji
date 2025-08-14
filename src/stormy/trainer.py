@@ -12,7 +12,6 @@ from stormy.datamodule import AutoTokenizerDataModule
 from stormy.module import SequenceClassificationModule
 from stormy.schedulers import LinearWarmupCosineAnnealingLR
 
-# Optimize tensor operations for better performance on modern hardware
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
@@ -23,7 +22,9 @@ class MyLightningCLI(LightningCLI):
         parser.set_defaults({"optimizer.lr": 3e-5})
 
         parser.add_lr_scheduler_args(LinearWarmupCosineAnnealingLR)
-        parser.set_defaults({"lr_scheduler.warmup_epochs": 5})
+        parser.set_defaults(
+            {"lr_scheduler.warmup_epochs": 5, "lr_scheduler.warmup_start_lr": 1.0 / 10}
+        )
 
         parser.link_arguments("trainer.max_epochs", "lr_scheduler.max_epochs")
         parser.link_arguments(
