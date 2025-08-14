@@ -42,13 +42,13 @@ trainer:
   default_root_dir: null
   model_registry: null
 model:
-  model_name: distilbert/distilbert-base-uncased
+  model_name: prajjwal1/bert-tiny
   max_token_len: 256
   cache_dir: data
 data:
   dataset_name: mat55555/jigsaw_toxic_comment
-  train_split: train[:1000]
-  test_split: test[:1000]
+  train_split: train[:60000]
+  test_split: test[:60000]
   text_column: text
   label_columns:
     - toxic
