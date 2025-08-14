@@ -64,9 +64,5 @@ ignore = [
     "E501",
 ]
 
-[tool.pyright]
-exclude = [
-  ".venv"
-]
-venvPath = "."
-venv = ".venv"
+[tool.ty.environment]
+python = "./.venv"
