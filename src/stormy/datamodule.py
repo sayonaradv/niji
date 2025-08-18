@@ -1,4 +1,3 @@
-import gc
 import os
 from typing import cast
 
@@ -90,8 +89,6 @@ class AutoTokenizerDataModule(pl.LightningDataModule):
             )
 
             self.test_data.set_format(type="torch", columns=["text", "labels"])
-
-        gc.collect()
 
     def preprocess_data(self, batch: dict) -> dict:
         # Combine the binary label columns into one tensor per example
