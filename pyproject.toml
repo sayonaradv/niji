@@ -20,6 +20,10 @@ dependencies = [
     "litserve>=0.2.15",
 ]
 
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = ["**/*venv/**/*"]
+
 [project.scripts]
 stormy = "stormy:main"
 train = "stormy.trainer:main"
