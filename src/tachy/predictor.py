@@ -1,8 +1,8 @@
 import torch
 from jsonargparse import auto_cli
 
-from stormy.config import JIGSAW_LABELS
-from stormy.module import SequenceClassificationModule
+from tachy.config import JIGSAW_LABELS
+from tachy.module import SequenceClassificationModule
 
 
 def predict(

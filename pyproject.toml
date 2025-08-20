@@ -1,12 +1,9 @@
 [project]
-name = "stormy-ai"
-version = "1.0.1a9"
+name = "tachy"
+version = "0.1.0a1"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "Cozmo", email = "107803920+Cozmo18@users.noreply.github.com" }
-]
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 dependencies = [
     "datasets>=4.0.0",
     "jsonargparse[signatures]>=4.40.0",
@@ -21,16 +18,13 @@ project-includes = ["**/*"]
 project-excludes = ["**/*venv/**/*"]
 
 [project.scripts]
-stormy = "stormy:main"
-train = "stormy.trainer:main"
-predict = "stormy.predictor:cli_main"
+tachy = "tachy:main"
+train = "tachy.trainer:main"
+predict = "tachy.predictor:cli_main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/stormy"]
 
 [dependency-groups]
 dev = [

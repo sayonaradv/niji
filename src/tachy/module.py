@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.nn import functional as F
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from stormy.utils import get_model_and_tokenizer
+from tachy.utils import get_model_and_tokenizer
 
 
 class SequenceClassificationModule(pl.LightningModule):

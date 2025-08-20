@@ -8,9 +8,9 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from stormy.datamodule import AutoTokenizerDataModule
-from stormy.module import SequenceClassificationModule
-from stormy.schedulers import LinearWarmupCosineAnnealingLR
+from tachy.datamodule import AutoTokenizerDataModule
+from tachy.module import SequenceClassificationModule
+from tachy.schedulers import LinearWarmupCosineAnnealingLR
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
