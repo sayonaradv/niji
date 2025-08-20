@@ -1,7 +1,7 @@
 name: Checks
 on: [push, pull_request]
 jobs:
-  ruff:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,10 +15,13 @@ jobs:
       - name: Install the project
         run: uv sync --locked --dev
 
-      - name: Check linting
+      - name: Linting
         run: uv run ruff check --fix --diff --output-format github
 
-      - name: Check formatting
+      - name: Typechecking
+        run: uv run pyrefly check
+
+      - name: Formatting
         run: uv run ruff format --diff
 
       - name: Run tests
