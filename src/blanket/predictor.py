@@ -1,8 +1,8 @@
 import torch
 from jsonargparse import auto_cli
 
-from tachy.config import JIGSAW_LABELS
-from tachy.module import SequenceClassificationModule
+from blanket.config import JIGSAW_LABELS
+from blanket.module import SequenceClassificationModule
 
 
 def predict(

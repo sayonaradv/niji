@@ -8,9 +8,9 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from tachy.datamodule import AutoTokenizerDataModule
-from tachy.module import SequenceClassificationModule
-from tachy.schedulers import LinearWarmupCosineAnnealingLR
+from blanket.datamodule import HFDataModule
+from blanket.module import SequenceClassificationModule
+from blanket.schedulers import LinearWarmupCosineAnnealingLR
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -37,7 +37,7 @@ class MyLightningCLI(LightningCLI):
 def main(args: ArgsType = None) -> None:
     MyLightningCLI(
         model_class=SequenceClassificationModule,
-        datamodule_class=AutoTokenizerDataModule,
+        datamodule_class=HFDataModule,
         trainer_defaults={
             "max_epochs": 20,
             "deterministic": True,

@@ -1,5 +1,5 @@
 [project]
-name = "tachy"
+name = "blanket"
 version = "0.0.1a1"
 description = "Add your description here"
 readme = "README.md"
@@ -18,9 +18,9 @@ project-includes = ["**/*"]
 project-excludes = ["**/*venv/**/*"]
 
 [project.scripts]
-tachy = "tachy:main"
-train = "tachy.trainer:main"
-predict = "tachy.predictor:cli_main"
+blanket = "blanket:main"
+train = "blanket.trainer:main"
+predict = "blanket.predictor:cli_main"
 
 [build-system]
 requires = ["hatchling"]
@@ -58,6 +58,3 @@ ignore = [
     # the judgement of all of us.
     "E501",
 ]
-
-[tool.ty.environment]
-python = "./.venv"
