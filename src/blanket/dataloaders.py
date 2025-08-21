@@ -46,21 +46,7 @@ class JigsawDataset(Dataset):
         else:
             raise ValueError(f"Invalid split '{split}'. Must be 'train' or 'test'.")
 
-        return (
-            df.astype(
-                {
-                    "comment_text": "str",
-                    "toxic": "int",
-                    "severe_toxic": "int",
-                    "obscene": "int",
-                    "threat": "int",
-                    "insult": "int",
-                    "identity_hate": "int",
-                }
-            )
-            .rename(columns={"comment_text": "text"})
-            .drop(columns=["id"])
-        )
+        return df.rename(columns={"comment_text": "text"}).drop(columns=["id"])
 
     def __len__(self) -> int:
         return len(self.data)
