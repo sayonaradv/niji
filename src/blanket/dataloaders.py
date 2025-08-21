@@ -1,10 +1,11 @@
 import os
 from typing import Literal
 
+import lightning.pytorch as pl
 import pandas as pd
 import torch
 from torch import Tensor
-from torch.utils.data.dataset import Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 
 JIGSAW_DATA_DIR: str = os.path.join(
     "data", "jigsaw-toxic-comment-classification-challenge"
@@ -12,9 +13,7 @@ JIGSAW_DATA_DIR: str = os.path.join(
 
 
 class JigsawDataset(Dataset):
-    def __init__(
-        self, split: Literal["train", "test"] = "train", data_dir: str = JIGSAW_DATA_DIR
-    ) -> None:
+    def __init__(self, split: Literal["train", "test"], data_dir: str) -> None:
         """
         Initialize Jigsaw dataset.
 
@@ -58,11 +57,58 @@ class JigsawDataset(Dataset):
         return {"text": text, "labels": labels}
 
 
-if __name__ == "__main__":
-    train_ds = JigsawDataset(split="train")
-    test_ds = JigsawDataset(split="test")
+class JigsawDataModule(pl.LightningDataModule):
+    def __init__(
+        self,
+        data_dir: str = JIGSAW_DATA_DIR,
+        batch_size: int = 64,
+        val_size: float = 0.2,
+    ) -> None:
+        super().__init__()
+        self.data_dir = data_dir
+        self.batch_size = batch_size
+        self.val_size = val_size
 
-    print(f"Train dataset size: {len(train_ds)}")
-    print(f"Test dataset size: {len(test_ds)}")
-    print("\nSample from train dataset:")
-    print(train_ds[0])
+        self.train_ds: Dataset | None = None
+        self.val_ds: Dataset | None = None
+        self.test_ds: Dataset | None = None
+
+    def setup(self, stage: str | None) -> None:
+        if stage == "fit" or stage is None:
+            lengths: list[float] = [1 - self.val_size, self.val_size]
+            full_train_ds = JigsawDataset(split="train", data_dir=self.data_dir)
+            self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
+        elif stage == "test" or stage is None:
+            self.test_ds = JigsawDataset(split="test", data_dir=self.data_dir)
+
+    def train_dataloader(self) -> DataLoader | None:
+        if self.train_ds:
+            return DataLoader(
+                self.train_ds, shuffle=True, batch_size=self.batch_size, drop_last=True
+            )
+        else:
+            return None
+
+    def val_dataloader(self) -> DataLoader | None:
+        if self.val_ds:
+            return DataLoader(self.val_ds, batch_size=self.batch_size, drop_last=True)
+        else:
+            return None
+
+    def test_dataloader(self) -> DataLoader | None:
+        if self.test_ds:
+            return DataLoader(self.test_ds, batch_size=self.batch_size, drop_last=True)
+        else:
+            return None
+
+
+if __name__ == "__main__":
+    dm = JigsawDataModule()
+    dm.setup(stage="fit")
+    train_dl = dm.train_dataloader()
+    val_dl = dm.val_dataloader()
+    test_dl = dm.test_dataloader()
+
+    print(f"Train dataloader: {len(train_dl)}")
+    print(f"Val dataloader: {len(val_dl)}")
+    print(f"Test dataloader: {test_dl}")
