@@ -39,7 +39,6 @@ class JigsawDataset(Dataset):
                 .query("toxic != -1")
                 .reset_index(drop=True)
             )
-
         elif split == "train":
             df = pd.read_csv(train_path)
         else:
@@ -73,33 +72,39 @@ class JigsawDataModule(pl.LightningDataModule):
         self.val_ds: Dataset | None = None
         self.test_ds: Dataset | None = None
 
-    def setup(self, stage: str | None) -> None:
+    def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
             lengths: list[float] = [1 - self.val_size, self.val_size]
             full_train_ds = JigsawDataset(split="train", data_dir=self.data_dir)
             self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
-        elif stage == "test" or stage is None:
+        if stage == "test" or stage is None:
             self.test_ds = JigsawDataset(split="test", data_dir=self.data_dir)
 
-    def train_dataloader(self) -> DataLoader | None:
-        if self.train_ds:
-            return DataLoader(
-                self.train_ds, shuffle=True, batch_size=self.batch_size, drop_last=True
+    def train_dataloader(self) -> DataLoader:
+        if self.train_ds is None:
+            raise RuntimeError(
+                "Train dataset has not been initialized. "
+                "Did you forget to call `setup('fit')`?"
             )
-        else:
-            return None
+        return DataLoader(
+            self.train_ds, shuffle=True, batch_size=self.batch_size, drop_last=True
+        )
 
-    def val_dataloader(self) -> DataLoader | None:
-        if self.val_ds:
-            return DataLoader(self.val_ds, batch_size=self.batch_size, drop_last=True)
-        else:
-            return None
+    def val_dataloader(self) -> DataLoader:
+        if self.val_ds is None:
+            raise RuntimeError(
+                "Validation dataset has not been initialized. "
+                "Did you forget to call `setup('fit')`?"
+            )
+        return DataLoader(self.val_ds, batch_size=self.batch_size, drop_last=True)
 
-    def test_dataloader(self) -> DataLoader | None:
-        if self.test_ds:
-            return DataLoader(self.test_ds, batch_size=self.batch_size, drop_last=True)
-        else:
-            return None
+    def test_dataloader(self) -> DataLoader:
+        if self.test_ds is None:
+            raise RuntimeError(
+                "Test dataset has not been initialized. "
+                "Did you forget to call `setup('test')`?"
+            )
+        return DataLoader(self.test_ds, batch_size=self.batch_size, drop_last=True)
 
 
 if __name__ == "__main__":
@@ -107,8 +112,13 @@ if __name__ == "__main__":
     dm.setup(stage="fit")
     train_dl = dm.train_dataloader()
     val_dl = dm.val_dataloader()
-    test_dl = dm.test_dataloader()
 
-    print(f"Train dataloader: {len(train_dl)}")
-    print(f"Val dataloader: {len(val_dl)}")
+    # This will raise unless you also call `dm.setup(stage="test")`
+    try:
+        test_dl = dm.test_dataloader()
+    except RuntimeError as e:
+        test_dl = str(e)
+
+    print(f"Train dataloader batches: {len(train_dl)}")
+    print(f"Val dataloader batches: {len(val_dl)}")
     print(f"Test dataloader: {test_dl}")
