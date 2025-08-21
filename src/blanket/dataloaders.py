@@ -2,9 +2,9 @@ import os
 from typing import Literal
 
 import pandas as pd
-from torch.utils.data.dataset import Dataset
-from torch import Tensor
 import torch
+from torch import Tensor
+from torch.utils.data.dataset import Dataset
 
 JIGSAW_DATA_DIR: str = os.path.join(
     "data", "jigsaw-toxic-comment-classification-challenge"
