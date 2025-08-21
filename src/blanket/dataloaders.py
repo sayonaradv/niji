@@ -105,20 +105,3 @@ class JigsawDataModule(pl.LightningDataModule):
                 "Did you forget to call `setup('test')`?"
             )
         return DataLoader(self.test_ds, batch_size=self.batch_size, drop_last=True)
-
-
-if __name__ == "__main__":
-    dm = JigsawDataModule()
-    dm.setup(stage="fit")
-    train_dl = dm.train_dataloader()
-    val_dl = dm.val_dataloader()
-
-    # This will raise unless you also call `dm.setup(stage="test")`
-    try:
-        test_dl = dm.test_dataloader()
-    except RuntimeError as e:
-        test_dl = str(e)
-
-    print(f"Train dataloader batches: {len(train_dl)}")
-    print(f"Val dataloader batches: {len(val_dl)}")
-    print(f"Test dataloader: {test_dl}")
