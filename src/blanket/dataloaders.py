@@ -52,7 +52,7 @@ class JigsawDataset(Dataset):
     def __getitem__(self, idx: int) -> dict[str, str | Tensor]:
         row: dict[str, str | int] = self.data.iloc[idx].to_dict()
         text: str = str(row.pop("text"))
-        labels: Tensor = torch.IntTensor(list(row.values()))
+        labels: Tensor = torch.FloatTensor(list(row.values()))
         return {"text": text, "labels": labels}
 
 
@@ -75,7 +75,9 @@ class JigsawDataModule(pl.LightningDataModule):
     def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
             lengths: list[float] = [1 - self.val_size, self.val_size]
-            full_train_ds = JigsawDataset(split="train", data_dir=self.data_dir)
+            full_train_ds: Dataset = JigsawDataset(
+                split="train", data_dir=self.data_dir
+            )
             self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
         if stage == "test" or stage is None:
             self.test_ds = JigsawDataset(split="test", data_dir=self.data_dir)

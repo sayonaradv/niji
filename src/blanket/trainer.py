@@ -8,9 +8,8 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from blanket.datamodule import HFDataModule
-from blanket.module import SequenceClassificationModule
-from blanket.schedulers import LinearWarmupCosineAnnealingLR
+from blanket.dataloaders import JigsawDataModule
+from blanket.models import ToxicityClassifier
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -18,26 +17,13 @@ torch.set_float32_matmul_precision("medium")
 
 class MyLightningCLI(LightningCLI):
     def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
-        parser.add_optimizer_args(torch.optim.Adam)
-        parser.set_defaults({"optimizer.lr": 3e-5})
-
-        parser.add_lr_scheduler_args(LinearWarmupCosineAnnealingLR)
-        parser.set_defaults(
-            {"lr_scheduler.warmup_epochs": 5, "lr_scheduler.warmup_start_lr": 1.0 / 10}
-        )
-
-        parser.link_arguments("trainer.max_epochs", "lr_scheduler.max_epochs")
-        parser.link_arguments(
-            "data.label_columns",
-            "model.num_labels",
-            compute_fn=lambda label_columns: len(label_columns),
-        )
+        parser.link_arguments("trainer.max_epochs", "model.num_training_steps")
 
 
 def main(args: ArgsType = None) -> None:
     MyLightningCLI(
-        model_class=SequenceClassificationModule,
-        datamodule_class=HFDataModule,
+        model_class=ToxicityClassifier,
+        datamodule_class=JigsawDataModule,
         trainer_defaults={
             "max_epochs": 20,
             "deterministic": True,
