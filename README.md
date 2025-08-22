@@ -1,117 +1,141 @@
-<!-- LOGO -->
-<h1>
-<p align="center">
-  <img src=".github/images/cloud_icon.png" alt="stormy logo" width="128">
-  <br>Stormy
-</h1>
-  <p align="center">
-    Open-source Python library for detecting hateful or offensive language using state-of-the-art machine learning models.
-    <br />
-    <a href="#about">About</a>
-    ·
-    <a href="#features">Features</a>
-    ·
-    <a href="#installation">Installation</a>
-    ·
-    <a href="#development">Development</a>
-    ·
-    <a href="#roadmap-and-status">Roadmap</a>
-    ·
-    <a href="#planned-projects">Planned Projects</a>
-  </p>
-</p>
+# Blanket ⛈️
 
----
+**Professional-grade toxicity detection powered by transformer models**
 
-## About
-
-**Stormy** is an open-source Python library that detects hateful or offensive language. Stormy models are trained to predict toxic comments on the Jigsaw Toxic Comment Classification challenge. Unlike traditional keyword-based approaches, Stormy leverages advanced natural language processing to understand context and nuance, providing more accurate and fair toxicity detection.
-
-**Stormy** is designed to help maintain healthy and positive online environments by identifying and handling inappropriate messages in real-time, with customizable rules and actionable analytics.
+Blanket is a modern Python library for detecting toxic and harmful content in text using state-of-the-art transformer models. Built on PyTorch Lightning and Hugging Face Transformers, it provides robust, scalable solutions for content moderation and safety applications.
 
 ---
 
 ## Features
 
-- 🤖 **AI-Powered Detection**: Fine-tuned BERT models for accurate toxicity detection.
-- ⚡ **Real-time Analysis**: Instant text analysis for toxicity and offensive language.
-- 🛡️ **Customizable Thresholds**: Configure detection thresholds and actions.
-- 📊 **Analytics Tools**: Track moderation metrics and analyze text datasets.
-- 🔌 **API-Ready**: Easily integrate toxicity detection into your own Python applications.
+- 🧠 **Transformer-Based Detection**: Leverages BERT, DistilBERT, and other transformer models for superior accuracy
+- ⚡ **Lightning Fast Training**: Built on PyTorch Lightning for efficient, scalable model training
+- 🎯 **Multi-Label Classification**: Detects multiple toxicity categories simultaneously (toxic, severe_toxic, obscene, threat, insult, identity_hate)
+- 🔧 **Flexible Configuration**: YAML-based configuration system for easy experimentation
+- 📊 **Rich Monitoring**: Built-in logging, progress tracking, and model checkpointing
+- 🚀 **Production Ready**: Optimized inference with model compilation and efficient tokenization
 
 ---
 
-## Roadmap and Status
+## Usage
 
-The high-level plan for Stormy, in order:
+### Making Quick Predictions
 
-|  #  | Step                        | Status |
-| :-: | --------------------------- | :----: |
-|  1  | Data Handling & Preprocessing |   ✅   |
-|  2  | Model Building & Training     |   ⚠️   |
-|  3  | API Deployment                |   ❌   |
-|  4  | Library Usage Examples        |   ❌   |
-|  5  | Testing & Deployment          |   ❌   |
+For users who simply want to use pre-trained models for toxicity detection:
 
-### Details
+#### Installation
 
-#### Data Handling & Preprocessing ✅
-- Dataset acquisition and storage
-- Text cleaning and preprocessing
-- Train-test split implementation
+```bash
+# Install using UV (recommended)
+uv add blanket
 
-#### Model Building & Training ⚠️
-- BERT model fine-tuning in progress
-- Performance evaluation metrics defined
-- Model checkpointing system implemented
+# Or using pip
+pip install blanket
+```
 
-#### API Deployment ❌
-- FastAPI endpoint design
-- Model serving infrastructure
-- API documentation
+#### Basic Prediction
 
-#### Library Usage Examples ❌
-- Example scripts and notebooks
-- Documentation for integration
+```python
+from blanket import Blanket
 
-#### Testing & Deployment ❌
-- Packaging and distribution
-- Cloud deployment setup
-- Monitoring and logging
+# Load a pre-trained model
+detector = Blanket(checkpoint="path/to/pretrained/model.ckpt")
+
+# Detect toxicity in single text
+detector.predict("This is a sample text to analyze")
+
+# Process multiple texts at once
+texts = [
+    "This is a normal comment",
+    "Another piece of text to check",
+    "Multiple texts can be processed together"
+]
+detector.predict(texts)
+```
+
+### Training / Fine-tuning
+
+For users who want to train their own models or fine-tune existing ones:
+
+#### Setup for Training
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd blanket
+
+# Install with development dependencies using UV (recommended)
+uv sync
+
+# Or using pip
+pip install -e ".[dev]"
+```
+
+#### Training Commands
+
+```bash
+# Quick training with BERT-tiny for testing/development
+uv run train fit --config configs/jigsaw_test.yaml
+
+# Full training with DistilBERT for production
+uv run train fit --config configs/jigsaw_full.yaml
+
+# Custom training with your own config
+uv run train fit --config path/to/your/config.yaml
+```
+
+#### Making Predictions with Custom Models
+
+```python
+from blanket import Blanket
+
+# Load your trained model
+detector = Blanket(checkpoint="lightning_logs/version_0/checkpoints/best.ckpt")
+
+# Use for inference
+detector.predict("Text to analyze with your custom model")
+```
 
 ---
 
-## Planned Projects
+## Architecture
 
-### Stormy-Bot (Future Work)
+Blanket is built with a modular architecture:
 
-We plan to build **Stormy-Bot**, a Discord bot that leverages Stormy models to detect offensive messages sent in Discord servers. This will be a separate project and repository. Stay tuned for updates!
+- **Models** (`blanket.models`): ToxicityClassifier built on transformer architectures
+- **Data** (`blanket.dataloaders`): JigsawDataModule for efficient data loading and preprocessing  
+- **Training** (`blanket.trainer`): Lightning CLI with professional callbacks and monitoring
+- **Inference** (`blanket.predictor`): Optimized prediction pipeline for production use
+
+### Supported Models
+
+- DistilBERT (recommended for production)
+- BERT variants (including BERT-tiny for development)
+- Any Hugging Face transformer model compatible with sequence classification
 
 ---
 
-## Installation
+## Configuration
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/dbozbay/stormy-ai.git
-   cd stormy-ai
-   ```
+Blanket uses YAML configuration files for reproducible experiments:
 
-2. **Install dependencies:**
-   ```bash
-   uv sync --no-dev
-   ```
+```yaml
+model:
+  model_name: distilbert/distilbert-base-uncased
+  max_token_len: 256
+  cache_dir: data
 
-3. **Set up environment variables (if needed):**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+data:
+  dataset_name: mat55555/jigsaw_toxic_comment
+  batch_size: 64
+  val_size: 0.2
 
-4. **Run example usage:**
-   ```bash
-   uv run trainer fit --config configs/jigsaw-config.yaml  # Or see example scripts in the documentation
-   ```
+trainer:
+  max_epochs: 20
+  deterministic: true
+```
+
+See `configs/` directory for complete examples.
 
 ---
 
@@ -119,38 +143,117 @@ We plan to build **Stormy-Bot**, a Discord bot that leverages Stormy models to d
 
 ### Prerequisites
 
-- Python 3.11+
-- GPU (recommended for model training)
+- Python 3.13+
+- CUDA-compatible GPU (recommended for training)
 
-### Setting Up Development Environment
+### Setup Development Environment
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/dbozbay/stormy-ai.git
-   cd stormy-ai
-   ```
+```bash
+# Clone and install with development dependencies
+git clone <your-repo-url>
+cd blanket
+pip install -e ".[dev]"
 
-2. **Install development dependencies:**
-   ```bash
-   uv sync --dev
-   ```
+# Run tests
+pytest
 
-3. **Run tests:**
-   ```bash
-   uv run pytest
-   ```
+# Code formatting and linting
+ruff check .
+ruff format .
+```
+
+### Project Structure
+
+```
+src/blanket/
+├── __init__.py          # Main exports
+├── config.py           # Configuration constants
+├── dataloaders.py      # Data loading and preprocessing
+├── models.py           # ToxicityClassifier implementation
+├── predictor.py        # Inference pipeline
+├── trainer.py          # Training CLI and callbacks
+├── schedulers.py       # Learning rate scheduling
+└── utils.py            # Model and tokenizer utilities
+```
+
+---
+
+## Training Details
+
+### Dataset
+
+Blanket trains on the Jigsaw Toxic Comment Classification dataset, which includes six toxicity categories:
+
+- `toxic`: General toxicity
+- `severe_toxic`: Severely toxic content
+- `obscene`: Obscene language
+- `threat`: Threatening language
+- `insult`: Insulting content
+- `identity_hate`: Identity-based hate speech
+
+### Model Performance
+
+- **Loss Function**: Binary cross-entropy for multi-label classification
+- **Metrics**: Multi-label accuracy across all toxicity categories
+- **Optimization**: Adam optimizer with cosine annealing and linear warmup
+- **Regularization**: Model compilation for improved training speed
+
+---
+
+## API Reference
+
+### Core Classes
+
+#### `ToxicityClassifier`
+PyTorch Lightning module for toxicity detection.
+
+```python
+classifier = ToxicityClassifier(
+    model_name="distilbert/distilbert-base-uncased",
+    max_token_len=256,
+    lr=3e-5
+)
+```
+
+#### `JigsawDataModule`
+Lightning DataModule for the Jigsaw dataset.
+
+```python
+datamodule = JigsawDataModule(
+    batch_size=64,
+    val_size=0.2
+)
+```
+
+#### `Blanket`
+High-level inference interface.
+
+```python
+detector = Blanket(
+    checkpoint="model.ckpt",
+    threshold=0.5,
+    device="cpu"
+)
+```
 
 ---
 
 ## Contributing
 
-We welcome contributions! To get started:
+We welcome contributions! Please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes and add tests
+4. Run the test suite (`pytest`)
+5. Format your code (`ruff format .`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+### Code Style
+
+This project uses Ruff for formatting and linting. The configuration is in `pyproject.toml`.
 
 ---
 
@@ -162,11 +265,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Acknowledgments
 
-- [Hugging Face](https://huggingface.co/) for the BERT model
-- [FastAPI](https://fastapi.tiangolo.com/) for the API framework
+- [Hugging Face Transformers](https://huggingface.co/transformers/) for the transformer implementations
+- [PyTorch Lightning](https://lightning.ai/) for the training framework
+- [Jigsaw/Conversation AI](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge) for the toxicity dataset
 
 ---
 
-**stormy-ai** is in active development. Stay tuned for updates and new features!
-
----
+**Blanket** - Professional toxicity detection for safer digital spaces.
