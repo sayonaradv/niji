@@ -33,6 +33,9 @@ class ToxicityClassifier(pl.LightningModule):
         )
         self.model.train()
 
+    def configure_model(self) -> None:
+        self.model.compile()  # improves training speed
+
     def forward(  # type: ignore[override]
         self, text: str | list[str], labels: Tensor | None = None
     ) -> dict[str, Tensor]:
@@ -46,7 +49,7 @@ class ToxicityClassifier(pl.LightningModule):
         outputs: Tensor = self.model(**inputs)[0]  # logits
         outputs = torch.sigmoid(outputs)  # probabilities
         if labels is not None:
-            loss: Tensor = F.binary_cross_entropy_with_logits(outputs, labels)
+            loss: Tensor = F.binary_cross_entropy(outputs, labels)
             return {"outputs": outputs, "loss": loss}
         else:
             return {"outputs": outputs}

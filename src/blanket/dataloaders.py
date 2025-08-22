@@ -72,6 +72,9 @@ class JigsawDataModule(pl.LightningDataModule):
         self.val_ds: Dataset | None = None
         self.test_ds: Dataset | None = None
 
+    def prepare_data(self) -> None:
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
     def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
             lengths: list[float] = [1 - self.val_size, self.val_size]
@@ -89,7 +92,10 @@ class JigsawDataModule(pl.LightningDataModule):
                 "Did you forget to call `setup('fit')`?"
             )
         return DataLoader(
-            self.train_ds, shuffle=True, batch_size=self.batch_size, drop_last=True
+            self.train_ds,
+            shuffle=True,
+            batch_size=self.batch_size,
+            drop_last=True,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -98,7 +104,11 @@ class JigsawDataModule(pl.LightningDataModule):
                 "Validation dataset has not been initialized. "
                 "Did you forget to call `setup('fit')`?"
             )
-        return DataLoader(self.val_ds, batch_size=self.batch_size, drop_last=True)
+        return DataLoader(
+            self.val_ds,
+            batch_size=self.batch_size,
+            drop_last=True,
+        )
 
     def test_dataloader(self) -> DataLoader:
         if self.test_ds is None:
@@ -106,4 +116,18 @@ class JigsawDataModule(pl.LightningDataModule):
                 "Test dataset has not been initialized. "
                 "Did you forget to call `setup('test')`?"
             )
-        return DataLoader(self.test_ds, batch_size=self.batch_size, drop_last=True)
+        return DataLoader(
+            self.test_ds,
+            batch_size=self.batch_size,
+            drop_last=True,
+        )
+
+
+if __name__ == "__main__":
+    dm = JigsawDataModule()
+    dm.setup(stage="fit")
+    train_dl = dm.train_dataloader()
+    val_dl = dm.val_dataloader()
+    batch = next(iter(train_dl))
+    print(batch)
+    print(batch["labels"])

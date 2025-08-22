@@ -28,7 +28,13 @@ def cli_main(args: ArgsType = None) -> None:
             "max_epochs": 20,
             "deterministic": True,
             "callbacks": [
-                EarlyStopping(monitor="val_loss", mode="min", patience=3, verbose=True),
+                EarlyStopping(
+                    monitor="val_loss",
+                    mode="min",
+                    min_delta=0.001,
+                    patience=3,
+                    verbose=True,
+                ),
                 ModelCheckpoint(
                     monitor="val_loss",
                     mode="min",
