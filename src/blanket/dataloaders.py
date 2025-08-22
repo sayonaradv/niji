@@ -121,13 +121,3 @@ class JigsawDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             drop_last=True,
         )
-
-
-if __name__ == "__main__":
-    dm = JigsawDataModule()
-    dm.setup(stage="fit")
-    train_dl = dm.train_dataloader()
-    val_dl = dm.val_dataloader()
-    batch = next(iter(train_dl))
-    print(batch)
-    print(batch["labels"])
