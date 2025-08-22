@@ -20,7 +20,7 @@ class MyLightningCLI(LightningCLI):
         parser.link_arguments("trainer.max_epochs", "model.num_training_steps")
 
 
-def main(args: ArgsType = None) -> None:
+def cli_main(args: ArgsType = None) -> None:
     MyLightningCLI(
         model_class=ToxicityClassifier,
         datamodule_class=JigsawDataModule,
@@ -48,4 +48,4 @@ def main(args: ArgsType = None) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    cli_main()

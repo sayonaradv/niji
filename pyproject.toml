@@ -19,7 +19,7 @@ project-excludes = ["**/*venv/**/*"]
 
 [project.scripts]
 blanket = "blanket:main"
-train = "blanket.trainer:main"
+train = "blanket.trainer:cli_main"
 predict = "blanket.predictor:cli_main"
 
 [build-system]
