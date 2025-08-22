@@ -25,10 +25,3 @@ class Blanket:
             print(f"\nText: {_text}")
             print("Label probabilities:")
             print(_pred)
-
-
-if __name__ == "__main__":
-    ckpt_path = "lightning_logs/version_0/checkpoints/epoch=06-val_loss=0.0487.ckpt"
-    Blanket(ckpt_path).predict(
-        ["you're such a bitch!", "can we be friends?", "the weather is great."]
-    )
