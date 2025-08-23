@@ -13,9 +13,6 @@ dependencies = [
     "tensorboard>=2.20.0",
 ]
 
-[tool.pyrefly]
-project-includes = ["**/*"]
-project-excludes = ["**/*venv/**/*"]
 
 [project.scripts]
 blanket = "blanket:main"
@@ -32,6 +29,16 @@ dev = [
     "pytest>=8.4.1",
     "ruff>=0.12.8",
 ]
+
+[tool.pyrefly]
+project-includes = ["."]
+project-excludes = ["**/.[!/.]*", "**/*venv/**"]
+search-path = ["src"]
+site-package-path = [".venv/lib/python3.13/site-packages"]
+
+python-platform = "darwin"
+python-version = "3.13"
+python-interpreter = ".venv/bin/python3"
 
 [tool.ruff.lint]
 select = [
