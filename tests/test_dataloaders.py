@@ -7,7 +7,7 @@ from blanket.dataloaders import JigsawDataModule
 
 
 @pytest.fixture
-def tiny_jigsaw_dir(tmp_path):
+def tiny_jigsaw_dir(tmp_path) -> str:
     """Create synthetic CSVs (20 rows) mimicking the Jigsaw dataset format."""
 
     # train.csv (20 rows)
@@ -52,26 +52,26 @@ def tiny_jigsaw_dir(tmp_path):
 
 
 @pytest.fixture
-def dm(tiny_jigsaw_dir):
+def dm(tiny_jigsaw_dir) -> JigsawDataModule:
     return JigsawDataModule(data_dir=tiny_jigsaw_dir, batch_size=1)
 
 
-def test_train_dataloader_raises_without_setup(dm):
+def test_train_dataloader_raises_without_setup(dm) -> None:
     with pytest.raises(RuntimeError, match="setup\\('fit'\\)"):
         _ = dm.train_dataloader()
 
 
-def test_val_dataloader_raises_without_setup(dm):
+def test_val_dataloader_raises_without_setup(dm) -> None:
     with pytest.raises(RuntimeError, match="setup\\('fit'\\)"):
         _ = dm.val_dataloader()
 
 
-def test_test_dataloader_raises_without_setup(dm):
+def test_test_dataloader_raises_without_setup(dm) -> None:
     with pytest.raises(RuntimeError, match="setup\\('test'\\)"):
         _ = dm.test_dataloader()
 
 
-def test_fit_dataloaders_after_setup(dm):
+def test_fit_dataloaders_after_setup(dm) -> None:
     dm.setup(stage="fit")
 
     train_dl = dm.train_dataloader()
@@ -93,7 +93,7 @@ def test_fit_dataloaders_after_setup(dm):
     assert batch["labels"].ndim == 2  # multi-label
 
 
-def test_test_dataloader_after_setup(dm):
+def test_test_dataloader_after_setup(dm) -> None:
     dm.setup(stage="test")
     test_dl = dm.test_dataloader()
 

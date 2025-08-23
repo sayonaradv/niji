@@ -10,7 +10,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 class Blanket:
-    def __init__(self, checkpoint: str, threshold: float = 0.5, device="cpu") -> None:
+    def __init__(self, checkpoint: str, threshold: float = 0.5, device: str="cpu") -> None:
         self.model: LightningModule = ToxicityClassifier.load_from_checkpoint(
             checkpoint, map_location=device
         )
