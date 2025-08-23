@@ -13,7 +13,6 @@ dependencies = [
     "tensorboard>=2.20.0",
 ]
 
-
 [project.scripts]
 blanket = "blanket:main"
 train = "blanket.trainer:cli_main"
