@@ -18,8 +18,8 @@ jobs:
       - name: Linting
         run: uv run ruff check --fix --diff --output-format github
 
-      # - name: Typechecking
-      #   run: uv run pyrefly check
+      - name: Typechecking
+        run: uv run pyrefly check
 
       - name: Formatting
         run: uv run ruff format --diff
