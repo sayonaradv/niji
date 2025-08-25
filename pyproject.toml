@@ -1,7 +1,6 @@
 [project]
-name = "blanket"
+name = "blankett"
 version = "0.0.1a2"
-description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -14,9 +13,9 @@ dependencies = [
 ]
 
 [project.scripts]
-blanket = "blanket:main"
-train = "blanket.trainer:cli_main"
-predict = "blanket.predictor:cli_main"
+blankett = "blankett:main"
+train = "blankett.trainer:cli_main"
+predict = "blankett.predictor:cli_main"
 
 [build-system]
 requires = ["hatchling"]

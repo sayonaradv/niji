@@ -7,8 +7,8 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from blanket.dataloaders import JigsawDataModule
-from blanket.models import ToxicityClassifier
+from blankett.dataloaders import JigsawDataModule
+from blankett.models import ToxicityClassifier
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")

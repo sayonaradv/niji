@@ -76,7 +76,7 @@ wheels = [
 ]
 
 [[package]]
-name = "blanket"
+name = "blankett"
 version = "0.0.1a2"
 source = { editable = "." }
 dependencies = [

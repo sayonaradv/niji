@@ -2,7 +2,7 @@ import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from blanket.models import ToxicityClassifier
+from blankett.models import ToxicityClassifier
 
 DOWNLOAD_URL: str = "https://github.com/yourthorne/blanket/releases/download/"
 

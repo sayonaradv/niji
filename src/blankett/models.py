@@ -11,8 +11,8 @@ from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import get_cosine_schedule_with_warmup
 
-from blanket.dataloaders import JIGSAW_LABELS
-from blanket.utils import get_model_and_tokenizer
+from blankett.dataloaders import JIGSAW_LABELS
+from blankett.utils import get_model_and_tokenizer
 
 
 class ToxicityClassifier(pl.LightningModule):
