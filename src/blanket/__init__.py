@@ -1,11 +1,7 @@
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
 def main() -> None:
     print("Hello from Blanket! ⛈️")
-
-
-# __all__ = [
-#     "JIGSAW_LABELS",
-#     "Blanket",
-#     "JigsawDataModule",
-#     "ToxicityClassifier",
-#     "main",
-# ]
