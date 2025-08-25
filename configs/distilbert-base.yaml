@@ -43,14 +43,19 @@ trainer:
   model_registry: null
 model:
   model_name: distilbert/distilbert-base-uncased
-  num_labels: 6
   max_token_len: 256
   lr: 3.0e-05
   warmup_epochs: 5
   cache_dir: data
 data:
   data_dir: null
-  labels: null
+  labels:
+  - toxic
+  - severe_toxic
+  - obscene
+  - threat
+  - insult
+  - identity_hate
   batch_size: 64
   val_size: 0.2
 optimizer: null
