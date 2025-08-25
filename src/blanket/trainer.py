@@ -3,7 +3,6 @@ from lightning.pytorch.callbacks import (
     EarlyStopping,
     LearningRateMonitor,
     ModelCheckpoint,
-    RichModelSummary,
     RichProgressBar,
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
@@ -17,7 +16,7 @@ torch.set_float32_matmul_precision("medium")
 
 class MyLightningCLI(LightningCLI):
     def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
-        parser.link_arguments("trainer.max_epochs", "model.num_training_steps")
+        parser.link_arguments("data.labels", "model.label_names")
 
 
 def cli_main(args: ArgsType = None) -> None:
@@ -31,7 +30,6 @@ def cli_main(args: ArgsType = None) -> None:
                 EarlyStopping(
                     monitor="val_loss",
                     mode="min",
-                    min_delta=0.001,
                     patience=3,
                     verbose=True,
                 ),
@@ -43,7 +41,6 @@ def cli_main(args: ArgsType = None) -> None:
                     verbose=True,
                 ),
                 LearningRateMonitor(logging_interval="epoch"),
-                RichModelSummary(max_depth=-1),
                 RichProgressBar(),
             ],
             "logger": True,
