@@ -31,10 +31,13 @@ class Split(Enum):
 
 class JigsawDataset(Dataset):
     def __init__(
-        self, split: Split, data_dir: str, labels: list[str] | None = None
+        self,
+        split: Split,
+        data_dir: str,
+        labels: list[str] = JIGSAW_LABELS,
     ) -> None:
         self.data_dir: str = data_dir
-        self.labels: list[str] = labels if labels is not None else JIGSAW_LABELS
+        self.labels: list[str] = labels
         self._check_data_dir()
         self.data: pd.DataFrame = self.load_data(split, data_dir=self.data_dir)
         self._check_labels()
@@ -90,7 +93,7 @@ class JigsawDataModule(pl.LightningDataModule):
     def __init__(
         self,
         data_dir: str | None = None,
-        labels: list[str] | None = None,
+        labels: list[str] = JIGSAW_LABELS,
         batch_size: int = 64,
         val_size: float = 0.2,
     ) -> None:
@@ -105,10 +108,6 @@ class JigsawDataModule(pl.LightningDataModule):
         self.train_ds: Dataset | None = None
         self.val_ds: Dataset | None = None
         self.test_ds: Dataset | None = None
-
-    def prepare_data(self) -> None:
-        # os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        pass
 
     def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
