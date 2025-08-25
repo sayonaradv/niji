@@ -42,13 +42,15 @@ trainer:
   default_root_dir: null
   model_registry: null
 model:
-  model_name: prajjwal1/bert-tiny
+  model_name: distilbert/distilbert-base-uncased
+  num_labels: 6
   max_token_len: 256
   lr: 3.0e-05
-  num_warmup_steps: 5
+  warmup_epochs: 5
   cache_dir: data
 data:
-  data_dir: data/jigsaw-toxic-comment-classification-challenge
+  data_dir: null
+  labels: null
   batch_size: 64
   val_size: 0.2
 optimizer: null

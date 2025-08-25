@@ -1,4 +1,4 @@
-# lightning.pytorch==2.5.2
+# lightning.pytorch==2.5.3
 seed_everything: 1234
 trainer:
   accelerator: auto
@@ -42,40 +42,17 @@ trainer:
   default_root_dir: null
   model_registry: null
 model:
-  model_name: distilbert/distilbert-base-uncased
+  model_name: prajjwal1/bert-tiny
+  num_labels: 6
   max_token_len: 256
+  lr: 3.0e-05
+  warmup_epochs: 5
   cache_dir: data
 data:
-  dataset_name: mat55555/jigsaw_toxic_comment
-  train_split: train
-  test_split: test
-  text_column: text
-  label_columns:
-    - toxic
-    - severe_toxic
-    - obscene
-    - threat
-    - insult
-    - identity_hate
-  val_size: 0.2
+  data_dir: null
+  labels: null
   batch_size: 64
-  cache_dir: data
-optimizer:
-  lr: 3.0e-05
-  betas:
-  - 0.9
-  - 0.999
-  eps: 1.0e-08
-  weight_decay: 0
-  amsgrad: false
-  foreach: null
-  maximize: false
-  capturable: false
-  differentiable: false
-  fused: null
-lr_scheduler:
-  warmup_epochs: 5
-  warmup_start_lr: 0.0
-  eta_min: 0.0
-  last_epoch: -1
+  val_size: 0.2
+optimizer: null
+lr_scheduler: null
 ckpt_path: null
