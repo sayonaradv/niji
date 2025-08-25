@@ -17,6 +17,9 @@ torch.set_float32_matmul_precision("medium")
 class MyLightningCLI(LightningCLI):
     def add_arguments_to_parser(self, parser: LightningArgumentParser) -> None:
         parser.link_arguments("data.labels", "model.label_names")
+        parser.link_arguments(
+            "data.labels", "model.num_labels", compute_fn=lambda x: len(x)
+        )
 
 
 def cli_main(args: ArgsType = None) -> None:
