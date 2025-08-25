@@ -1,5 +1,6 @@
 import os
-from typing import Literal
+from dataclasses import dataclass
+from enum import Enum
 
 import lightning.pytorch as pl
 import pandas as pd
@@ -7,64 +8,97 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset, random_split
 
-JIGSAW_DATA_DIR: str = os.path.join(
-    "data", "jigsaw-toxic-comment-classification-challenge"
-)
+JIGSAW_LABELS: list[str] = [
+    "toxic",
+    "severe_toxic",
+    "obscene",
+    "threat",
+    "insult",
+    "identity_hate",
+]
+
+
+@dataclass
+class SplitConfig:
+    inputs_path: str
+    labels_path: str | None = None
+
+
+class Split(Enum):
+    TRAIN = SplitConfig(inputs_path="train.csv")
+    TEST = SplitConfig(inputs_path="test.csv", labels_path="test_labels.csv")
 
 
 class JigsawDataset(Dataset):
-    def __init__(self, split: Literal["train", "test"], data_dir: str) -> None:
-        """
-        Initialize Jigsaw dataset.
+    def __init__(
+        self, split: Split, data_dir: str, labels: list[str] | None = None
+    ) -> None:
+        self.data_dir: str = data_dir
+        self.labels: list[str] = labels if labels is not None else JIGSAW_LABELS
+        self._check_data_dir()
+        self.data: pd.DataFrame = self.load_data(split, data_dir=self.data_dir)
+        self._check_labels()
 
-        Args:
-            split: Either "train" or "test"
-            data_dir: Directory containing the Jigsaw dataset files
-        """
-        self.data = self.load_data(split=split, data_dir=data_dir)
-
-    def load_data(self, split: Literal["train", "test"], data_dir: str) -> pd.DataFrame:
-        """Load data from the specified directory and split."""
-        if not os.path.exists(data_dir):
-            raise FileNotFoundError(f"Data directory {data_dir} does not exist.")
-
-        train_path: str = os.path.join(data_dir, "train.csv")
-        test_text_path: str = os.path.join(data_dir, "test.csv")
-        test_labels_path: str = os.path.join(data_dir, "test_labels.csv")
-
-        if split == "test":
-            df: pd.DataFrame = (
-                pd.read_csv(test_text_path)
-                .merge(pd.read_csv(test_labels_path))
-                .query("toxic != -1")
-                .reset_index(drop=True)
+    def _check_data_dir(self) -> None:
+        if not os.path.exists(self.data_dir):
+            raise FileNotFoundError(
+                f"Data directory not found: '{self.data_dir}'. "
+                f"Please ensure the directory exists and contains the Jigsaw dataset files."
             )
-        elif split == "train":
-            df = pd.read_csv(train_path)
-        else:
-            raise ValueError(f"Invalid split '{split}'. Must be 'train' or 'test'.")
 
-        return df.rename(columns={"comment_text": "text"}).drop(columns=["id"])
+    def _check_labels(self) -> None:
+        missing_labels: list[str] = [
+            label for label in self.labels if label not in self.data.columns
+        ]
+        if missing_labels:
+            available_labels: list[str] = [
+                col for col in self.data.columns if col in JIGSAW_LABELS
+            ]
+            raise ValueError(
+                f"Labels {missing_labels} not found in dataset. "
+                f"Available labels: {available_labels}"
+            )
+
+    def load_data(self, split: Split, data_dir: str) -> pd.DataFrame:
+        if split.value.labels_path is None:
+            return pd.read_csv(os.path.join(data_dir, split.value.inputs_path))
+        else:
+            df1: pd.DataFrame = pd.read_csv(
+                os.path.join(data_dir, split.value.inputs_path)
+            )
+            df2: pd.DataFrame = pd.read_csv(
+                os.path.join(data_dir, split.value.labels_path)
+            )
+            return df1.merge(df2, on="id").query("toxic != -1").reset_index(drop=True)
 
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, idx: int) -> dict[str, str | Tensor]:
-        row: dict[str, str | int] = self.data.iloc[idx].to_dict()
-        text: str = str(row.pop("text"))
-        labels: Tensor = torch.FloatTensor(list(row.values()))
-        return {"text": text, "labels": labels}
+        row: pd.Series = self.data.iloc[idx]
+        return {
+            "text": str(row["comment_text"]),
+            "labels": torch.FloatTensor(row[self.labels].tolist()),
+        }
 
 
 class JigsawDataModule(pl.LightningDataModule):
+    _DEFAULT_DATA_DIR: str = os.path.join(
+        "data", "jigsaw-toxic-comment-classification-challenge"
+    )
+
     def __init__(
         self,
-        data_dir: str = JIGSAW_DATA_DIR,
+        data_dir: str | None = None,
+        labels: list[str] | None = None,
         batch_size: int = 64,
         val_size: float = 0.2,
     ) -> None:
         super().__init__()
-        self.data_dir = data_dir
+        self.data_dir: str = (
+            data_dir if data_dir is not None else self._DEFAULT_DATA_DIR
+        )
+        self.labels = labels
         self.batch_size = batch_size
         self.val_size = val_size
 
@@ -73,17 +107,20 @@ class JigsawDataModule(pl.LightningDataModule):
         self.test_ds: Dataset | None = None
 
     def prepare_data(self) -> None:
-        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        # os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        pass
 
     def setup(self, stage: str | None = None) -> None:
         if stage == "fit" or stage is None:
             lengths: list[float] = [1 - self.val_size, self.val_size]
             full_train_ds: Dataset = JigsawDataset(
-                split="train", data_dir=self.data_dir
+                Split.TRAIN, data_dir=self.data_dir, labels=self.labels
             )
             self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
         if stage == "test" or stage is None:
-            self.test_ds = JigsawDataset(split="test", data_dir=self.data_dir)
+            self.test_ds = JigsawDataset(
+                Split.TEST, data_dir=self.data_dir, labels=self.labels
+            )
 
     def train_dataloader(self) -> DataLoader:
         if self.train_ds is None:
