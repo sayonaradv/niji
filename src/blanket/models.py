@@ -11,6 +11,7 @@ from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import get_cosine_schedule_with_warmup
 
+from blanket.dataloaders import JIGSAW_LABELS
 from blanket.utils import get_model_and_tokenizer
 
 
@@ -19,7 +20,7 @@ class ToxicityClassifier(pl.LightningModule):
         self,
         model_name: str,
         num_labels: int = 6,
-        label_names: list[str] | None = None,
+        label_names: list[str] = JIGSAW_LABELS,
         max_token_len: int = 256,
         lr: float = 3e-5,
         warmup_epochs: int = 5,
@@ -31,7 +32,7 @@ class ToxicityClassifier(pl.LightningModule):
         self.model, self.tokenizer = get_model_and_tokenizer(
             self.hparams["model_name"],
             cache_dir=self.hparams["cache_dir"],
-            num_labels=self.hparams["num_labels"],
+            num_labels=len(self.hparams["label_names"]),
         )
         self.model.train()
 
@@ -86,7 +87,9 @@ class ToxicityClassifier(pl.LightningModule):
         preds: Tensor
         loss: Tensor
         preds, loss = self(**batch).values()
-        acc: Tensor = multilabel_accuracy(preds, batch["labels"], num_labels=6)
+        acc: Tensor = multilabel_accuracy(
+            preds, batch["labels"], num_labels=self.hparams["num_labels"]
+        )
         self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 
@@ -104,7 +107,3 @@ class ToxicityClassifier(pl.LightningModule):
             num_training_steps=int(max_epochs),
         )
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
-
-
-if __name__ == "__main__":
-    model = ToxicityClassifier("prajjwal1/bert-tiny", label_names=["one", "two"])
