@@ -18,20 +18,33 @@ class ToxicityClassifier(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
+        num_labels: int = 6,
+        label_names: list[str] | None = None,
         max_token_len: int = 256,
         lr: float = 3e-5,
-        num_warmup_steps: int = 5,
-        num_training_steps: int = 20,
+        warmup_epochs: int = 5,
         cache_dir: str | None = "data",
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+        self._validate_labels()
         self.model, self.tokenizer = get_model_and_tokenizer(
             self.hparams["model_name"],
             cache_dir=self.hparams["cache_dir"],
-            num_labels=6,
+            num_labels=self.hparams["num_labels"],
         )
         self.model.train()
+
+    def _validate_labels(self) -> None:
+        num_labels = self.hparams["num_labels"]
+        label_names = self.hparams["label_names"]
+
+        if label_names is not None and len(label_names) != num_labels:
+            raise ValueError(
+                f"Length of label_names ({len(label_names)}) must match num_labels ({num_labels})."
+            )
+        else:
+            return
 
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
@@ -81,9 +94,17 @@ class ToxicityClassifier(pl.LightningModule):
         optimizer: Optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.hparams["lr"]
         )
+        max_epochs = self.trainer.max_epochs
+        if max_epochs is None:
+            raise ValueError("Trainer.max_epochs must be set for the scheduler.")
+
         scheduler: LRScheduler = get_cosine_schedule_with_warmup(
             optimizer,
-            num_warmup_steps=self.hparams["num_warmup_steps"],
-            num_training_steps=self.hparams["num_training_steps"],
+            num_warmup_steps=self.hparams["warmup_epochs"],
+            num_training_steps=int(max_epochs),
         )
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+
+if __name__ == "__main__":
+    model = ToxicityClassifier("prajjwal1/bert-tiny", label_names=["one", "two"])
