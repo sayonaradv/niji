@@ -4,14 +4,14 @@ from torch import Tensor
 
 from blankett.models import ToxicityClassifier
 
-DOWNLOAD_URL: str = "https://github.com/yourthorne/blanket/releases/download/"
+DOWNLOAD_URL: str = "https://github.com/yourthorne/blankett/releases/download/"
 
 MODEL_URLS: dict[str, str] = {
-    "bert-tiny": DOWNLOAD_URL + "v0.0.1a2/jigsaw-bert-tiny.ckpt",
+    "bert-tiny": DOWNLOAD_URL + "v0.0.1alpha1/bert_tiny.ckpt",
 }
 
 
-class Blanket:
+class Blankett:
     def __init__(
         self,
         model_name: str = "bert-tiny",
@@ -68,7 +68,7 @@ class Blanket:
 
 
 if __name__ == "__main__":
-    _ = Blanket().predict(
+    _ = Blankett().predict(
         [
             "I love your work!",
             "You're a total loser.",
