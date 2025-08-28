@@ -44,8 +44,6 @@ class ToxicityClassifier(pl.LightningModule):
             raise ValueError(
                 f"Length of label_names ({len(label_names)}) must match num_labels ({num_labels})."
             )
-        else:
-            return
 
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
@@ -53,16 +51,20 @@ class ToxicityClassifier(pl.LightningModule):
     def forward(  # type: ignore[override]
         self, text: str | list[str], labels: Tensor | None = None
     ) -> dict[str, Tensor]:
-        inputs: dict[str, int] = self.tokenizer(
+        inputs: dict[str, Tensor] = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
             padding="max_length",
             truncation=True,
             return_tensors="pt",
-        ).to(self.device)
-        outputs: Tensor = self.model(**inputs)[0]  # logits
-        outputs = torch.sigmoid(outputs)  # probabilities
+        )
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
+
+        outputs: Tensor = self.model(**inputs).logits
+        outputs = torch.sigmoid(outputs)
+
         if labels is not None:
+            labels = labels.to(self.device)
             loss: Tensor = F.binary_cross_entropy(outputs, labels)
             return {"outputs": outputs, "loss": loss}
         else:
