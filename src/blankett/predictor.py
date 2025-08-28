@@ -4,7 +4,7 @@ from torch import Tensor
 
 from blankett.models import ToxicityClassifier
 
-DOWNLOAD_URL: str = "https://github.com/yourthorne/blankett/releases/download/"
+DOWNLOAD_URL: str = "https://github.com/sulzyy/blankett/releases/download/"
 
 MODEL_URLS: dict[str, str] = {
     "bert-tiny": DOWNLOAD_URL + "v0.0.1alpha1/bert_tiny.ckpt",
@@ -45,7 +45,7 @@ class Blankett:
         self, model_name: str, checkpoint_path: str | None, device: str
     ) -> LightningModule:
         if checkpoint_path is None:
-            checkpoint_path = MODEL_URLS[model_name]
+            checkpoint_path: str = MODEL_URLS[model_name]
         return ToxicityClassifier.load_from_checkpoint(
             checkpoint_path, map_location=device
         )
