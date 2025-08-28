@@ -1,8 +1,11 @@
 import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor
+from transformers import logging
 
 from blankett.models import ToxicityClassifier
+
+logging.set_verbosity_error()
 
 DOWNLOAD_URL: str = "https://github.com/sulzyy/blankett/releases/download/"
 
@@ -45,7 +48,7 @@ class Blankett:
         self, model_name: str, checkpoint_path: str | None, device: str
     ) -> LightningModule:
         if checkpoint_path is None:
-            checkpoint_path: str = MODEL_URLS[model_name]
+            checkpoint_path = MODEL_URLS[model_name]
         return ToxicityClassifier.load_from_checkpoint(
             checkpoint_path, map_location=device
         )
