@@ -23,20 +23,10 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "pyrefly>=0.29.0",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
+    "ty>=0.0.1a19",
 ]
-
-[tool.pyrefly]
-project-includes = ["."]
-project-excludes = ["**/.[!/.]*", "**/*venv/**"]
-search-path = ["src"]
-site-package-path = [".venv/lib/python3.13/site-packages"]
-
-python-platform = "darwin"
-python-version = "3.13"
-python-interpreter = ".venv/bin/python3"
 
 [tool.ruff.lint]
 select = [
