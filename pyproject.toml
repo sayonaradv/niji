@@ -23,9 +23,9 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "pyrefly>=0.30.0",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
-    "ty>=0.0.1a19",
 ]
 
 [tool.ruff.lint]
