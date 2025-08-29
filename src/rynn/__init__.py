@@ -1,6 +1,7 @@
-import os
+from rynn import setup
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+setup.env_vars()
+setup.logging()
 
 
 def main() -> None:

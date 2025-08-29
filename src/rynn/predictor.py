@@ -2,12 +2,9 @@ import torch
 from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
-from transformers import logging
 
 from rynn.models import Classifier
 from rynn.types import PredResult, TextInput
-
-logging.set_verbosity_error()
 
 DOWNLOAD_BASE_URL = "https://github.com/dbozbay/rynn/releases/download/"
 AVAILABLE_MODELS = {
