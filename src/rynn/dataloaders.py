@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from blankett.types import Batch
+from rynn.types import Batch
 
 JIGSAW_LABELS: list[str] = [
     "toxic",

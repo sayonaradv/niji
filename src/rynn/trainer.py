@@ -7,8 +7,8 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from blankett.dataloaders import JigsawDataModule
-from blankett.models import ToxicityClassifier
+from rynn.dataloaders import JigsawDataModule
+from rynn.models import Classifier
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -24,7 +24,7 @@ class MyLightningCLI(LightningCLI):
 
 def cli_main(args: ArgsType = None) -> None:
     MyLightningCLI(
-        model_class=ToxicityClassifier,
+        model_class=Classifier,
         datamodule_class=JigsawDataModule,
         trainer_defaults={
             "max_epochs": 20,

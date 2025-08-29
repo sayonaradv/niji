@@ -4,18 +4,18 @@ from lightning.pytorch import LightningModule
 from torch import Tensor
 from transformers import logging
 
-from blankett.models import ToxicityClassifier
-from blankett.types import PredResult, TextInput
+from rynn.models import Classifier
+from rynn.types import PredResult, TextInput
 
 logging.set_verbosity_error()
 
-DOWNLOAD_BASE_URL = "https://github.com/sulzyy/blankett/releases/download/"
+DOWNLOAD_BASE_URL = "https://github.com/dbozbay/rynn/releases/download/"
 AVAILABLE_MODELS = {
     "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha1/bert_tiny.ckpt",
 }
 
 
-class Blankett:
+class Rynn:
     """A pre-trained toxicity classification model for content moderation.
 
     This class provides an interface for loading and using fine-tuned transformer models
@@ -23,7 +23,7 @@ class Blankett:
     pre-trained models with configurable classification thresholds.
 
     Example:
-        >>> classifier = Blankett(model_name="bert-tiny", threshold=0.7)
+        >>> classifier = Rynn(model_name="bert-tiny", threshold=0.7)
         >>> results = classifier.predict("I love your work!")
         >>> print(results)
     """
@@ -78,7 +78,7 @@ class Blankett:
         if checkpoint_path is None:
             checkpoint_path = AVAILABLE_MODELS[self.model_name]
 
-        return ToxicityClassifier.load_from_checkpoint(
+        return Classifier.load_from_checkpoint(
             checkpoint_path, map_location=self.device
         )
 
@@ -174,7 +174,7 @@ def classify(
         python predictor.py --text '["Text 1", "Text 2"]' --model_name bert-tiny
         ```
     """
-    classifier = Blankett(
+    classifier = Rynn(
         model_name=model_name,
         checkpoint_path=checkpoint_path,
         threshold=threshold,

@@ -13,12 +13,12 @@ from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import get_cosine_schedule_with_warmup
 
-from blankett.dataloaders import JIGSAW_LABELS
-from blankett.types import Batch, TensorDict, TextInput
-from blankett.utils import get_model_and_tokenizer
+from rynn.dataloaders import JIGSAW_LABELS
+from rynn.types import Batch, TensorDict, TextInput
+from rynn.utils import get_model_and_tokenizer
 
 
-class ToxicityClassifier(pl.LightningModule):
+class Classifier(pl.LightningModule):
     def __init__(
         self,
         model_name: str,

@@ -1,6 +1,6 @@
 [project]
-name = "blankett"
-version = "0.0.1a2"
+name = "rynn"
+version = "0.0.1a1"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -13,8 +13,8 @@ dependencies = [
 ]
 
 [project.scripts]
-blankett = "blankett.predictor:cli_main"
-train = "blankett.trainer:cli_main"
+rynn = "rynn.predictor:cli_main"
+train = "rynn.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]

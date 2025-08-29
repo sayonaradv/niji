@@ -4,4 +4,4 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 def main() -> None:
-    print("Hello from Blankett! ⛈️")
+    print("Hello from Rynn! ⛈️")

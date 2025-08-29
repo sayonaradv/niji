@@ -1,6 +1,6 @@
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from blankett.types import ModelTokenizerPair
+from rynn.types import ModelTokenizerPair
 
 
 def get_model_and_tokenizer(
