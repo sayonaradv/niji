@@ -1,3 +1,5 @@
+from typing import cast
+
 import lightning.pytorch as pl
 import torch
 from lightning.pytorch.utilities.types import (
@@ -12,6 +14,7 @@ from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import get_cosine_schedule_with_warmup
 
 from blankett.dataloaders import JIGSAW_LABELS
+from blankett.types import Batch, TensorDict, TextInput
 from blankett.utils import get_model_and_tokenizer
 
 
@@ -48,10 +51,8 @@ class ToxicityClassifier(pl.LightningModule):
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
 
-    def forward(  # type: ignore[override]
-        self, text: str | list[str], labels: Tensor | None = None
-    ) -> dict[str, Tensor]:
-        inputs: dict[str, Tensor] = self.tokenizer(
+    def forward(self, text: TextInput, labels: Tensor | None = None) -> TensorDict:  # type: ignore[override]
+        inputs: TensorDict = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
             padding="max_length",
@@ -70,28 +71,29 @@ class ToxicityClassifier(pl.LightningModule):
         else:
             return {"outputs": outputs}
 
-    def training_step(self, batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
+    def training_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         loss: Tensor = self(**batch)["loss"]
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
-    def validation_step(  # type: ignore[override]
-        self, batch: dict[str, str | Tensor], batch_idx: int
-    ) -> STEP_OUTPUT:
+    def validation_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         self._shared_eval_step(batch, stage="val")
         return None
 
-    def test_step(self, batch: dict[str, str | Tensor], batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
+    def test_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         self._shared_eval_step(batch, stage="test")
         return None
 
-    def _shared_eval_step(self, batch: dict, stage: str) -> STEP_OUTPUT:
+    def _shared_eval_step(self, batch: Batch, stage: str) -> STEP_OUTPUT:
         preds: Tensor
         loss: Tensor
+        labels: Tensor
+        acc: Tensor
+
         preds, loss = self(**batch).values()
-        acc: Tensor = multilabel_accuracy(
-            preds, batch["labels"], num_labels=self.hparams["num_labels"]
-        )
+        labels = cast(Tensor, batch["labels"])
+        acc = multilabel_accuracy(preds, labels, num_labels=self.hparams["num_labels"])
+
         self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 

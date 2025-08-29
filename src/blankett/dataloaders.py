@@ -5,8 +5,9 @@ from enum import Enum
 import lightning.pytorch as pl
 import pandas as pd
 import torch
-from torch import Tensor
 from torch.utils.data import DataLoader, Dataset, random_split
+
+from blankett.types import Batch
 
 JIGSAW_LABELS: list[str] = [
     "toxic",
@@ -77,7 +78,7 @@ class JigsawDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, idx: int) -> dict[str, str | Tensor]:
+    def __getitem__(self, idx: int) -> Batch:
         row: pd.Series = self.data.iloc[idx]
         return {
             "text": str(row["comment_text"]),
