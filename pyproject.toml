@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-predict = "blankett.predictor:cli_main"
+blankett = "blankett.predictor:cli_main"
 train = "blankett.trainer:cli_main"
 
 [build-system]
