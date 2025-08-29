@@ -1,19 +1,19 @@
-name: Release
+name: Publish
 
 on:
-    push:
-      tags:
-        - v*
+  release:
+    types:
+      - created
 
 jobs:
-  pypi:
+  publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    environment: release
+    environment: pypi
     permissions:
         id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
       - run: uv build
       - run: uv publish --trusted-publishing always
