@@ -5,17 +5,29 @@ from torch import Tensor
 from transformers import logging
 
 from blankett.models import ToxicityClassifier
+from blankett.types import PredResult, TextInput
 
 logging.set_verbosity_error()
 
-DOWNLOAD_URL: str = "https://github.com/sulzyy/blankett/releases/download/"
-
-MODEL_URLS: dict[str, str] = {
-    "bert-tiny": DOWNLOAD_URL + "v0.0.1alpha1/bert_tiny.ckpt",
+DOWNLOAD_BASE_URL = "https://github.com/sulzyy/blankett/releases/download/"
+AVAILABLE_MODELS = {
+    "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha1/bert_tiny.ckpt",
 }
 
 
 class Blankett:
+    """A pre-trained toxicity classification model for content moderation.
+
+    This class provides an interface for loading and using fine-tuned transformer models
+    to detect toxic content in text. It supports both local checkpoints and remote
+    pre-trained models with configurable classification thresholds.
+
+    Example:
+        >>> classifier = Blankett(model_name="bert-tiny", threshold=0.7)
+        >>> results = classifier.predict("I love your work!")
+        >>> print(results)
+    """
+
     def __init__(
         self,
         model_name: str = "bert-tiny",
@@ -23,57 +35,102 @@ class Blankett:
         threshold: float = 0.5,
         device: str = "cpu",
     ) -> None:
-        """
+        """Initialize the toxicity classification model.
+
         Args:
-            model_name: Name of the remote pre-trained model to download and use.
-            checkpoint_path: Path to local model checkpoint (if None, downloads from URL with `model_name`).
-            threshold: Classification threshold for positive predictions.
-            device: Device to run inference on (cpu/cuda).
+            model_name (str): Name of the pre-trained model to use. Available models
+                can be found in the AVAILABLE_MODELS dictionary. Defaults to "bert-tiny".
+            checkpoint_path (str | None): Path to a local model checkpoint
+                file. If None, the model will be downloaded from the remote repository
+                using the specified model_name. Defaults to None.
+            threshold (float): Classification threshold for determining positive predictions.
+                Values above this threshold are classified as toxic. Must be between
+                0.0 and 1.0. Defaults to 0.5.
+            device (str): PyTorch device specification for model inference. Common values
+                include "cpu", "cuda", "cuda:0", etc. Defaults to "cpu".
+
+        Raises:
+            ValueError: If model_name is not found in AVAILABLE_MODELS or if threshold
+                is not within the valid range [0.0, 1.0].
+
+        Note:
+            The model will be automatically downloaded on first use if no local
+            checkpoint_path is provided.
         """
+        self._validate_inputs(model_name, threshold)
+
+        self.model_name = model_name
         self.threshold = threshold
-        self.model = self._load_model(model_name, checkpoint_path, device)
+        self.device = device
+        self.model = self._load_model(checkpoint_path)
+
+    def _validate_inputs(self, model_name: str, threshold: float) -> None:
+        """Validate constructor inputs."""
+        if model_name not in AVAILABLE_MODELS:
+            available = ", ".join(AVAILABLE_MODELS.keys())
+            raise ValueError(f"Unknown model '{model_name}'. Available: {available}")
+
+        if not 0.0 <= threshold <= 1.0:
+            raise ValueError(f"Threshold must be between 0.0 and 1.0, got {threshold}")
+
+    def _load_model(self, checkpoint_path: str | None) -> LightningModule:
+        """Load model from checkpoint path or download URL."""
+        if checkpoint_path is None:
+            checkpoint_path = AVAILABLE_MODELS[self.model_name]
+
+        return ToxicityClassifier.load_from_checkpoint(
+            checkpoint_path, map_location=self.device
+        )
 
     @torch.no_grad()
     def predict(
         self,
-        text: str | list[str],
-        pretty_print: bool = True,
-    ) -> dict[str, Tensor | dict[str, Tensor]]:
-        """Predict toxicity for given text(s).
+        texts: TextInput,
+        verbose: bool = True,
+    ) -> PredResult:
+        """Predict toxicity for input text(s).
 
         Args:
-            text: Single text string or list of text strings to classify.
+            texts: Single text string or list of strings to classify.
+            verbose: If True, print results to stdout.
 
         Returns:
-            Dictionary mapping input text to prediction results.
+            Dictionary mapping input texts to their prediction results.
         """
         self.model.eval()
-        text = [text] if isinstance(text, str) else text
-        outputs: Tensor = self.model(text)["outputs"].detach().cpu()
-        results: dict[str, Tensor | dict[str, Tensor]] = {}
-        label_names: list[str] | None = self.model.hparams.get("label_names", None)
-        for _text, prob_vector in zip(text, outputs, strict=True):
-            if label_names is not None:
-                prob_dict = dict(zip(label_names, prob_vector, strict=True))
-                results[_text] = prob_dict
-            else:
-                results[_text] = prob_vector
-        self._print_results(results)
+
+        text_list = [texts] if isinstance(texts, str) else texts
+        outputs: Tensor = self.model(text_list)["outputs"].detach().cpu()
+        results = self._format_predictions(text_list, outputs)
+
+        if verbose:
+            self._print_results(results)
+
         return results
 
-    def _load_model(
-        self, model_name: str, checkpoint_path: str | None, device: str
-    ) -> LightningModule:
-        if checkpoint_path is None:
-            checkpoint_path = MODEL_URLS[model_name]
-        return ToxicityClassifier.load_from_checkpoint(
-            checkpoint_path, map_location=device
-        )
+    def _format_predictions(
+        self,
+        texts: TextInput,
+        outputs: Tensor,
+    ) -> PredResult:
+        """Format raw model outputs into stuctured results."""
+        results = {}
+        label_names = self.model.hparams.get("label_names")
 
-    def _print_results(self, results: dict[str, Tensor | dict[str, Tensor]]) -> None:
-        sep = "-" * 50
+        for text, prob_vector in zip(texts, outputs, strict=True):
+            if label_names:
+                results[text] = dict(zip(label_names, prob_vector, strict=True))
+            else:
+                results[text] = prob_vector
+
+        return results
+
+    def _print_results(self, results: PredResult) -> None:
+        """Print formatted prediction results."""
+        separator = "=" * 60
+
         for text, result in results.items():
-            print(sep)
+            print(separator)
             print(f'Input: "{text}"')
             if isinstance(result, Tensor):
                 print("Raw outputs:", result)
@@ -83,25 +140,39 @@ class Blankett:
                     prob_float = float(prob)
                     marker = "✓" if prob_float >= self.threshold else " "
                     print(f"  [{marker}] {label:<15} {prob_float:.2%}")
-            print(sep)
+            print(separator)
             print()
 
 
 def classify(
-    text: str | list[str],
+    texts: TextInput,
     model_name: str = "bert-tiny",
     checkpoint_path: str | None = None,
     threshold: float = 0.5,
     device: str = "cpu",
 ) -> None:
-    """CLI interface for Blankett toxicity classification.
+    """A toxicity classifier that can load pretrained models and make predictions.
 
     Args:
-        text: Text to classify for toxicity.
-        model_name: Name of the remote pre-trained model to download and use.
-        checkpoint_path: Path to local model checkpoint (if None, downloads from URL with `model_name`).
-        threshold: Classification threshold for positive predictions.
-        device: Device to run inference on (cpu/cuda).
+        texts (TextInput): Single text string or list of strings to classify.
+        model_name (str): Name of the pre-trained model to use. Available models
+            can be found in the AVAILABLE_MODELS dictionary. Defaults to "bert-tiny".
+        checkpoint_path (str | None): Path to a local model checkpoint
+            file. If None, the model will be downloaded from the remote repository
+            using the specified model_name. Defaults to None.
+        threshold (float): Classification threshold for determining positive predictions.
+            Values above this threshold are classified as toxic. Must be between
+            0.0 and 1.0. Defaults to 0.5.
+        device (str): PyTorch device specification for model inference. Common values
+            include "cpu", "cuda", "cuda:0", etc. Defaults to "cpu".
+
+    Example:
+        Command line usage:
+
+        ```bash
+        python predictor.py --text "Hello world" --threshold 0.7
+        python predictor.py --text '["Text 1", "Text 2"]' --model_name bert-tiny
+        ```
     """
     classifier = Blankett(
         model_name=model_name,
@@ -109,10 +180,11 @@ def classify(
         threshold=threshold,
         device=device,
     )
-    _ = classifier.predict(text, pretty_print=True)
+    _ = classifier.predict(texts)
 
 
 def cli_main():
+    """Entry point for CLI."""
     auto_cli(classify)
 
 
