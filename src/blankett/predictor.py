@@ -1,4 +1,5 @@
 import torch
+from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
 from transformers import logging
@@ -22,13 +23,30 @@ class Blankett:
         threshold: float = 0.5,
         device: str = "cpu",
     ) -> None:
+        """
+        Args:
+            model_name: Name of the remote pre-trained model to download and use.
+            checkpoint_path: Path to local model checkpoint (if None, downloads from URL with `model_name`).
+            threshold: Classification threshold for positive predictions.
+            device: Device to run inference on (cpu/cuda).
+        """
         self.threshold = threshold
-        self.model = self.load_model(model_name, checkpoint_path, device)
+        self.model = self._load_model(model_name, checkpoint_path, device)
 
     @torch.no_grad()
     def predict(
-        self, text: str | list[str], verbose: bool = False
+        self,
+        text: str | list[str],
+        pretty_print: bool = True,
     ) -> dict[str, Tensor | dict[str, Tensor]]:
+        """Predict toxicity for given text(s).
+
+        Args:
+            text: Single text string or list of text strings to classify.
+
+        Returns:
+            Dictionary mapping input text to prediction results.
+        """
         self.model.eval()
         text = [text] if isinstance(text, str) else text
         outputs: Tensor = self.model(text)["outputs"].detach().cpu()
@@ -40,11 +58,10 @@ class Blankett:
                 results[_text] = prob_dict
             else:
                 results[_text] = prob_vector
-        if verbose:
-            self._print_results(results)
+        self._print_results(results)
         return results
 
-    def load_model(
+    def _load_model(
         self, model_name: str, checkpoint_path: str | None, device: str
     ) -> LightningModule:
         if checkpoint_path is None:
@@ -64,18 +81,40 @@ class Blankett:
                 print("Predictions:")
                 for label, prob in result.items():
                     prob_float = float(prob)
-                    marker = "✔" if prob_float >= self.threshold else " "
+                    marker = "✓" if prob_float >= self.threshold else " "
                     print(f"  [{marker}] {label:<15} {prob_float:.2%}")
             print(sep)
             print()
 
 
-if __name__ == "__main__":
-    _ = Blankett().predict(
-        [
-            "I love your work!",
-            "You're a total loser.",
-            "If you don't refund me, I will report your crap company.",
-        ],
-        verbose=True,
+def classify(
+    text: str | list[str],
+    model_name: str = "bert-tiny",
+    checkpoint_path: str | None = None,
+    threshold: float = 0.5,
+    device: str = "cpu",
+) -> None:
+    """CLI interface for Blankett toxicity classification.
+
+    Args:
+        text: Text to classify for toxicity.
+        model_name: Name of the remote pre-trained model to download and use.
+        checkpoint_path: Path to local model checkpoint (if None, downloads from URL with `model_name`).
+        threshold: Classification threshold for positive predictions.
+        device: Device to run inference on (cpu/cuda).
+    """
+    classifier = Blankett(
+        model_name=model_name,
+        checkpoint_path=checkpoint_path,
+        threshold=threshold,
+        device=device,
     )
+    _ = classifier.predict(text, pretty_print=True)
+
+
+def cli_main():
+    auto_cli(classify)
+
+
+if __name__ == "__main__":
+    cli_main()

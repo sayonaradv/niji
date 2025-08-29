@@ -13,9 +13,8 @@ dependencies = [
 ]
 
 [project.scripts]
-blankett = "blankett:main"
-train = "blankett.trainer:cli_main"
 predict = "blankett.predictor:cli_main"
+train = "blankett.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]
