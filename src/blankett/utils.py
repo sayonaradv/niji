@@ -1,16 +1,13 @@
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    PreTrainedModel,
-    PreTrainedTokenizerFast,
-)
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from blankett.types import ModelTokenizerPair
 
 
 def get_model_and_tokenizer(
     model_name: str,
     num_labels: int,
     cache_dir: str | None,
-) -> tuple[PreTrainedModel, PreTrainedTokenizerFast]:
+) -> ModelTokenizerPair:
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
         num_labels=num_labels,
