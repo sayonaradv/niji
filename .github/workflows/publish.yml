@@ -1,9 +1,9 @@
 name: Publish
 
 on:
-  release:
-    types:
-      - created
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   publish:
@@ -17,6 +17,3 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv build
       - run: uv publish --trusted-publishing always
-
-
-    
