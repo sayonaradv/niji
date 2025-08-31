@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rynn = "ruffle.predictor:cli_main"
+ruffle = "ruffle.predictor:cli_main"
 train = "ruffle.trainer:cli_main"
 
 [build-system]
