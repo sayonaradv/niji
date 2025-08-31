@@ -2,6 +2,7 @@
   <img src=".github/images/ruffle-high-resolution-logo-grayscale-transparent.png" alt="Ruffle Logo" width="200">
 </div>
 
+---
 
 **Professional-grade toxicity detection powered by transformer models**
 
