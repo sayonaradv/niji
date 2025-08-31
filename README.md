@@ -78,6 +78,21 @@ texts = [
     "Batch processing is supported"
 ]
 results = detector.predict(texts)
+
+```
+### CLI
+
+Use Ruffle directly from the command line:
+
+```bash
+# Classify single text
+uv run ruffle "Hello world" --model_name bert-tiny --threshold 0.7
+
+# Classify multiple texts  
+uv run ruffle '["Text 1", "Text 2"]' --model_name bert-tiny
+
+# Use custom checkpoint
+uv run ruffle "Sample text" --checkpoint_path model.ckpt
 ```
 
 ### Custom Model Training
@@ -95,20 +110,6 @@ uv run train fit --config configs/jigsaw_full.yaml
 uv run train fit --config path/to/your/config.yaml
 ```
 
-### Command Line Interface
-
-Use Ruffle directly from the command line:
-
-```bash
-# Classify single text
-uv run python -m ruffle.predictor --texts "Hello world" --threshold 0.7
-
-# Classify multiple texts  
-uv run python -m ruffle.predictor --texts '["Text 1", "Text 2"]' --model_name bert-tiny
-
-# Use custom checkpoint
-uv run python -m ruffle.predictor --texts "Sample text" --checkpoint_path model.ckpt
-```
 
 See the [documentation](https://ruffle.readthedocs.io) for comprehensive guides and API reference.
 
