@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=".github/images/ruffle-high-resolution-logo-grayscale-transparent.png" alt="Ruffle Logo" width="200">
+  <img src=".github/images/ruffle-high-resolution-log.png" alt="Ruffle Logo" width="200">
 </div>
 
 ---
