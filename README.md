@@ -4,7 +4,9 @@
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
 
-![Ruffle in action](https://via.placeholder.com/800x400?text=Ruffle+Toxicity+Detection+Demo)
+<div align="center">
+  <img src=".github/images/ruffle-high-resolution-logo-grayscale-transparent.png" alt="Ruffle Logo" width="200">
+</div>
 
 ---
 
