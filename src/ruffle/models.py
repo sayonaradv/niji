@@ -13,9 +13,9 @@ from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 from transformers import get_cosine_schedule_with_warmup
 
-from rynn.dataloaders import JIGSAW_LABELS
-from rynn.types import Batch, TensorDict, TextInput
-from rynn.utils import get_model_and_tokenizer
+from ruffle.dataloaders import JIGSAW_LABELS
+from ruffle.types import Batch, TensorDict, TextInput
+from ruffle.utils import get_model_and_tokenizer
 
 
 class Classifier(pl.LightningModule):

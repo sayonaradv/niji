@@ -7,8 +7,8 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.cli import ArgsType, LightningArgumentParser, LightningCLI
 
-from rynn.dataloaders import JigsawDataModule
-from rynn.models import Classifier
+from ruffle.dataloaders import JigsawDataModule
+from ruffle.models import Classifier
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")

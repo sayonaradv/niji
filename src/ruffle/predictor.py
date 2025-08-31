@@ -3,8 +3,8 @@ from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from rynn.models import Classifier
-from rynn.types import PredResult, TextInput
+from ruffle.models import Classifier
+from ruffle.types import PredResult, TextInput
 
 DOWNLOAD_BASE_URL = "https://github.com/dbozbay/rynn/releases/download/"
 AVAILABLE_MODELS = {
@@ -12,7 +12,7 @@ AVAILABLE_MODELS = {
 }
 
 
-class Rynn:
+class Ruffle:
     """A pre-trained toxicity classification model for content moderation.
 
     This class provides an interface for loading and using fine-tuned transformer models
@@ -171,7 +171,7 @@ def classify(
         python predictor.py --text '["Text 1", "Text 2"]' --model_name bert-tiny
         ```
     """
-    classifier = Rynn(
+    classifier = Ruffle(
         model_name=model_name,
         checkpoint_path=checkpoint_path,
         threshold=threshold,

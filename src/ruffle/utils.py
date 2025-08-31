@@ -1,6 +1,6 @@
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from rynn.types import ModelTokenizerPair
+from ruffle.types import ModelTokenizerPair
 
 
 def get_model_and_tokenizer(

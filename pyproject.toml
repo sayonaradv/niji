@@ -1,5 +1,5 @@
 [project]
-name = "rynn"
+name = "ruffle"
 version = "0.0.1a1"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -13,8 +13,8 @@ dependencies = [
 ]
 
 [project.scripts]
-rynn = "rynn.predictor:cli_main"
-train = "rynn.trainer:cli_main"
+rynn = "ruffle.predictor:cli_main"
+train = "ruffle.trainer:cli_main"
 
 [build-system]
 requires = ["hatchling"]

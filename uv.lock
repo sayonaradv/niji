@@ -1056,7 +1056,7 @@ wheels = [
 ]
 
 [[package]]
-name = "rynn"
+name = "ruffle"
 version = "0.0.1a1"
 source = { editable = "." }
 dependencies = [
