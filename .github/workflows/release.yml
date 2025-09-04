@@ -1,17 +1,17 @@
-name: Publish
+name: Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - v*
 
 jobs:
-  publish:
+  pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    environment: pypi
+    environment: release
     permissions:
-        id-token: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
