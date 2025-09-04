@@ -12,6 +12,7 @@ def get_model_and_tokenizer(
         model_name,
         num_labels=num_labels,
         cache_dir=cache_dir,
+        problem_type="multi_label_classification",
     )
     tokenizer = AutoTokenizer.from_pretrained(
         model_name, cache_dir=cache_dir, use_fast=True
