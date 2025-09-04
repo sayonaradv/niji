@@ -23,7 +23,7 @@ class Classifier(pl.LightningModule):
         self,
         model_name: str,
         num_labels: int = 6,
-        label_names: list[str] = JIGSAW_LABELS,
+        label_names: list[str] | None = None,
         max_token_len: int = 256,
         lr: float = 3e-5,
         warmup_start_lr: float = 3e-6,
@@ -36,7 +36,7 @@ class Classifier(pl.LightningModule):
         self.model, self.tokenizer = get_model_and_tokenizer(
             self.hparams["model_name"],
             cache_dir=self.hparams["cache_dir"],
-            num_labels=len(self.hparams["label_names"]),
+            num_labels=self.hparams["num_labels"],
         )
         self.model.train()
 
