@@ -15,7 +15,7 @@ from ruffle.types import PredResult, TextInput
 
 DOWNLOAD_BASE_URL = "https://github.com/zuzu-sh/ruffle/releases/download/"
 AVAILABLE_MODELS = {
-    "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha2/bert-tiny-jigsaw.ckpt",
+    "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha2/finetuned-bert-tiny.ckpt",
 }
 """Dictionary mapping model names to their download URLs."""
 
