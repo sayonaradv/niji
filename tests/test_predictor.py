@@ -17,4 +17,4 @@ class TestRuffle:
 
     def test_init_with_invalid_ckpt_path(self):
         with pytest.raises(FileNotFoundError, match="No such file or directory"):
-            Ruffle(checkpoint_path="invalid_path")
+            Ruffle(ckpt_path="invalid_path")

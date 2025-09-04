@@ -36,7 +36,7 @@ class Ruffle:
     def __init__(
         self,
         model_name: str = "bert-tiny",
-        checkpoint_path: str | None = None,
+        ckpt_path: str | None = None,
         threshold: float = 0.5,
         device: str = "cpu",
     ) -> None:
@@ -45,7 +45,7 @@ class Ruffle:
         Args:
             model_name (str): Name of the pre-trained model to use. Available models
                 can be found in the AVAILABLE_MODELS dictionary. Defaults to "bert-tiny".
-            checkpoint_path (str | None): Path to a local model checkpoint
+            ckpt_path (str | None): Path to a local model checkpoint
                 file. If None, the model will be downloaded from the remote repository
                 using the specified model_name. Defaults to None.
             threshold (float): Classification threshold for determining positive predictions.
@@ -60,14 +60,14 @@ class Ruffle:
 
         Note:
             The model will be automatically downloaded on first use if no local
-            checkpoint_path is provided.
+            ckpt_path is provided.
         """
         self._validate_inputs(model_name, threshold)
 
         self.model_name = model_name
         self.threshold = threshold
         self.device = device
-        self.model = self._load_model(checkpoint_path)
+        self.model = self._load_model(ckpt_path)
 
     def _validate_inputs(self, model_name: str, threshold: float) -> None:
         """Validate constructor inputs.
@@ -86,22 +86,20 @@ class Ruffle:
         if not 0.0 <= threshold <= 1.0:
             raise ValueError(f"Threshold must be between 0.0 and 1.0, got {threshold}")
 
-    def _load_model(self, checkpoint_path: str | None) -> LightningModule:
+    def _load_model(self, ckpt_path: str | None) -> LightningModule:
         """Load model from checkpoint path or download URL.
 
         Args:
-            checkpoint_path: Local path to checkpoint file, or None to use
+            ckpt_path: Local path to checkpoint file, or None to use
                 pre-configured download URL.
 
         Returns:
             Loaded LightningModule model ready for inference.
         """
-        if checkpoint_path is None:
-            checkpoint_path = AVAILABLE_MODELS[self.model_name]
+        if ckpt_path is None:
+            ckpt_path = AVAILABLE_MODELS[self.model_name]
 
-        return Classifier.load_from_checkpoint(
-            checkpoint_path, map_location=self.device
-        )
+        return Classifier.load_from_checkpoint(ckpt_path, map_location=self.device)
 
     @torch.no_grad()
     def predict(
@@ -183,7 +181,7 @@ class Ruffle:
 def classify(
     texts: TextInput,
     model_name: str = "bert-tiny",
-    checkpoint_path: str | None = None,
+    ckpt_path: str | None = None,
     threshold: float = 0.5,
     device: str = "cpu",
 ) -> None:
@@ -196,7 +194,7 @@ def classify(
         texts: Single text string or list of strings to classify.
         model_name: Name of the pre-trained model to use. Available models
             can be found in the AVAILABLE_MODELS dictionary.
-        checkpoint_path: Path to a local model checkpoint file. If None,
+        ckpt_path: Path to a local model checkpoint file. If None,
             the model will be downloaded from the remote repository.
         threshold: Classification threshold for determining positive predictions.
             Values above this threshold are classified as toxic.
@@ -212,7 +210,7 @@ def classify(
     """
     classifier = Ruffle(
         model_name=model_name,
-        checkpoint_path=checkpoint_path,
+        ckpt_path=ckpt_path,
         threshold=threshold,
         device=device,
     )
