@@ -1,3 +1,10 @@
+"""High-level prediction interface for toxicity classification.
+
+This module provides the main user-facing API for loading pre-trained toxicity
+classification models and making predictions on text data. It includes both
+a Python class interface and a command-line interface.
+"""
+
 import torch
 from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
@@ -10,6 +17,7 @@ DOWNLOAD_BASE_URL = "https://github.com/zuzu-sh/ruffle/releases/download/"
 AVAILABLE_MODELS = {
     "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha1/finetuned-bert-tiny.ckpt",
 }
+"""Dictionary mapping model names to their download URLs."""
 
 
 class Ruffle:
@@ -20,7 +28,7 @@ class Ruffle:
     pre-trained models with configurable classification thresholds.
 
     Example:
-        >>> classifier = Rynn(model_name="bert-tiny", threshold=0.7)
+        >>> classifier = Ruffle(model_name="bert-tiny", threshold=0.7)
         >>> results = classifier.predict("I love your work!")
         >>> print(results)
     """
@@ -62,7 +70,15 @@ class Ruffle:
         self.model = self._load_model(checkpoint_path)
 
     def _validate_inputs(self, model_name: str, threshold: float) -> None:
-        """Validate constructor inputs."""
+        """Validate constructor inputs.
+        
+        Args:
+            model_name: Name of the model to validate.
+            threshold: Classification threshold to validate.
+            
+        Raises:
+            ValueError: If model_name is not available or threshold is invalid.
+        """
         if model_name not in AVAILABLE_MODELS:
             available = ", ".join(AVAILABLE_MODELS.keys())
             raise ValueError(f"Unknown model '{model_name}'. Available: {available}")
@@ -71,7 +87,15 @@ class Ruffle:
             raise ValueError(f"Threshold must be between 0.0 and 1.0, got {threshold}")
 
     def _load_model(self, checkpoint_path: str | None) -> LightningModule:
-        """Load model from checkpoint path or download URL."""
+        """Load model from checkpoint path or download URL.
+        
+        Args:
+            checkpoint_path: Local path to checkpoint file, or None to use
+                pre-configured download URL.
+                
+        Returns:
+            Loaded LightningModule model ready for inference.
+        """
         if checkpoint_path is None:
             checkpoint_path = AVAILABLE_MODELS[self.model_name]
 
@@ -89,10 +113,12 @@ class Ruffle:
 
         Args:
             texts: Single text string or list of strings to classify.
-            verbose: If True, print results to stdout.
+            verbose: If True, print formatted results to stdout.
 
         Returns:
             Dictionary mapping input texts to their prediction results.
+            If the model has label_names, returns probabilities for each label.
+            Otherwise returns raw probability tensors.
         """
         self.model.eval()
 
@@ -110,7 +136,16 @@ class Ruffle:
         texts: TextInput,
         outputs: Tensor,
     ) -> PredResult:
-        """Format raw model outputs into stuctured results."""
+        """Format raw model outputs into structured results.
+        
+        Args:
+            texts: Input texts (list of strings).
+            outputs: Model probability outputs with shape (batch_size, num_labels).
+            
+        Returns:
+            Dictionary mapping each input text to either a dictionary of
+            label probabilities (if model has label_names) or raw tensor.
+        """
         results = {}
         label_names = self.model.hparams.get("label_names")
 
@@ -123,7 +158,11 @@ class Ruffle:
         return results
 
     def _print_results(self, results: PredResult) -> None:
-        """Print formatted prediction results."""
+        """Print formatted prediction results to stdout.
+        
+        Args:
+            results: Dictionary of prediction results to display.
+        """
         separator = "=" * 60
 
         for text, result in results.items():
@@ -148,27 +187,27 @@ def classify(
     threshold: float = 0.5,
     device: str = "cpu",
 ) -> None:
-    """A toxicity classifier that can load pretrained models and make predictions.
+    """Command-line interface for toxicity classification.
+
+    A convenience function that creates a Ruffle classifier and makes predictions
+    on the provided texts. Results are automatically printed to stdout.
 
     Args:
-        texts (TextInput): Single text string or list of strings to classify.
-        model_name (str): Name of the pre-trained model to use. Available models
-            can be found in the AVAILABLE_MODELS dictionary. Defaults to "bert-tiny".
-        checkpoint_path (str | None): Path to a local model checkpoint
-            file. If None, the model will be downloaded from the remote repository
-            using the specified model_name. Defaults to None.
-        threshold (float): Classification threshold for determining positive predictions.
-            Values above this threshold are classified as toxic. Must be between
-            0.0 and 1.0. Defaults to 0.5.
-        device (str): PyTorch device specification for model inference. Common values
-            include "cpu", "cuda", "cuda:0", etc. Defaults to "cpu".
+        texts: Single text string or list of strings to classify.
+        model_name: Name of the pre-trained model to use. Available models
+            can be found in the AVAILABLE_MODELS dictionary.
+        checkpoint_path: Path to a local model checkpoint file. If None, 
+            the model will be downloaded from the remote repository.
+        threshold: Classification threshold for determining positive predictions.
+            Values above this threshold are classified as toxic.
+        device: PyTorch device specification for model inference.
 
     Example:
         Command line usage:
 
         ```bash
-        python predictor.py --text "Hello world" --threshold 0.7
-        python predictor.py --text '["Text 1", "Text 2"]' --model_name bert-tiny
+        python predictor.py --texts "Hello world" --threshold 0.7
+        python predictor.py --texts '["Text 1", "Text 2"]' --model_name bert-tiny
         ```
     """
     classifier = Ruffle(
@@ -180,8 +219,13 @@ def classify(
     _ = classifier.predict(texts)
 
 
-def cli_main():
-    """Entry point for CLI."""
+def cli_main() -> None:
+    """Entry point for the command-line interface.
+    
+    Uses jsonargparse to automatically generate a CLI from the classify function.
+    This allows users to call the predictor from the command line with automatic
+    argument parsing and help generation.
+    """
     auto_cli(classify)
 
 
