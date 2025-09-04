@@ -36,6 +36,7 @@ class SplitConfig:
         labels_path: Optional path to the labels CSV file. None for training split
             where labels are included in the inputs file.
     """
+
     inputs_path: str
     labels_path: str | None = None
 
@@ -47,6 +48,7 @@ class Split(Enum):
         TRAIN: Training split configuration with labels included in train.csv.
         TEST: Test split configuration with separate test.csv and test_labels.csv files.
     """
+
     TRAIN = SplitConfig(inputs_path="train.csv")
     TEST = SplitConfig(inputs_path="test.csv", labels_path="test_labels.csv")
 
@@ -62,6 +64,7 @@ class JigsawDataset(Dataset):
         labels: List of label names to include in the dataset.
         data: Pandas DataFrame containing the loaded and preprocessed data.
     """
+
     def __init__(
         self,
         split: Split,
@@ -182,6 +185,7 @@ class JigsawDataModule(pl.LightningDataModule):
         val_ds: Validation dataset instance.
         test_ds: Test dataset instance.
     """
+
     _DEFAULT_DATA_DIR: str = os.path.join(
         "data", "jigsaw-toxic-comment-classification-challenge"
     )
