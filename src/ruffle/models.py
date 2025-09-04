@@ -26,16 +26,16 @@ from ruffle.utils import get_model_and_tokenizer
 
 class Classifier(pl.LightningModule):
     """PyTorch Lightning module for multilabel text classification.
-    
+
     A wrapper around transformer models that provides training, validation,
     and testing capabilities for multilabel classification tasks. Uses binary
     cross-entropy loss with sigmoid activation for multi-label prediction.
-    
+
     Attributes:
         model: The underlying transformer model for classification.
         tokenizer: Tokenizer associated with the model.
     """
-    
+
     def __init__(
         self,
         model_name: str,
@@ -48,7 +48,7 @@ class Classifier(pl.LightningModule):
         cache_dir: str | None = "data",
     ) -> None:
         """Initialize the Classifier module.
-        
+
         Args:
             model_name: Name or path of the pre-trained transformer model.
             num_labels: Number of labels for multilabel classification.
@@ -60,7 +60,7 @@ class Classifier(pl.LightningModule):
             warmup_epochs: Number of epochs for learning rate warmup.
             cache_dir: Directory to cache downloaded models. If None, uses default
                 transformers cache directory.
-                
+
         Raises:
             ValueError: If label_names length doesn't match num_labels.
         """
@@ -76,7 +76,7 @@ class Classifier(pl.LightningModule):
 
     def _validate_labels(self) -> None:
         """Validate that label_names length matches num_labels if provided.
-        
+
         Raises:
             ValueError: If label_names is provided but has different length than num_labels.
         """
@@ -90,7 +90,7 @@ class Classifier(pl.LightningModule):
 
     def configure_model(self) -> None:
         """Configure the model for optimized training.
-        
+
         Compiles the model using PyTorch's compile functionality to improve
         training speed and efficiency.
         """
@@ -98,15 +98,15 @@ class Classifier(pl.LightningModule):
 
     def forward(self, text: TextInput, labels: Tensor | None = None) -> TensorDict:  # type: ignore[override]
         """Forward pass through the model.
-        
+
         Tokenizes input text, runs it through the model, and applies sigmoid
         activation to get probabilities. Optionally computes loss if labels are provided.
-        
+
         Args:
             text: Input text(s) as string or list of strings.
             labels: Optional ground truth labels for computing loss. Should be
                 FloatTensor with shape (batch_size, num_labels) containing binary values.
-                
+
         Returns:
             Dictionary containing:
                 - 'outputs': Model predictions after sigmoid activation with shape
@@ -134,11 +134,11 @@ class Classifier(pl.LightningModule):
 
     def training_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         """Execute a single training step.
-        
+
         Args:
             batch: Training batch containing 'text' and 'labels' keys.
             batch_idx: Index of the current batch.
-            
+
         Returns:
             Training loss tensor for backpropagation.
         """
@@ -148,11 +148,11 @@ class Classifier(pl.LightningModule):
 
     def validation_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         """Execute a single validation step.
-        
+
         Args:
             batch: Validation batch containing 'text' and 'labels' keys.
             batch_idx: Index of the current batch.
-            
+
         Returns:
             None.
         """
@@ -161,11 +161,11 @@ class Classifier(pl.LightningModule):
 
     def test_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         """Execute a single test step.
-        
+
         Args:
             batch: Test batch containing 'text' and 'labels' keys.
             batch_idx: Index of the current batch.
-            
+
         Returns:
             None.
         """
@@ -174,14 +174,14 @@ class Classifier(pl.LightningModule):
 
     def _shared_eval_step(self, batch: Batch, stage: str) -> STEP_OUTPUT:
         """Shared logic for validation and test steps.
-        
+
         Computes predictions, loss, and multilabel accuracy for evaluation.
         Logs metrics with the specified stage prefix.
-        
+
         Args:
             batch: Evaluation batch containing 'text' and 'labels' keys.
             stage: Stage name ("val" or "test") for metric logging.
-            
+
         Returns:
             None.
         """
@@ -199,10 +199,10 @@ class Classifier(pl.LightningModule):
 
     def configure_optimizers(self) -> OptimizerLRSchedulerConfig:
         """Configure optimizer and learning rate scheduler.
-        
+
         Sets up Adam optimizer with linear warmup followed by cosine annealing
         learning rate schedule for stable training.
-        
+
         Returns:
             Dictionary containing optimizer and lr_scheduler configurations
             for PyTorch Lightning.

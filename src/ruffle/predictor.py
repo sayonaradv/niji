@@ -71,11 +71,11 @@ class Ruffle:
 
     def _validate_inputs(self, model_name: str, threshold: float) -> None:
         """Validate constructor inputs.
-        
+
         Args:
             model_name: Name of the model to validate.
             threshold: Classification threshold to validate.
-            
+
         Raises:
             ValueError: If model_name is not available or threshold is invalid.
         """
@@ -88,11 +88,11 @@ class Ruffle:
 
     def _load_model(self, checkpoint_path: str | None) -> LightningModule:
         """Load model from checkpoint path or download URL.
-        
+
         Args:
             checkpoint_path: Local path to checkpoint file, or None to use
                 pre-configured download URL.
-                
+
         Returns:
             Loaded LightningModule model ready for inference.
         """
@@ -137,11 +137,11 @@ class Ruffle:
         outputs: Tensor,
     ) -> PredResult:
         """Format raw model outputs into structured results.
-        
+
         Args:
             texts: Input texts (list of strings).
             outputs: Model probability outputs with shape (batch_size, num_labels).
-            
+
         Returns:
             Dictionary mapping each input text to either a dictionary of
             label probabilities (if model has label_names) or raw tensor.
@@ -159,7 +159,7 @@ class Ruffle:
 
     def _print_results(self, results: PredResult) -> None:
         """Print formatted prediction results to stdout.
-        
+
         Args:
             results: Dictionary of prediction results to display.
         """
@@ -196,7 +196,7 @@ def classify(
         texts: Single text string or list of strings to classify.
         model_name: Name of the pre-trained model to use. Available models
             can be found in the AVAILABLE_MODELS dictionary.
-        checkpoint_path: Path to a local model checkpoint file. If None, 
+        checkpoint_path: Path to a local model checkpoint file. If None,
             the model will be downloaded from the remote repository.
         threshold: Classification threshold for determining positive predictions.
             Values above this threshold are classified as toxic.
@@ -221,7 +221,7 @@ def classify(
 
 def cli_main() -> None:
     """Entry point for the command-line interface.
-    
+
     Uses jsonargparse to automatically generate a CLI from the classify function.
     This allows users to call the predictor from the command line with automatic
     argument parsing and help generation.
