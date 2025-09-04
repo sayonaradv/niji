@@ -2,8 +2,6 @@
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
 
----
-
 ## Highlights
 
 - ⚡ **Lightning Fast**: Built on PyTorch Lightning for efficient training and inference
@@ -15,11 +13,7 @@ An extremely fast and accurate Python library for detecting toxic and harmful co
 
 Ruffle provides both high-level prediction APIs for quick content moderation and comprehensive training tools for custom model development.
 
----
-
 ## Installation
-
-### Quick Installation
 
 Install Ruffle using uv (recommended):
 
@@ -32,24 +26,6 @@ Or using pip:
 ```bash
 pip install ruffle
 ```
-
-### Development Installation
-
-For training custom models or contributing to development:
-
-```bash
-# Clone the repository
-git clone https://github.com/zuzo-sh/ruffle.git
-cd ruffle
-
-# Install with development dependencies using uv
-uv sync
-
-# Or using pip
-pip install -e ".[dev]"
-```
-
----
 
 ## Quick Start
 
@@ -76,6 +52,7 @@ texts = [
 results = detector.predict(texts)
 
 ```
+
 ### CLI
 
 Use Ruffle directly from the command line:
@@ -106,10 +83,7 @@ uv run train fit --config configs/jigsaw_full.yaml
 uv run train fit --config path/to/your/config.yaml
 ```
 
-
 See the [documentation](https://ruffle.readthedocs.io) for comprehensive guides and API reference.
-
----
 
 ## Detection Categories
 
@@ -138,7 +112,6 @@ Example output:
 }
 ```
 
----
 
 ## Configuration
 
@@ -174,8 +147,6 @@ trainer:
 
 See the [`configs/`](configs/) directory for complete examples.
 
----
-
 ## Development
 
 ### Prerequisites
@@ -204,21 +175,17 @@ uv run ruff check .
 uv run ruff format .
 ```
 
----
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
 
 ## Acknowledgments
 
 - **[Hugging Face Transformers](https://huggingface.co/transformers/)** - For the transformer model implementations
 - **[PyTorch Lightning](https://lightning.ai/)** - For the training framework and utilities
 - **[Jigsaw/Conversation AI](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge)** - For the toxicity classification dataset
-
----
 
 ## Benchmarks
 
@@ -231,8 +198,6 @@ Performance comparisons with other toxicity detection libraries:
 | Library B | CNN | 82.1% | 23ms | 384MB |
 
 *Benchmarks run on NVIDIA RTX 3080 with batch size 32*
-
----
 
 **Ruffle** - Professional toxicity detection for safer digital spaces.
 
