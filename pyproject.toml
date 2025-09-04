@@ -29,11 +29,13 @@ dev = [
 ]
 
 [tool.ty.environment]
+python = "./.venv"
 python-platform = "darwin"
 python-version = "3.13"
 
 [tool.ty.terminal]
 output-format = "concise"
+error-on-warning = true
 
 [tool.ruff.lint]
 select = [
