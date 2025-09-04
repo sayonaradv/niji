@@ -22,11 +22,17 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "pyrefly>=0.30.0",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
     "ty>=0.0.1a20",
 ]
+
+[tool.ty.environment]
+python-platform = "darwin"
+python-version = "3.13"
+
+[tool.ty.terminal]
+output-format = "concise"
 
 [tool.ruff.lint]
 select = [
