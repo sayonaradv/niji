@@ -1,16 +1,10 @@
-<div align="center">
-  <img src=".github/images/ruffle-high-resolution-logo.png" alt="Ruffle Logo" width="200">
-</div>
-
----
-
-**Professional-grade toxicity detection powered by transformer models**
+# Ruffle
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
 
 ---
 
-## ✨ Highlights
+## Highlights
 
 - ⚡ **Lightning Fast**: Built on PyTorch Lightning for efficient training and inference
 - 🧠 **Transformer-Powered**: Leverages BERT, DistilBERT, and other state-of-the-art models
@@ -23,7 +17,7 @@ Ruffle provides both high-level prediction APIs for quick content moderation and
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Quick Installation
 
@@ -57,7 +51,7 @@ pip install -e ".[dev]"
 
 ---
 
-## 📖 Quick Start
+## Quick Start
 
 ### Content Moderation
 
@@ -117,27 +111,7 @@ See the [documentation](https://ruffle.readthedocs.io) for comprehensive guides 
 
 ---
 
-## 🏗️ Architecture
-
-Ruffle is built with a modular, extensible architecture:
-
-### Core Components
-
-- **`ruffle.models`**: `Classifier` - PyTorch Lightning module with transformer backbone
-- **`ruffle.dataloaders`**: `JigsawDataModule` - Efficient data loading for training and validation  
-- **`ruffle.predictor`**: `Ruffle` - High-level inference API for production use
-- **`ruffle.trainer`**: Lightning CLI with professional callbacks and monitoring
-- **`ruffle.utils`**: Model and tokenizer utilities with caching support
-
-### Supported Models
-
-- **DistilBERT** (recommended for production)
-- **BERT** variants (including BERT-tiny for development)
-- **Any Hugging Face transformer** compatible with sequence classification
-
----
-
-## 📊 Detection Categories
+## Detection Categories
 
 Ruffle detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
 
@@ -166,7 +140,7 @@ Example output:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Ruffle uses YAML configuration files for reproducible training:
 
@@ -202,31 +176,7 @@ See the [`configs/`](configs/) directory for complete examples.
 
 ---
 
-## 🎯 API Reference
-
-### High-Level Inference
-
-```python
-from ruffle import Ruffle
-
-# Initialize detector
-detector = Ruffle(
-    model_name="bert-tiny",           # Pre-trained model name
-    checkpoint_path=None,             # Optional: path to custom checkpoint  
-    threshold=0.5,                    # Classification threshold
-    device="cpu"                      # Device for inference
-)
-
-# Make predictions
-results = detector.predict(
-    texts="Text to analyze",          # str or list[str]
-    verbose=True                      # Print formatted results
-)
-```
-
----
-
-## 🔬 Development
+## Development
 
 ### Prerequisites
 
@@ -246,87 +196,23 @@ uv sync
 # Run tests
 uv run pytest
 
+# Type checking
+uv run ty check .
+
 # Code formatting and linting  
 uv run ruff check .
 uv run ruff format .
-
-# Type checking
-uv run pyrefly check .
-```
-
-### Project Structure
-
-```
-src/ruffle/
-├── __init__.py          # Main package exports
-├── models.py            # Classifier PyTorch Lightning module
-├── dataloaders.py       # JigsawDataModule and datasets
-├── predictor.py         # High-level Ruffle inference API
-├── trainer.py           # Lightning CLI with callbacks
-├── schedulers.py        # Learning rate scheduling utilities
-├── setup.py             # Environment and logging setup
-├── types.py             # Type definitions and aliases
-└── utils.py             # Model and tokenizer utilities
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=ruffle --cov-report=html
-
-# Run specific test file
-uv run pytest tests/test_predictor.py -v
 ```
 
 ---
 
-## 📚 Documentation
-
-- **[Getting Started Guide](https://ruffle.readthedocs.io/getting-started/)** - Basic usage and installation
-- **[Training Guide](https://ruffle.readthedocs.io/training/)** - Custom model training and fine-tuning  
-- **[API Reference](https://ruffle.readthedocs.io/api/)** - Complete API documentation
-- **[Configuration Guide](https://ruffle.readthedocs.io/configuration/)** - YAML configuration options
-- **[Production Deployment](https://ruffle.readthedocs.io/production/)** - Performance optimization and scaling
-
----
-
-## 🤝 Contributing
-
-We welcome contributions of all kinds! Here's how to get started:
-
-1. **Fork the repository** on GitHub
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes** and add tests
-4. **Run the test suite**: `uv run pytest`
-5. **Format your code**: `uv run ruff format .`
-6. **Run type checking**: `uv run mypy src/ruffle`  
-7. **Commit your changes**: `git commit -m 'Add amazing feature'`
-8. **Push to your branch**: `git push origin feature/amazing-feature`
-9. **Open a Pull Request**
-
-### Code Style
-
-This project uses:
-- **Ruff** for formatting and linting (configuration in `pyproject.toml`)
-- **Pyrefly** for type checking
-- **Pytest** for testing
-- **Conventional Commits** for commit messages
-
-See our [Contributing Guide](CONTRIBUTING.md) for detailed guidelines.
-
----
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **[Hugging Face Transformers](https://huggingface.co/transformers/)** - For the transformer model implementations
 - **[PyTorch Lightning](https://lightning.ai/)** - For the training framework and utilities
@@ -334,7 +220,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-## 📈 Benchmarks
+## Benchmarks
 
 Performance comparisons with other toxicity detection libraries:
 
