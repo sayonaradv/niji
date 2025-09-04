@@ -99,6 +99,7 @@ Ruffle detects six categories of toxicity based on the Jigsaw Toxic Comment Clas
 | `identity_hate` | Identity-based hate speech and discrimination |
 
 Example output:
+
 ```python
 {
     "This is offensive content": {
@@ -111,7 +112,6 @@ Example output:
     }
 }
 ```
-
 
 ## Configuration
 
@@ -175,11 +175,9 @@ uv run ruff check .
 uv run ruff format .
 ```
 
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 
 ## Acknowledgments
 
@@ -200,4 +198,3 @@ Performance comparisons with other toxicity detection libraries:
 *Benchmarks run on NVIDIA RTX 3080 with batch size 32*
 
 **Ruffle** - Professional toxicity detection for safer digital spaces.
-
