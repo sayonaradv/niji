@@ -42,7 +42,7 @@ trainer:
   default_root_dir: null
   model_registry: null
 model:
-  model_name: prajjwal1/bert-tiny
+  model_name: google/bert_uncased_L-2_H-128_A-2
   max_token_len: 256
   lr: 3.0e-05
   warmup_epochs: 5
