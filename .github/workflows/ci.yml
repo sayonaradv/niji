@@ -1,5 +1,5 @@
 # Basic CI setup: Lint with ruff, tycheck with ty,  run tests with pytest
-name: Test
+name: Checks
 
 on:
   pull_request:
@@ -8,26 +8,31 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Lint
+  checks:
+    name: Run Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - name: Ruff lint
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Linter
         run: uv run ruff check --fix --diff --output-format github .
-      - name: Ty typecheck
+      - name: Typechecker
         run: uv run ty check .
-      - name: Ruff format
+      - name: Formatter
         run: uv run ruff format --diff .
 
-  test:
+  tests:
     name: Run tests
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
-      - run: uv run pytest
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Tests
+        run: uv run pytest
