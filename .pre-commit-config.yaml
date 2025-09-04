@@ -1,13 +1,6 @@
 repos:
   - repo: local
     hooks:
-      - id: ty-check
-        name: Type checking with ty
-        entry: uv run ty check .
-        language: system
-        pass_filenames: false
-        always_run: true
-      
       - id: ruff-check
         name: Linting with ruff
         entry: uv run ruff check --fix
@@ -18,4 +11,12 @@ repos:
         name: Formatting with ruff
         entry: uv run ruff format
         language: system
+        types: [python]             
+ 
+      - id: ty-check
+        name: Type checking with ty
+        entry: uv run ty check
+        language: system
         types: [python]
+      
+
