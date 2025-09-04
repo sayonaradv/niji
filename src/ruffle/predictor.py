@@ -13,7 +13,7 @@ from torch import Tensor
 from ruffle.models import Classifier
 from ruffle.types import PredResult, TextInput
 
-DOWNLOAD_BASE_URL = "https://github.com/zuzu-sh/ruffle/releases/download/"
+DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
 AVAILABLE_MODELS = {
     "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha2/finetuned-bert-tiny.ckpt",
 }
