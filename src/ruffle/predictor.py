@@ -6,9 +6,9 @@ from torch import Tensor
 from ruffle.models import Classifier
 from ruffle.types import PredResult, TextInput
 
-DOWNLOAD_BASE_URL = "https://github.com/dbozbay/rynn/releases/download/"
+DOWNLOAD_BASE_URL = "https://github.com/zuzu-sh/ruffle/releases/download/"
 AVAILABLE_MODELS = {
-    "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha1/bert_tiny.ckpt",
+    "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha1/finetuned-bert-tiny.ckpt",
 }
 
 
