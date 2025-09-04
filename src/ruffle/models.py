@@ -11,9 +11,9 @@ from torch import Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
-from transformers import get_cosine_schedule_with_warmup
 
 from ruffle.dataloaders import JIGSAW_LABELS
+from ruffle.schedulers import LinearWarmupCosineAnnealingLR
 from ruffle.types import Batch, TensorDict, TextInput
 from ruffle.utils import get_model_and_tokenizer
 
@@ -26,6 +26,7 @@ class Classifier(pl.LightningModule):
         label_names: list[str] = JIGSAW_LABELS,
         max_token_len: int = 256,
         lr: float = 3e-5,
+        warmup_start_lr: float = 3e-6,
         warmup_epochs: int = 5,
         cache_dir: str | None = "data",
     ) -> None:
@@ -101,13 +102,11 @@ class Classifier(pl.LightningModule):
         optimizer: Optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.hparams["lr"]
         )
-        max_epochs = self.trainer.max_epochs
-        if max_epochs is None:
-            raise ValueError("Trainer.max_epochs must be set for the scheduler.")
-
-        scheduler: LRScheduler = get_cosine_schedule_with_warmup(
+        scheduler: LRScheduler = LinearWarmupCosineAnnealingLR(
             optimizer,
-            num_warmup_steps=self.hparams["warmup_epochs"],
-            num_training_steps=int(max_epochs),
+            warmup_epochs=self.hparams["warmup_epochs"],
+            warmup_start_lr=self.hparams["warmup_start_lr"],
+            max_epochs=self.trainer.max_epochs,
         )
+
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
