@@ -12,7 +12,6 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from ruffle.dataloaders import JIGSAW_LABELS
 from ruffle.schedulers import LinearWarmupCosineAnnealingLR
 from ruffle.types import Batch, TensorDict, TextInput
 from ruffle.utils import get_model_and_tokenizer
