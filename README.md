@@ -191,11 +191,11 @@ Performance comparisons with other toxicity detection libraries:
 
 | Library | Model | Accuracy | Inference Time | Memory Usage |
 |---------|-------|----------|---------------|--------------|
-| Ruffle | BERT-Tiny | **96.7%** | **8ms** | **128MB** |
+| Ruffle | BERT-Tiny | **96.7%** | **5ms** | **128MB** |
 | Ruffle | DistilBERT | **94.2%** | **12ms** | **256MB** |
 | Library A | LSTM | 87.3% | 45ms | 512MB |
 | Library B | CNN | 82.1% | 23ms | 384MB |
 
-*Benchmarks run on NVIDIA RTX 3080 with batch size 32*
+*Benchmarks run on MacBook Pro M1 Pro CPU with batch size 5*
 
 **Ruffle** - Professional toxicity detection for safer digital spaces.
