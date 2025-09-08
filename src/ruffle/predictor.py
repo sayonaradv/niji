@@ -10,7 +10,7 @@ from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from ruffle.models import Classifier
+from ruffle.model import Classifier
 from ruffle.types import PredResult, TextInput
 
 DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
