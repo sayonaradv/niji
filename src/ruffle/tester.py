@@ -46,5 +46,9 @@ def test(
     trainer.test(model, datamodule=datamodule)
 
 
-if __name__ == "__main__":
+def main() -> None:
     auto_cli(test)
+
+
+if __name__ == "__main__":
+    main()

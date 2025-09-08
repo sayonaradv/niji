@@ -217,15 +217,9 @@ def classify(
     _ = classifier.predict(texts)
 
 
-def cli_main() -> None:
-    """Entry point for the command-line interface.
-
-    Uses jsonargparse to automatically generate a CLI from the classify function.
-    This allows users to call the predictor from the command line with automatic
-    argument parsing and help generation.
-    """
+def main() -> None:
     auto_cli(classify)
 
 
 if __name__ == "__main__":
-    cli_main()
+    main()

@@ -124,5 +124,9 @@ def train(
     trainer.fit(model, datamodule=datamodule)
 
 
-if __name__ == "__main__":
+def main():
     auto_cli(train)
+
+
+if __name__ == "__main__":
+    main()
