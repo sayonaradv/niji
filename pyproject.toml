@@ -17,6 +17,7 @@ dependencies = [
 ruffle = "ruffle.predictor:main"
 trainer = "ruffle.trainer:main"
 tester = "ruffle.tester:main"
+benchmarker = "ruffle.benchmark:main"
 
 [build-system]
 requires = ["hatchling"]
