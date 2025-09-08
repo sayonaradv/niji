@@ -10,11 +10,14 @@ dependencies = [
     "transformers>=4.55.2",
     "rich>=14.1.0",
     "tensorboard>=2.20.0",
+    "pydantic>=2.11.7",
 ]
 
 [project.scripts]
-ruffle = "ruffle.predictor:cli_main"
-train = "ruffle.trainer:cli_main"
+ruffle = "ruffle.predictor:main"
+trainer = "ruffle.trainer:main"
+tester = "ruffle.tester:main"
+benchmarker = "ruffle.benchmark:main"
 
 [build-system]
 requires = ["hatchling"]

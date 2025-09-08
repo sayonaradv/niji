@@ -19,9 +19,13 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
+from ruffle.config import ModelConfig
+from ruffle.dataset import JIGSAW_LABELS
 from ruffle.schedulers import LinearWarmupCosineAnnealingLR
 from ruffle.types import Batch, TensorDict, TextInput
 from ruffle.utils import get_model_and_tokenizer
+
+_DEFAULT_MODEL_CONFIG = ModelConfig()
 
 
 class Classifier(pl.LightningModule):
@@ -39,13 +43,13 @@ class Classifier(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
-        num_labels: int = 6,
+        num_labels: int = _DEFAULT_MODEL_CONFIG.num_labels,
         label_names: list[str] | None = None,
-        max_token_len: int = 256,
-        lr: float = 3e-5,
-        warmup_start_lr: float = 3e-6,
-        warmup_epochs: int = 5,
-        cache_dir: str | None = "data",
+        max_token_len: int = _DEFAULT_MODEL_CONFIG.max_token_len,
+        lr: float = _DEFAULT_MODEL_CONFIG.lr,
+        warmup_start_lr: float = _DEFAULT_MODEL_CONFIG.warmup_start_lr,
+        warmup_epochs: int = _DEFAULT_MODEL_CONFIG.warmup_epochs,
+        cache_dir: str | None = _DEFAULT_MODEL_CONFIG.cache_dir,
     ) -> None:
         """Initialize the Classifier module.
 
@@ -65,6 +69,7 @@ class Classifier(pl.LightningModule):
             ValueError: If label_names length doesn't match num_labels.
         """
         super().__init__()
+        label_names = label_names or JIGSAW_LABELS
         self.save_hyperparameters()
         self._validate_labels()
         self.model, self.tokenizer = get_model_and_tokenizer(

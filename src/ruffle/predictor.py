@@ -10,7 +10,7 @@ from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from ruffle.models import Classifier
+from ruffle.model import Classifier
 from ruffle.types import PredResult, TextInput
 
 DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
@@ -217,15 +217,9 @@ def classify(
     _ = classifier.predict(texts)
 
 
-def cli_main() -> None:
-    """Entry point for the command-line interface.
-
-    Uses jsonargparse to automatically generate a CLI from the classify function.
-    This allows users to call the predictor from the command line with automatic
-    argument parsing and help generation.
-    """
+def main() -> None:
     auto_cli(classify)
 
 
 if __name__ == "__main__":
-    cli_main()
+    main()

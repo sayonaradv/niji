@@ -14,6 +14,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 
+from ruffle.config import DatasetConfig
 from ruffle.types import Batch
 
 JIGSAW_LABELS: list[str] = [
@@ -25,6 +26,8 @@ JIGSAW_LABELS: list[str] = [
     "identity_hate",
 ]
 """List of all available toxicity labels in the Jigsaw dataset."""
+
+_DEFAULT_CONFIG = DatasetConfig()
 
 
 @dataclass
@@ -60,6 +63,7 @@ class JigsawDataset(Dataset):
     for multilabel classification. Supports both training and test splits.
 
     Attributes:
+        split: Dataset split (TRAIN or TEST).
         data_dir: Directory containing the dataset CSV files.
         labels: List of label names to include in the dataset.
         data: Pandas DataFrame containing the loaded and preprocessed data.
@@ -68,24 +72,28 @@ class JigsawDataset(Dataset):
     def __init__(
         self,
         split: Split,
-        data_dir: str,
-        labels: list[str] = JIGSAW_LABELS,
+        data_dir: str = _DEFAULT_CONFIG.data_dir,
+        labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataset.
 
         Args:
             split: Dataset split to load (TRAIN or TEST).
-            data_dir: Directory containing the Jigsaw dataset CSV files.
-            labels: List of toxicity labels to include. Must be subset of JIGSAW_LABELS.
+            data_dir: Directory containing the Jigsaw dataset CSV files. Defaults to
+                path specified in DatasetConfig.
+            labels: List of toxicity labels to include. If None, uses all available
+                labels from JIGSAW_LABELS found in the dataset. Must be subset of JIGSAW_LABELS.
 
         Raises:
             FileNotFoundError: If data_dir doesn't exist.
             ValueError: If any labels are not found in the dataset.
         """
         self.data_dir: str = data_dir
-        self.labels: list[str] = labels
         self._check_data_dir()
-        self.data: pd.DataFrame = self.load_data(split, data_dir=self.data_dir)
+        self.data: pd.DataFrame = self._load_data(split, data_dir=self.data_dir)
+        self.labels: list[str] = labels or [
+            col for col in self.data.columns if col in JIGSAW_LABELS
+        ]
         self._check_labels()
 
     def _check_data_dir(self) -> None:
@@ -118,7 +126,7 @@ class JigsawDataset(Dataset):
                 f"Available labels: {available_labels}"
             )
 
-    def load_data(self, split: Split, data_dir: str) -> pd.DataFrame:
+    def _load_data(self, split: Split, data_dir: str) -> pd.DataFrame:
         """Load and preprocess data for the specified split.
 
         For the training split, loads data directly from train.csv.
@@ -178,39 +186,33 @@ class JigsawDataModule(pl.LightningDataModule):
 
     Attributes:
         data_dir: Directory containing the dataset CSV files.
-        labels: List of toxicity labels to include in the dataset.
         batch_size: Batch size for DataLoaders.
         val_size: Fraction of training data to use for validation.
+        labels: List of toxicity labels to include in the dataset.
         train_ds: Training dataset instance.
         val_ds: Validation dataset instance.
         test_ds: Test dataset instance.
     """
 
-    _DEFAULT_DATA_DIR: str = os.path.join(
-        "data", "jigsaw-toxic-comment-classification-challenge"
-    )
-
     def __init__(
         self,
-        data_dir: str | None = None,
-        labels: list[str] = JIGSAW_LABELS,
-        batch_size: int = 64,
-        val_size: float = 0.2,
+        data_dir: str = _DEFAULT_CONFIG.data_dir,
+        batch_size: int = _DEFAULT_CONFIG.batch_size,
+        val_size: float = _DEFAULT_CONFIG.val_size,
+        labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataModule.
 
         Args:
-            data_dir: Directory containing dataset files. If None, uses default path
-                'data/jigsaw-toxic-comment-classification-challenge'.
-            labels: List of toxicity labels to include. Must be subset of JIGSAW_LABELS.
+            data_dir: Directory containing dataset files.
             batch_size: Batch size for all DataLoaders.
             val_size: Fraction of training data to use for validation (0.0 to 1.0).
+            labels: List of toxicity labels to include. If None, uses all available
+                labels (JIGSAW_LABELS). Must be subset of JIGSAW_LABELS.
         """
         super().__init__()
-        self.data_dir: str = (
-            data_dir if data_dir is not None else self._DEFAULT_DATA_DIR
-        )
-        self.labels = labels
+        self.data_dir = data_dir
+        self.labels = labels or JIGSAW_LABELS
         self.batch_size = batch_size
         self.val_size = val_size
 
