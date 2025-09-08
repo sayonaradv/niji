@@ -1,19 +1,29 @@
-# Ruffle
+# Ruffle ⛈️
+
+**Professional-grade toxicity detection powered by transformer models**
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
 
-## Highlights
+![Ruffle in action](https://via.placeholder.com/800x400?text=Ruffle+Toxicity+Detection+Demo)
+
+---
+
+## ✨ Highlights
 
 - ⚡ **Lightning Fast**: Built on PyTorch Lightning for efficient training and inference
 - 🧠 **Transformer-Powered**: Leverages BERT, DistilBERT, and other state-of-the-art models
-- 🎯 **Multi-Label Detection**: Simultaneously detects toxic, severe_toxic, obscene, threat, insult, and identity_hate
+- 🎯 **Multi-Label Detection**: Simultaneously detects `toxic`, `severe_toxic`, `obscene`, `threat`, `insult`, and `identity_hate`
 - 🚀 **Production Ready**: Optimized inference pipeline with model compilation
 - 🔧 **Flexible Configuration**: YAML-based configuration system for easy experimentation
 - 📊 **Rich Monitoring**: Built-in progress tracking, logging, and model checkpointing
 
 Ruffle provides both high-level prediction APIs for quick content moderation and comprehensive training tools for custom model development.
 
-## Installation
+---
+
+## 🚀 Installation
+
+### Quick Installation
 
 Install Ruffle using uv (recommended):
 
@@ -27,9 +37,27 @@ Or using pip:
 pip install ruffle
 ```
 
-## Quick Start
+### Development Installation
 
-### Content Moderation
+For training custom models or contributing to development:
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ruffle.git
+cd ruffle
+
+# Install with development dependencies using uv
+uv sync
+
+# Or using pip
+pip install -e ".[dev]"
+```
+
+---
+
+## 📖 Usage
+
+### API
 
 Get started with toxicity detection in just a few lines:
 
@@ -37,10 +65,10 @@ Get started with toxicity detection in just a few lines:
 from ruffle import Ruffle
 
 # Load a pre-trained model
-detector = Ruffle(model_name="bert-tiny")
+ruffle = Ruffle(model_name="bert-tiny")
 
 # Detect toxicity in text
-result = detector.predict("This is a sample comment to analyze")
+result = ruffle.predict("This is a sample comment to analyze")
 print(result)
 
 # Process multiple texts efficiently  
@@ -49,43 +77,30 @@ texts = [
     "Another piece of text to check", 
     "Batch processing is supported"
 ]
-results = detector.predict(texts)
-
+results = ruffle.predict(texts)
 ```
 
 ### CLI
 
-Use Ruffle directly from the command line:
+Or run Ruffle directly from the command line:
+
 
 ```bash
 # Classify single text
-uv run ruffle "Hello world" --model_name bert-tiny --threshold 0.7
+uv run python -m ruffle.predictor --texts "Hello world" --threshold 0.7
 
 # Classify multiple texts  
-uv run ruffle '["Text 1", "Text 2"]' --model_name bert-tiny
+uv run python -m ruffle.predictor --texts '["Text 1", "Text 2"]' --model_name bert-tiny
 
 # Use custom checkpoint
-uv run ruffle "Sample text" --checkpoint_path model.ckpt
-```
-
-### Custom Model Training
-
-Train your own toxicity detection model:
-
-```bash
-# Quick training with BERT-tiny for testing
-uv run train fit --config configs/jigsaw_test.yaml
-
-# Full production training with DistilBERT
-uv run train fit --config configs/jigsaw_full.yaml
-
-# Use your custom configuration
-uv run train fit --config path/to/your/config.yaml
+uv run python -m ruffle.predictor --texts "Sample text" --checkpoint_path model.ckpt
 ```
 
 See the [documentation](https://ruffle.readthedocs.io) for comprehensive guides and API reference.
 
-## Detection Categories
+---
+
+## 📊 Detection Categories
 
 Ruffle detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
 
@@ -99,7 +114,6 @@ Ruffle detects six categories of toxicity based on the Jigsaw Toxic Comment Clas
 | `identity_hate` | Identity-based hate speech and discrimination |
 
 Example output:
-
 ```python
 {
     "This is offensive content": {
@@ -113,41 +127,19 @@ Example output:
 }
 ```
 
-## Configuration
+---
 
-Ruffle uses YAML configuration files for reproducible training:
+### Train your own HuggingFace models
 
-```yaml
-# config.yaml
-model:
-  model_name: distilbert/distilbert-base-uncased
-  max_token_len: 256
-  lr: 3e-5
-  warmup_epochs: 5
-  cache_dir: data
+After you've downloaded the Jigsaw dataset, you can finetune any model available on https://huggingface.co/models:
 
-data:
-  data_dir: data/jigsaw-toxic-comment-classification-challenge
-  labels: [toxic, severe_toxic, obscene, threat, insult, identity_hate]
-  batch_size: 64
-  val_size: 0.2
-
-trainer:
-  max_epochs: 20
-  deterministic: true
-  callbacks:
-    - EarlyStopping:
-        monitor: val_loss
-        patience: 3
-    - ModelCheckpoint:
-        monitor: val_loss
-        mode: min
-        save_top_k: 1
+```bash
+uv run -m ruffle.trainer <your_model_name> --data_dir=<jigsaw_dir>
 ```
 
-See the [`configs/`](configs/) directory for complete examples.
+---
 
-## Development
+## 🔬 Development
 
 ### Prerequisites
 
@@ -163,39 +155,69 @@ cd ruffle
 
 # Install with development dependencies
 uv sync
-
-# Run tests
-uv run pytest
-
-# Type checking
-uv run ty check .
-
-# Code formatting and linting  
-uv run ruff check .
-uv run ruff format .
 ```
 
-## License
+---
+
+## 📚 Documentation
+
+- **[Getting Started Guide](https://ruffle.readthedocs.io/getting-started/)** - Basic usage and installation
+- **[Training Guide](https://ruffle.readthedocs.io/training/)** - Custom model training and fine-tuning  
+- **[API Reference](https://ruffle.readthedocs.io/api/)** - Complete API documentation
+- **[Configuration Guide](https://ruffle.readthedocs.io/configuration/)** - YAML configuration options
+- **[Production Deployment](https://ruffle.readthedocs.io/production/)** - Performance optimization and scaling
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions of all kinds! Here's how to get started:
+
+1. **Fork the repository** on GitHub
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Make your changes** and add tests
+4. **Run the test suite**: `uv run pytest`
+5. **Format your code**: `uv run ruff format .`
+6. **Run type checking**: `uv run mypy src/ruffle`  
+7. **Commit your changes**: `git commit -m 'Add amazing feature'`
+8. **Push to your branch**: `git push origin feature/amazing-feature`
+9. **Open a Pull Request**
+
+### Code Style
+
+This project uses:
+- **Ruff** for formatting and linting (configuration in `pyproject.toml`)
+- **ty** for type checking
+- **pytest** for testing
+- **Conventional Commits** for commit messages
+
+See our [Contributing Guide](CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+---
+
+## 🙏 Acknowledgments
 
 - **[Hugging Face Transformers](https://huggingface.co/transformers/)** - For the transformer model implementations
 - **[PyTorch Lightning](https://lightning.ai/)** - For the training framework and utilities
 - **[Jigsaw/Conversation AI](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge)** - For the toxicity classification dataset
 
-## Benchmarks
+---
 
-Performance comparisons with other toxicity detection libraries:
+## 📈 Benchmarks
 
-| Library | Model | Accuracy | Inference Time | Memory Usage |
+
+| Model | Accuracy | Inference Time |
 |---------|-------|----------|---------------|--------------|
-| Ruffle | BERT-Tiny | **96.7%** | **5ms** | **128MB** |
-| Ruffle | DistilBERT | **94.2%** | **12ms** | **256MB** |
-| Library A | LSTM | 87.3% | 45ms | 512MB |
-| Library B | CNN | 82.1% | 23ms | 384MB |
+| BERT-Tiny | **96.7%** | **12ms** |
 
-*Benchmarks run on MacBook Pro M1 Pro CPU with batch size 5*
+*Benchmarks run on Macbook Pro M1 Pro
+
+---
 
 **Ruffle** - Professional toxicity detection for safer digital spaces.
