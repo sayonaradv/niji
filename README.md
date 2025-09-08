@@ -1,10 +1,6 @@
-# Ruffle ⛈️
-
-**Professional-grade toxicity detection powered by transformer models**
+# Ruffle
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
-
-![Ruffle in action](https://via.placeholder.com/800x400?text=Ruffle+Toxicity+Detection+Demo)
 
 ---
 
@@ -43,7 +39,7 @@ For training custom models or contributing to development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ruffle.git
+git clone https://github.com/zuzo-sh/ruffle.git
 cd ruffle
 
 # Install with development dependencies using uv
@@ -83,7 +79,6 @@ results = ruffle.predict(texts)
 ### CLI
 
 Or run Ruffle directly from the command line:
-
 
 ```bash
 # Classify single text
@@ -129,9 +124,9 @@ Example output:
 
 ---
 
-### Train your own HuggingFace models
+### Train your own models
 
-After you've downloaded the Jigsaw dataset, you can finetune any model available on https://huggingface.co/models:
+After you've downloaded the [Jigsaw](https://www.kaggle.com/competitions/jigsaw-toxic-comment-classification-challenge)  dataset, you can finetune any model available on https://huggingface.co/models:
 
 ```bash
 uv run -m ruffle.trainer <your_model_name> --data_dir=<jigsaw_dir>
@@ -169,20 +164,6 @@ uv sync
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions of all kinds! Here's how to get started:
-
-1. **Fork the repository** on GitHub
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes** and add tests
-4. **Run the test suite**: `uv run pytest`
-5. **Format your code**: `uv run ruff format .`
-6. **Run type checking**: `uv run mypy src/ruffle`  
-7. **Commit your changes**: `git commit -m 'Add amazing feature'`
-8. **Push to your branch**: `git push origin feature/amazing-feature`
-9. **Open a Pull Request**
-
 ### Code Style
 
 This project uses:
@@ -210,11 +191,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 ## 📈 Benchmarks
-
-
-| Model | Accuracy | Inference Time |
-|---------|-------|----------|---------------|--------------|
-| BERT-Tiny | **96.7%** | **12ms** |
 
 *Benchmarks run on Macbook Pro M1 Pro
 
