@@ -69,23 +69,26 @@ class JigsawDataset(Dataset):
         self,
         split: Split,
         data_dir: str,
-        labels: list[str] = JIGSAW_LABELS,
+        labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataset.
 
         Args:
             split: Dataset split to load (TRAIN or TEST).
             data_dir: Directory containing the Jigsaw dataset CSV files.
-            labels: List of toxicity labels to include. Must be subset of JIGSAW_LABELS.
+            labels: List of toxicity labels to include. If None, uses all available
+                labels from JIGSAW_LABELS found in the dataset. Must be subset of JIGSAW_LABELS.
 
         Raises:
             FileNotFoundError: If data_dir doesn't exist.
             ValueError: If any labels are not found in the dataset.
         """
         self.data_dir: str = data_dir
-        self.labels: list[str] = labels
         self._check_data_dir()
         self.data: pd.DataFrame = self.load_data(split, data_dir=self.data_dir)
+        self.labels: list[str] = labels or [
+            col for col in self.data.columns if col in JIGSAW_LABELS
+        ]
         self._check_labels()
 
     def _check_data_dir(self) -> None:
@@ -193,7 +196,7 @@ class JigsawDataModule(pl.LightningDataModule):
     def __init__(
         self,
         data_dir: str | None = None,
-        labels: list[str] = JIGSAW_LABELS,
+        labels: list[str] | None = None,
         batch_size: int = 64,
         val_size: float = 0.2,
     ) -> None:
@@ -202,7 +205,8 @@ class JigsawDataModule(pl.LightningDataModule):
         Args:
             data_dir: Directory containing dataset files. If None, uses default path
                 'data/jigsaw-toxic-comment-classification-challenge'.
-            labels: List of toxicity labels to include. Must be subset of JIGSAW_LABELS.
+            labels: List of toxicity labels to include. If None, uses all available
+                labels (JIGSAW_LABELS). Must be subset of JIGSAW_LABELS.
             batch_size: Batch size for all DataLoaders.
             val_size: Fraction of training data to use for validation (0.0 to 1.0).
         """
@@ -210,7 +214,7 @@ class JigsawDataModule(pl.LightningDataModule):
         self.data_dir: str = (
             data_dir if data_dir is not None else self._DEFAULT_DATA_DIR
         )
-        self.labels = labels
+        self.labels = labels or JIGSAW_LABELS
         self.batch_size = batch_size
         self.val_size = val_size
 
