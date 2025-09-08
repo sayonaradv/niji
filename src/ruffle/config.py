@@ -6,13 +6,6 @@ from pydantic.dataclasses import dataclass
 
 
 @dataclass
-class Config:
-    cache_dir: str = "/data"
-    log_dir: str = "/lightning_logs"
-    seed: int = 1234
-
-
-@dataclass
 class DatasetConfig:
     data_dir: str = os.path.join(
         "data", "jigsaw-toxic-comment-classification-challenge"
@@ -28,12 +21,14 @@ class ModelConfig:
     lr: PositiveFloat = 3e-5
     warmup_start_lr: PositiveFloat = 3e-6
     warmup_epochs: PositiveInt = 5
-    cache_dir: str = Config.cache_dir
+    cache_dir: str | None = "data"
 
 
 @dataclass
-class TrainingConfig:
+class TrainerConfig:
     max_epochs: PositiveInt = 20
     accelerator: str = "auto"
+    stategy: str = "auto"
     devices: str | int = "auto"
     precision: str = "16-mixed"
+    seed: int = 1234
