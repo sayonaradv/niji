@@ -14,8 +14,9 @@ dependencies = [
 ]
 
 [project.scripts]
-ruffle = "ruffle.predictor:cli_main"
-train = "ruffle.trainer:cli_main"
+ruffle = "ruffle.predictor:main"
+trainer = "ruffle.trainer:main"
+tester = "ruffle.tester:main"
 
 [build-system]
 requires = ["hatchling"]
