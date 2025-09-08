@@ -1,5 +1,7 @@
 import os
+from typing import Annotated
 
+from pydantic import Field, PositiveFloat, PositiveInt
 from pydantic.dataclasses import dataclass
 
 
@@ -15,5 +17,5 @@ class DatasetConfig:
     data_dir: str = os.path.join(
         "data", "jigsaw-toxic-comment-classification-challenge"
     )
-    batch_size: int = 32
-    val_size: float = 0.2
+    batch_size: PositiveInt = 64
+    val_size: Annotated[PositiveFloat, Field(lt=1)] = 0.2
