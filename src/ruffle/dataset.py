@@ -63,6 +63,7 @@ class JigsawDataset(Dataset):
     for multilabel classification. Supports both training and test splits.
 
     Attributes:
+        split: Dataset split (TRAIN or TEST).
         data_dir: Directory containing the dataset CSV files.
         labels: List of label names to include in the dataset.
         data: Pandas DataFrame containing the loaded and preprocessed data.
@@ -78,7 +79,8 @@ class JigsawDataset(Dataset):
 
         Args:
             split: Dataset split to load (TRAIN or TEST).
-            data_dir: Directory containing the Jigsaw dataset CSV files.
+            data_dir: Directory containing the Jigsaw dataset CSV files. Defaults to
+                path specified in DatasetConfig.
             labels: List of toxicity labels to include. If None, uses all available
                 labels from JIGSAW_LABELS found in the dataset. Must be subset of JIGSAW_LABELS.
 
