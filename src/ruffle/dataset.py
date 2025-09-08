@@ -211,7 +211,7 @@ class JigsawDataModule(pl.LightningDataModule):
                 labels (JIGSAW_LABELS). Must be subset of JIGSAW_LABELS.
         """
         super().__init__()
-        self.data_dir: str = data_dir
+        self.data_dir = data_dir
         self.labels = labels or JIGSAW_LABELS
         self.batch_size = batch_size
         self.val_size = val_size
