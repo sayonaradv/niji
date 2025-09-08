@@ -13,7 +13,7 @@ import torch
 from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 
-from ruffle.models import Classifier
+from ruffle.model import Classifier
 from ruffle.predictor import AVAILABLE_MODELS
 from ruffle.types import TextInput
 
@@ -23,7 +23,7 @@ class InferenceBenchmark:
 
     def __init__(
         self,
-        model_name: str = "bert-tiny",
+        model_name: str,
         ckpt_path: str | None = None,
         device: str = "cpu",
     ) -> None:
@@ -154,8 +154,7 @@ class InferenceBenchmark:
 
 
 def benchmark_speed(
-    texts: list[str] | None = None,
-    model_name: str = "bert-tiny",
+    model_name: str,
     ckpt_path: str | None = None,
     device: str = "cpu",
     num_iterations: int = 100,
@@ -164,7 +163,6 @@ def benchmark_speed(
     """Command-line interface for running inference speed benchmarks.
 
     Args:
-        texts: List of texts to benchmark with. If None, uses default sample texts.
         model_name: Name of the pre-trained model to benchmark.
         ckpt_path: Path to a local model checkpoint file.
         device: PyTorch device specification for inference.
@@ -177,14 +175,13 @@ def benchmark_speed(
         python benchmarks.py --model_name bert-tiny --num_iterations 200
         ```
     """
-    if texts is None:
-        texts = [
-            "I love this product! It's amazing.",
-            "This is terrible and I hate it.",
-            "The weather is nice today.",
-            "You are an idiot and I hope you fail.",
-            "Thanks for your help, much appreciated!",
-        ]
+    texts = [
+        "I love this product! It's amazing.",
+        "This is terrible and I hate it.",
+        "The weather is nice today.",
+        "You are an idiot and I hope you fail.",
+        "Thanks for your help, much appreciated!",
+    ]
 
     benchmark = InferenceBenchmark(
         model_name=model_name,
@@ -199,10 +196,9 @@ def benchmark_speed(
     )
 
 
-def cli_main() -> None:
-    """Entry point for the command-line interface."""
+def main() -> None:
     auto_cli(benchmark_speed)
 
 
 if __name__ == "__main__":
-    cli_main()
+    main()
