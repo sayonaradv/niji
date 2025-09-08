@@ -1,6 +1,6 @@
 [project]
 name = "ruffle"
-version = "0.0.1a2"
+version = "0.0.1a3"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
