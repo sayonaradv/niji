@@ -33,9 +33,6 @@ def train(
     warmup_epochs: int = _DEFAULT_MODEL_CONFIG.warmup_epochs,
     cache_dir: str | None = _DEFAULT_MODEL_CONFIG.cache_dir,
     max_epochs: int = _DEFAULT_TRAINER_CONFIG.max_epochs,
-    accelerator: str = _DEFAULT_TRAINER_CONFIG.accelerator,
-    devices: str | int = _DEFAULT_TRAINER_CONFIG.devices,
-    precision: str = _DEFAULT_TRAINER_CONFIG.precision,
     seed: int = _DEFAULT_TRAINER_CONFIG.seed,
     fast_dev_run: bool = False,
 ) -> None:
@@ -59,9 +56,6 @@ def train(
         warmup_epochs: Number of warmup epochs before cosine decay.
         cache_dir: Model cache directory. If None, uses HuggingFace default.
         max_epochs: Maximum training epochs.
-        accelerator: Training accelerator ("auto", "cpu", "gpu", "tpu").
-        devices: Device specification ("auto", int, or device list).
-        precision: Training precision ("32", "16-mixed", "bf16-mixed").
         seed: Random seed for reproducible training.
         fast_dev_run: Enable fast development run for debugging.
 
@@ -120,9 +114,6 @@ def train(
 
     trainer = pl.Trainer(
         max_epochs=max_epochs,
-        accelerator=accelerator,
-        devices=devices,
-        # precision=precision,
         callbacks=callbacks,
         fast_dev_run=fast_dev_run,
         deterministic=True,
