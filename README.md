@@ -82,13 +82,13 @@ Or run Ruffle directly from the command line:
 
 ```bash
 # Classify single text
-uv run python -m ruffle.predictor --texts "Hello world" --threshold 0.7
+ruffle --texts "Hello world" --threshold 0.7
 
 # Classify multiple texts  
-uv run python -m ruffle.predictor --texts '["Text 1", "Text 2"]' --model_name bert-tiny
+ruffle --texts '["Text 1", "Text 2"]' --model_name bert-tiny
 
 # Use custom checkpoint
-uv run python -m ruffle.predictor --texts "Sample text" --checkpoint_path model.ckpt
+ruffle "Sample text" --checkpoint_path model.ckpt
 ```
 
 See the [documentation](https://ruffle.readthedocs.io) for comprehensive guides and API reference.
@@ -126,11 +126,30 @@ Example output:
 
 ### Train your own models
 
-After you've downloaded the [Jigsaw](https://www.kaggle.com/competitions/jigsaw-toxic-comment-classification-challenge)  dataset, you can finetune any model available on https://huggingface.co/models:
+1. Download the [Jigsaw Toxic Comment Classification](https://www.kaggle.com/competitions/jigsaw-toxic-comment-classification-challenge) dataset and unzip the csv files into `./data/jigsaw-toxic-comment-classification-challenge/`.
 
-```bash
-uv run -m ruffle.trainer <your_model_name> --data_dir=<jigsaw_dir>
-```
+2. Generate your desired training configuration file:
+    
+    ```bash
+    trainer <model_name> --print_config > config.yaml 
+    ```
+    
+    You must specifiy a `model_name` that is available on https://huggingface.co/models, e.g. `distilbert/distilbert-base-uncased`, `google-bert/bert-base-uncased`.
+
+    Run the help command (`uv run -m ruffle trainer --help`) to get a list of available training options like `batch_size`, `val_size`, `max_epochs`, `lr` and more.
+
+3. Run the training script with your configuration file:
+
+    ```bash
+    trainer --config config.yaml
+    ```
+
+4. Visualize the logging metrics with Tensorboard:
+    
+    ```bash
+    tensorboard --logdir /lightning_logs
+    ```
+
 
 ---
 
