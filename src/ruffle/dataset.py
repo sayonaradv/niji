@@ -24,7 +24,10 @@ JIGSAW_LABELS: list[str] = [
     "insult",
     "identity_hate",
 ]
-"""List of all available toxicity labels in the Jigsaw dataset."""
+
+JIGSAW_DATA_DIR: str = os.path.join(
+    "data", "jigsaw-toxic-comment-classification-challenge"
+)
 
 
 @dataclass
@@ -69,7 +72,7 @@ class JigsawDataset(Dataset):
     def __init__(
         self,
         split: Split,
-        data_dir: str = "./data",
+        data_dir: str,
         labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataset.
@@ -193,7 +196,7 @@ class JigsawDataModule(pl.LightningDataModule):
 
     def __init__(
         self,
-        data_dir: str = "./data",
+        data_dir: str = JIGSAW_DATA_DIR,
         batch_size: int = 64,
         val_size: float = 0.2,
         labels: list[str] | None = None,

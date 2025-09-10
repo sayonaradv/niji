@@ -2,13 +2,8 @@ import lightning.pytorch as pl
 import torch
 from jsonargparse import auto_cli
 
-from ruffle.config import DatasetConfig, ModelConfig, TrainerConfig
-from ruffle.dataset import JigsawDataModule
+from ruffle.dataset import JIGSAW_DATA_DIR, JigsawDataModule
 from ruffle.model import RuffleModel
-
-_DEFAULT_DATASET_CONFIG = DatasetConfig()
-_DEFAULT_MODEL_CONFIG = ModelConfig()
-_DEFAULT_TRAINER_CONFIG = TrainerConfig()
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -16,8 +11,8 @@ torch.set_float32_matmul_precision("medium")
 
 def test(
     ckpt_path: str,
-    data_dir: str = _DEFAULT_DATASET_CONFIG.data_dir,
-    batch_size: int = _DEFAULT_DATASET_CONFIG.batch_size,
+    data_dir: str = JIGSAW_DATA_DIR,
+    batch_size: int = 64,
 ) -> None:
     """Test a trained toxicity classification model using PyTorch Lightning.
 

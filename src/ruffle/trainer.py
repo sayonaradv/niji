@@ -8,13 +8,8 @@ from lightning.pytorch.callbacks import (
     RichProgressBar,
 )
 
-from ruffle.config import DatasetConfig, ModelConfig, TrainerConfig
-from ruffle.dataset import JigsawDataModule
+from ruffle.dataset import JIGSAW_DATA_DIR, JigsawDataModule
 from ruffle.model import RuffleModel
-
-_DEFAULT_DATASET_CONFIG = DatasetConfig()
-_DEFAULT_MODEL_CONFIG = ModelConfig()
-_DEFAULT_TRAINER_CONFIG = TrainerConfig()
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -22,18 +17,18 @@ torch.set_float32_matmul_precision("medium")
 
 def train(
     model_name: str,
-    data_dir: str = _DEFAULT_DATASET_CONFIG.data_dir,
-    batch_size: int = _DEFAULT_DATASET_CONFIG.batch_size,
-    val_size: float = _DEFAULT_DATASET_CONFIG.val_size,
-    num_labels: int = _DEFAULT_MODEL_CONFIG.num_labels,
+    data_dir: str = JIGSAW_DATA_DIR,
+    batch_size: int = 64,
+    val_size: float = 0.2,
+    num_labels: int = 6,
     label_names: list[str] | None = None,
-    max_token_len: int = _DEFAULT_MODEL_CONFIG.max_token_len,
-    lr: float = _DEFAULT_MODEL_CONFIG.lr,
-    warmup_start_lr: float = _DEFAULT_MODEL_CONFIG.warmup_start_lr,
-    warmup_epochs: int = _DEFAULT_MODEL_CONFIG.warmup_epochs,
-    cache_dir: str | None = _DEFAULT_MODEL_CONFIG.cache_dir,
-    max_epochs: int = _DEFAULT_TRAINER_CONFIG.max_epochs,
-    seed: int = _DEFAULT_TRAINER_CONFIG.seed,
+    max_token_len: int = 256,
+    lr: float = 3e-5,
+    warmup_start_lr: float = 3e-6,
+    warmup_epochs: int = 5,
+    max_epochs: int = 20,
+    cache_dir: str | None = "./data",
+    seed: int = 1234,
     fast_dev_run: bool = False,
 ) -> None:
     """Train a toxicity classification model using PyTorch Lightning.
