@@ -8,7 +8,6 @@ detection and content moderation applications.
 import lightning.pytorch as pl
 import torch
 from lightning.pytorch.utilities.types import (
-    STEP_OUTPUT,
     LRScheduler,
     OptimizerLRSchedulerConfig,
 )
@@ -17,13 +16,10 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from ruffle.config import ModelConfig
 from ruffle.dataset import JIGSAW_LABELS
 from ruffle.schedulers import LinearWarmupCosineAnnealingLR
-from ruffle.types import Batch, TensorDict, TextInput
+from ruffle.types import BATCH, MODEL_OUTPUT
 from ruffle.utils import get_model_and_tokenizer
-
-_DEFAULT_MODEL_CONFIG = ModelConfig()
 
 
 class RuffleModel(pl.LightningModule):
@@ -41,13 +37,13 @@ class RuffleModel(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
-        num_labels: int = _DEFAULT_MODEL_CONFIG.num_labels,
+        num_labels: int = 6,
         label_names: list[str] | None = None,
-        max_token_len: int = _DEFAULT_MODEL_CONFIG.max_token_len,
-        lr: float = _DEFAULT_MODEL_CONFIG.lr,
-        warmup_start_lr: float = _DEFAULT_MODEL_CONFIG.warmup_start_lr,
-        warmup_epochs: int = _DEFAULT_MODEL_CONFIG.warmup_epochs,
-        cache_dir: str | None = _DEFAULT_MODEL_CONFIG.cache_dir,
+        max_token_len: int = 256,
+        lr: float = 3e-5,
+        warmup_start_lr: float = 3e-6,
+        warmup_epochs: int = 5,
+        cache_dir: str | None = "./data",
     ) -> None:
         """Initialize the Classifier module.
 
@@ -99,7 +95,9 @@ class RuffleModel(pl.LightningModule):
         """
         self.model.compile()  # improves training speed
 
-    def forward(self, text: TextInput, labels: Tensor | None = None) -> TensorDict:  # type: ignore[override]
+    def forward(
+        self, text: str | list[str], labels: Tensor | None = None
+    ) -> MODEL_OUTPUT:  # type: ignore[override]
         """Forward pass through the model.
 
         Tokenizes input text, runs it through the model, and applies sigmoid
@@ -134,7 +132,7 @@ class RuffleModel(pl.LightningModule):
             loss = None
         return logits, loss
 
-    def training_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
+    def training_step(self, batch: BATCH, batch_idx: int) -> Tensor:  # type: ignore[override]
         """Execute a single training step.
 
         Args:
@@ -148,7 +146,7 @@ class RuffleModel(pl.LightningModule):
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
-    def validation_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
+    def validation_step(self, batch: BATCH, batch_idx: int) -> None:  # type: ignore[override]
         """Execute a single validation step.
 
         Args:
@@ -161,7 +159,7 @@ class RuffleModel(pl.LightningModule):
         self._shared_eval_step(batch, stage="val")
         return None
 
-    def test_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
+    def test_step(self, batch: BATCH, batch_idx: int) -> None:  # type: ignore[override]
         """Execute a single test step.
 
         Args:
@@ -174,7 +172,7 @@ class RuffleModel(pl.LightningModule):
         self._shared_eval_step(batch, stage="test")
         return None
 
-    def _shared_eval_step(self, batch: Batch, stage: str) -> STEP_OUTPUT:
+    def _shared_eval_step(self, batch: BATCH, stage: str) -> None:
         """Shared logic for validation and test steps.
 
         Computes predictions, loss, and multilabel accuracy for evaluation.

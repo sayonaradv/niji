@@ -1,39 +1,25 @@
-import torch
 from fastapi import Request
 from litserve import LitAPI, LitServer
+from torch import Tensor
 
-from ruffle.model import RuffleModel
-from ruffle.predictor import AVAILABLE_MODELS
+from ruffle.core import Ruffle
 
 
-class SimpleLitAPI(LitAPI):
+class RuffleAPI(LitAPI):
     def setup(self, device: str) -> None:
-        model_url = AVAILABLE_MODELS["bert-tiny"]
-        self.model = RuffleModel.load_from_checkpoint(model_url, map_location="cpu")
-        self.model.eval()
+        ckpt_path = "lightning_logs/version_2/checkpoints/epoch=07-val_loss=0.0454.ckpt"
+        self.ruffle = Ruffle(ckpt_path=ckpt_path)
 
     def decode_request(self, request: Request):
         return request["text"]
 
-    def predict(self, text):
-        """
-        Perform the inference
-        """
-        with torch.no_grad():
-            logits = self.model(text)[0].detach()
-        return logits
+    def predict(self, text: str) -> Tensor:
+        return self.ruffle.classify(text, pretty_print=False)
 
-    def encode_respose(self, logits):
-        probabilities = torch.nn.functional.sigmoid(logits)
+    def encode_respose(self, probabilities: Tensor):
         return probabilities
-        # label_names = self.model.label_names
-        # if label_names is not None:
-        #     return dict(zip(label_names, probabilities, strict=True))
-        # else:
-        #     return {"probabilities": probabilities}
-        #
 
 
 if __name__ == "__main__":
-    server = LitServer(SimpleLitAPI())
+    server = LitServer(RuffleAPI())
     server.run(port=8000)

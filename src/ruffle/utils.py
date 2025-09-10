@@ -1,13 +1,13 @@
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from typing import Any
 
-from ruffle.types import ModelTokenizerPair
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 
 def get_model_and_tokenizer(
     model_name: str,
     num_labels: int,
     cache_dir: str | None,
-) -> ModelTokenizerPair:
+) -> tuple[Any, Any]:
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,
         num_labels=num_labels,

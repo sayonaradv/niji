@@ -14,8 +14,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from ruffle.config import DatasetConfig
-from ruffle.types import Batch
+from ruffle.types import BATCH
 
 JIGSAW_LABELS: list[str] = [
     "toxic",
@@ -26,8 +25,6 @@ JIGSAW_LABELS: list[str] = [
     "identity_hate",
 ]
 """List of all available toxicity labels in the Jigsaw dataset."""
-
-_DEFAULT_CONFIG = DatasetConfig()
 
 
 @dataclass
@@ -72,7 +69,7 @@ class JigsawDataset(Dataset):
     def __init__(
         self,
         split: Split,
-        data_dir: str = _DEFAULT_CONFIG.data_dir,
+        data_dir: str = "./data",
         labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataset.
@@ -159,7 +156,7 @@ class JigsawDataset(Dataset):
         """
         return len(self.data)
 
-    def __getitem__(self, idx: int) -> Batch:
+    def __getitem__(self, idx: int) -> BATCH:
         """Get a single sample from the dataset.
 
         Args:
@@ -196,9 +193,9 @@ class JigsawDataModule(pl.LightningDataModule):
 
     def __init__(
         self,
-        data_dir: str = _DEFAULT_CONFIG.data_dir,
-        batch_size: int = _DEFAULT_CONFIG.batch_size,
-        val_size: float = _DEFAULT_CONFIG.val_size,
+        data_dir: str = "./data",
+        batch_size: int = 64,
+        val_size: float = 0.2,
         labels: list[str] | None = None,
     ) -> None:
         """Initialize the JigsawDataModule.
@@ -237,6 +234,7 @@ class JigsawDataModule(pl.LightningDataModule):
                 Split.TRAIN, data_dir=self.data_dir, labels=self.labels
             )
             self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
+
         if stage == "test" or stage is None:
             self.test_ds = JigsawDataset(
                 Split.TEST, data_dir=self.data_dir, labels=self.labels

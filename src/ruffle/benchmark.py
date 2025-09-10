@@ -13,9 +13,8 @@ import torch
 from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 
+from ruffle.core import AVAILABLE_MODELS
 from ruffle.model import RuffleModel
-from ruffle.predictor import AVAILABLE_MODELS
-from ruffle.types import TextInput
 
 
 class InferenceBenchmark:
@@ -53,7 +52,7 @@ class InferenceBenchmark:
 
     def benchmark_inference_speed(
         self,
-        texts: TextInput,
+        texts: str | list[str],
         num_iterations: int = 100,
         warmup_iterations: int = 10,
     ) -> dict[str, Any]:
