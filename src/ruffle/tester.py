@@ -4,7 +4,7 @@ from jsonargparse import auto_cli
 
 from ruffle.config import DatasetConfig, ModelConfig, TrainerConfig
 from ruffle.dataset import JigsawDataModule
-from ruffle.model import Classifier
+from ruffle.model import RuffleModel
 
 _DEFAULT_DATASET_CONFIG = DatasetConfig()
 _DEFAULT_MODEL_CONFIG = ModelConfig()
@@ -33,7 +33,7 @@ def test(
         Basic testing:
             test("checkpoints/epoch=10-val_loss=0.1234.ckpt")
     """
-    model = Classifier.load_from_checkpoint(ckpt_path)
+    model = RuffleModel.load_from_checkpoint(ckpt_path)
     model.eval()
 
     datamodule = JigsawDataModule(

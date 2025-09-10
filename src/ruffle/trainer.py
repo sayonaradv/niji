@@ -10,7 +10,7 @@ from lightning.pytorch.callbacks import (
 
 from ruffle.config import DatasetConfig, ModelConfig, TrainerConfig
 from ruffle.dataset import JigsawDataModule
-from ruffle.model import Classifier
+from ruffle.model import RuffleModel
 
 _DEFAULT_DATASET_CONFIG = DatasetConfig()
 _DEFAULT_MODEL_CONFIG = ModelConfig()
@@ -83,7 +83,7 @@ def train(
         labels=label_names,
     )
 
-    model = Classifier(
+    model = RuffleModel(
         model_name=model_name,
         num_labels=num_labels,
         label_names=label_names,

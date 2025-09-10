@@ -13,7 +13,7 @@ import torch
 from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 
-from ruffle.model import Classifier
+from ruffle.model import RuffleModel
 from ruffle.predictor import AVAILABLE_MODELS
 from ruffle.types import TextInput
 
@@ -49,7 +49,7 @@ class InferenceBenchmark:
                 )
             ckpt_path = AVAILABLE_MODELS[self.model_name]
 
-        return Classifier.load_from_checkpoint(ckpt_path, map_location=self.device)
+        return RuffleModel.load_from_checkpoint(ckpt_path, map_location=self.device)
 
     def benchmark_inference_speed(
         self,

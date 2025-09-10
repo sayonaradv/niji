@@ -10,7 +10,7 @@ from jsonargparse import auto_cli
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from ruffle.model import Classifier
+from ruffle.model import RuffleModel
 from ruffle.types import PredResult, TextInput
 
 DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
@@ -99,7 +99,7 @@ class Ruffle:
         if ckpt_path is None:
             ckpt_path = AVAILABLE_MODELS[self.model_name]
 
-        return Classifier.load_from_checkpoint(ckpt_path, map_location=self.device)
+        return RuffleModel.load_from_checkpoint(ckpt_path, map_location=self.device)
 
     @torch.no_grad()
     def predict(

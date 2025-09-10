@@ -5,8 +5,6 @@ multilabel text classification tasks, specifically designed for toxicity
 detection and content moderation applications.
 """
 
-from typing import cast
-
 import lightning.pytorch as pl
 import torch
 from lightning.pytorch.utilities.types import (
@@ -28,7 +26,7 @@ from ruffle.utils import get_model_and_tokenizer
 _DEFAULT_MODEL_CONFIG = ModelConfig()
 
 
-class Classifier(pl.LightningModule):
+class RuffleModel(pl.LightningModule):
     """PyTorch Lightning module for multilabel text classification.
 
     A wrapper around transformer models that provides training, validation,
@@ -118,24 +116,23 @@ class Classifier(pl.LightningModule):
                   (batch_size, num_labels).
                 - 'loss': Binary cross-entropy loss if labels provided, otherwise not included.
         """
-        inputs: TensorDict = self.tokenizer(
+        inputs = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
             padding="max_length",
             truncation=True,
             return_tensors="pt",
         )
-        inputs = {k: v.to(self.device) for k, v in inputs.items()}
-
-        outputs: Tensor = self.model(**inputs).logits
-        outputs = torch.sigmoid(outputs)
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+        outputs = self.model(**inputs)
+        logits = outputs.logits
 
         if labels is not None:
-            labels = labels.to(self.device)
-            loss: Tensor = F.binary_cross_entropy(outputs, labels)
-            return {"outputs": outputs, "loss": loss}
+            labels = labels.to(self.model.device)
+            loss = F.binary_cross_entropy_with_logits(logits, labels)
         else:
-            return {"outputs": outputs}
+            loss = None
+        return logits, loss
 
     def training_step(self, batch: Batch, batch_idx: int) -> STEP_OUTPUT:  # type: ignore[override]
         """Execute a single training step.
@@ -147,7 +144,7 @@ class Classifier(pl.LightningModule):
         Returns:
             Training loss tensor for backpropagation.
         """
-        loss: Tensor = self(**batch)["loss"]
+        _, loss = self(**batch)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
@@ -190,15 +187,19 @@ class Classifier(pl.LightningModule):
         Returns:
             None.
         """
-        preds: Tensor
-        loss: Tensor
-        labels: Tensor
-        acc: Tensor
+        if "labels" not in batch:
+            raise KeyError(
+                "Cannot perform validation step: batch is missing `labels` key."
+            )
+        if not isinstance(batch["labels"], Tensor):
+            raise TypeError(
+                f"Cannot perform validation step: expected `labels` to be a tensor, got {type(batch['labels'])}"
+            )
 
-        preds, loss = self(**batch).values()
-        labels = cast(Tensor, batch["labels"])
-        acc = multilabel_accuracy(preds, labels, num_labels=self.hparams["num_labels"])
-
+        logits, loss = self(**batch)
+        acc = multilabel_accuracy(
+            logits, batch["labels"], num_labels=self.hparams["num_labels"]
+        )
         self.log(f"{stage}_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 
