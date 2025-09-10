@@ -1340,6 +1340,7 @@ name = "ruffle"
 version = "0.0.1a3"
 source = { editable = "." }
 dependencies = [
+    { name = "colorama" },
     { name = "datasets" },
     { name = "jsonargparse", extra = ["signatures"] },
     { name = "lightning" },
@@ -1360,6 +1361,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "colorama", specifier = ">=0.4.6" },
     { name = "datasets", specifier = ">=4.0.0" },
     { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.40.0" },
     { name = "lightning", specifier = ">=2.5.3" },

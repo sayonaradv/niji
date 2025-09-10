@@ -12,6 +12,7 @@ dependencies = [
     "tensorboard>=2.20.0",
     "pydantic>=2.11.7",
     "litserve>=0.2.15",
+    "colorama>=0.4.6",
 ]
 
 [project.scripts]
