@@ -3,7 +3,7 @@ import pytest
 import torch
 from torch.utils.data import DataLoader
 
-from ruffle.dataset import JigsawDataModule
+from ruffle.dataloader import JigsawDataModule
 
 
 @pytest.fixture

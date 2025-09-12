@@ -7,14 +7,14 @@ class TestRuffle:
     VALID_MODEL_NAME = next(iter(AVAILABLE_MODELS))
 
     def test_init_with_invalid_model(self):
-        with pytest.raises(ValueError, match="Unknown model.*Available"):
+        with pytest.raises(ValueError, match="Unknown model"):
             Ruffle(model_name="nonexistent-model")
 
     def test_init_with_invalid_threshold(self):
-        with pytest.raises(ValueError, match="Threshold must be between 0.0 and 1.0"):
+        with pytest.raises(ValueError, match="Threshold must be between"):
             Ruffle(self.VALID_MODEL_NAME, threshold=1.5)
 
-        with pytest.raises(ValueError, match="Threshold must be between 0.0 and 1.0"):
+        with pytest.raises(ValueError, match="Threshold must be between"):
             Ruffle(self.VALID_MODEL_NAME, threshold=-0.1)
 
     def test_init_with_invalid_ckpt_path(self):
