@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ruffle = "ruffle.predictor:main"
+ruffle = "ruffle.core:main"
 trainer = "ruffle.trainer:main"
 tester = "ruffle.tester:main"
 benchmarker = "ruffle.benchmark:main"
