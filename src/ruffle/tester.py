@@ -1,9 +1,13 @@
+from time import perf_counter
+
 import lightning.pytorch as pl
 import torch
 from jsonargparse import auto_cli
 
-from ruffle.dataset import JIGSAW_DATA_DIR, JigsawDataModule
-from ruffle.model import RuffleModel
+from ruffle.config import DataConfig
+from ruffle.dataloader import JigsawDataModule
+from ruffle.module import RuffleModel
+from ruffle.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -11,23 +15,10 @@ torch.set_float32_matmul_precision("medium")
 
 def test(
     ckpt_path: str,
-    data_dir: str = JIGSAW_DATA_DIR,
-    batch_size: int = 64,
+    data_dir: str = DataConfig.data_dir,
+    batch_size: int = DataConfig.batch_size,
+    perf: bool = True,
 ) -> None:
-    """Test a trained toxicity classification model using PyTorch Lightning.
-
-    Loads a trained checkpoint and evaluates it on the test set from the Jigsaw
-    Toxic Comment Classification dataset.
-
-    Args:
-        ckpt_path: Path to the trained model checkpoint file (.ckpt).
-        data_dir: Path to dataset directory containing train and test files.
-        batch_size: Test batch size.
-
-    Examples:
-        Basic testing:
-            test("checkpoints/epoch=10-val_loss=0.1234.ckpt")
-    """
     model = RuffleModel.load_from_checkpoint(ckpt_path)
     model.eval()
 
@@ -37,8 +28,14 @@ def test(
         labels=model.hparams["label_names"],
     )
 
-    trainer = pl.Trainer(logger=True)
+    trainer = pl.Trainer()
+
+    start = perf_counter()
     trainer.test(model, datamodule=datamodule)
+    stop = perf_counter()
+
+    if perf:
+        log_perf(start, stop, trainer)
 
 
 def main() -> None:

@@ -11,7 +11,7 @@ from colorama import Fore, Style, init
 from lightning.pytorch import LightningModule
 from torch import Tensor
 
-from ruffle.model import RuffleModel
+from ruffle.module import RuffleModel
 
 DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
 AVAILABLE_MODELS = {
@@ -67,6 +67,7 @@ class Ruffle:
         self.ckpt_path = ckpt_path
         self.threshold = threshold
         self.device = device
+
         self._validate_inputs()
 
         self.model = self._load_model()
