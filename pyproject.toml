@@ -15,8 +15,8 @@ dependencies = [
 ]
 
 [project.scripts]
-ruffle = "ruffle.core:main"
-trainer = "ruffle.trainer:main"
+# ruffle = "ruffle.core:main"
+trainer = "ruffle.training:main"
 tester = "ruffle.tester:main"
 benchmarker = "ruffle.benchmark:main"
 
