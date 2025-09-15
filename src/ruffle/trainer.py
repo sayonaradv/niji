@@ -59,7 +59,7 @@ def train(
         cache_dir=CACHE_DIR,
     )
 
-    logger = TensorBoardLogger(save_dir=".", name="runs", version=run_name)
+    logger = TensorBoardLogger(save_dir="runs", name="training_runs", version=run_name)
 
     callbacks = [
         ModelCheckpoint(filename="{epoch:02d}-{val_loss:.4f}"),
