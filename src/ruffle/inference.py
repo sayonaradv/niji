@@ -264,8 +264,5 @@ def _print_results(
 if __name__ == "__main__":
     ckpt_path = "runs/training_runs/bert-tiny/checkpoints/epoch=01-val_loss=0.0726.ckpt"
 
-    sample_text = ["i hate you", "fuck you nigga", "have fun guys"]
+    sample_text = ["i hate you", "you're a dumbass!", "have fun guys"]
     preds = predict(sample_text, ckpt_path=ckpt_path)
-
-    # metrics = test(ckpt_path=ckpt_path)
-    # print(metrics)
