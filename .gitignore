@@ -14,8 +14,8 @@ wheels/
 # Data and logs - track directories but ignore contents
 data/*
 !data/.gitkeep
-lightning_logs/*
-!lightning_logs/.gitkeep
+runs/*
+!runs/.gitkeep
 
 # Env vars
 .env
