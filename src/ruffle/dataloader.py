@@ -1,10 +1,10 @@
 import os
-from dataclasses import dataclass
 from enum import Enum
 
 import lightning.pytorch as pl
 import pandas as pd
 import torch
+from pydantic import ConfigDict, Field, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
 from ruffle.config import DataConfig
@@ -20,18 +20,46 @@ JIGSAW_LABELS: list[str] = [
 ]
 
 
-@dataclass
-class SplitConfig:
-    inputs_path: str
-    labels_path: str | None = None
-
-
 class Split(Enum):
-    TRAIN = SplitConfig(inputs_path="train.csv")
-    TEST = SplitConfig(inputs_path="test.csv", labels_path="test_labels.csv")
+    TRAIN = "train"
+    TEST = "test"
+
+    @property
+    def inputs_file(self) -> str:
+        """Get the inputs CSV filename for this split."""
+        return f"{self.value}.csv"
+
+    @property
+    def labels_file(self) -> str | None:
+        """Get the labels CSV filename for this split, if separate."""
+        return "test_labels.csv" if self == Split.TEST else None
+
+    @validate_call(
+        config=ConfigDict(arbitrary_types_allowed=True), validate_return=True
+    )
+    def load_data(self, data_dir: str) -> pd.DataFrame:
+        """Load data for this split from the data directory."""
+        inputs_path = os.path.join(data_dir, self.inputs_file)
+
+        if self.labels_file is None:
+            # Train data: everything in one file
+            return pd.read_csv(inputs_path)
+        else:
+            # Test data: merge inputs and labels
+            labels_path = os.path.join(data_dir, self.labels_file)
+            inputs_df = pd.read_csv(inputs_path)
+            labels_df = pd.read_csv(labels_path)
+            return (
+                inputs_df.merge(labels_df, on="id")
+                .query("toxic != -1")
+                .reset_index(drop=True)
+            )
 
 
 class JigsawDataset(Dataset):
+    @validate_call(
+        config=ConfigDict(validate_default=True, arbitrary_types_allowed=True)
+    )
     def __init__(
         self,
         split: Split,
@@ -41,7 +69,7 @@ class JigsawDataset(Dataset):
         self.data_dir: str = data_dir
         self._check_data_dir()
 
-        self.data = self._load_data(split, data_dir=self.data_dir)
+        self.data = split.load_data(self.data_dir)
         self.labels = labels or [
             col for col in self.data.columns if col in JIGSAW_LABELS
         ]
@@ -67,18 +95,6 @@ class JigsawDataset(Dataset):
                 f"Available labels: {available_labels}"
             )
 
-    def _load_data(self, split: Split, data_dir: str) -> pd.DataFrame:
-        if split.value.labels_path is None:
-            return pd.read_csv(os.path.join(data_dir, split.value.inputs_path))
-        else:
-            df1: pd.DataFrame = pd.read_csv(
-                os.path.join(data_dir, split.value.inputs_path)
-            )
-            df2: pd.DataFrame = pd.read_csv(
-                os.path.join(data_dir, split.value.labels_path)
-            )
-            return df1.merge(df2, on="id").query("toxic != -1").reset_index(drop=True)
-
     def __len__(self) -> int:
         return len(self.data)
 
@@ -91,11 +107,12 @@ class JigsawDataset(Dataset):
 
 
 class JigsawDataModule(pl.LightningDataModule):
+    @validate_call(config=ConfigDict(validate_default=True))
     def __init__(
         self,
         data_dir: str = DataConfig.data_dir,
-        batch_size: int = DataConfig.batch_size,
-        val_size: float = DataConfig.val_size,
+        batch_size: PositiveInt = DataConfig.batch_size,
+        val_size: float = Field(default=DataConfig.val_size, gt=0, lt=1),
         labels: list[str] | None = None,
     ) -> None:
         super().__init__()

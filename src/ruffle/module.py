@@ -4,28 +4,29 @@ from lightning.pytorch.utilities.types import (
     LRScheduler,
     OptimizerLRSchedulerConfig,
 )
+from pydantic import ConfigDict, PositiveFloat, PositiveInt, validate_call
 from torch import Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from ruffle.config import Config, ModuleConfig
 from ruffle.schedulers import LinearWarmupCosineAnnealingLR
 from ruffle.types import BATCH, MODEL_OUTPUT
 from ruffle.utils import get_model_and_tokenizer
 
 
 class RuffleModel(pl.LightningModule):
+    @validate_call(config=ConfigDict(validate_default=True))
     def __init__(
         self,
         model_name: str,
-        num_labels: int = ModuleConfig.num_labels,
+        num_labels: PositiveInt = 6,
         label_names: list[str] | None = None,
-        max_token_len: int = ModuleConfig.max_token_len,
-        lr: float = ModuleConfig.lr,
-        warmup_start_lr: float = ModuleConfig.warmup_start_lr,
-        warmup_epochs: int = ModuleConfig.warmup_epochs,
-        cache_dir: str | None = Config.cache_dir,
+        max_token_len: PositiveInt = 256,
+        lr: PositiveFloat = 3e-5,
+        warmup_start_lr: PositiveFloat = 1e-5,
+        warmup_epochs: PositiveInt = 20,
+        cache_dir: str | None = "./data",
     ) -> None:
         super().__init__()
 
@@ -51,6 +52,7 @@ class RuffleModel(pl.LightningModule):
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
 
+    @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
     def forward(
         self, text: str | list[str], labels: Tensor | None = None
     ) -> MODEL_OUTPUT:  # type: ignore[override]

@@ -1,5 +1,7 @@
 import os
-from dataclasses import dataclass
+
+from pydantic import Field, PositiveFloat, PositiveInt
+from pydantic.dataclasses import dataclass
 
 JIGSAW_DIR: str = "jigsaw-toxic-comment-classification-challenge"
 ROOT_DIR: str = os.getcwd()
@@ -9,26 +11,26 @@ ROOT_DIR: str = os.getcwd()
 class Config:
     cache_dir: str = "./data"
     log_dir: str = "./runs"
-    seed: int = 18
+    seed: PositiveInt = 18
 
 
 @dataclass
 class DataConfig:
-    batch_size: int = 64
-    val_size: float = 0.2
+    batch_size: PositiveInt = 64
+    val_size: float = Field(default=0.2, gt=0, lt=1)
     data_dir: str = f"./data/{JIGSAW_DIR}"
 
 
 @dataclass
 class ModuleConfig:
-    num_labels: int = 6
-    max_token_len: int = 256
-    lr: float = 3e-5
-    warmup_start_lr: float = 1e-5
-    warmup_epochs: int = 5
+    num_labels: PositiveInt = 6
+    max_token_len: PositiveInt = 256
+    lr: PositiveFloat = 3e-5
+    warmup_start_lr: PositiveFloat = 1e-5
+    warmup_epochs: PositiveInt = 5
 
 
 @dataclass
 class TrainerConfig:
-    max_epochs: int = 20
-    patience: int = 3
+    max_epochs: PositiveInt = 20
+    patience: PositiveInt = 3
