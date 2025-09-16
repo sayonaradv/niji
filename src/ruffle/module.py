@@ -4,7 +4,12 @@ from lightning.pytorch.utilities.types import (
     LRScheduler,
     OptimizerLRSchedulerConfig,
 )
-from pydantic import ConfigDict, PositiveFloat, PositiveInt, validate_call
+from pydantic import (
+    ConfigDict,
+    PositiveFloat,
+    PositiveInt,
+    validate_call,
+)
 from torch import Tensor
 from torch.nn import functional as F
 from torch.optim import Optimizer
@@ -30,8 +35,12 @@ class RuffleModel(pl.LightningModule):
     ) -> None:
         super().__init__()
 
+        if label_names is not None and len(label_names) != num_labels:
+            raise ValueError(
+                f"Size of 'label_names' ({len(label_names)}) does not match 'num_labels' ({num_labels})"
+            )
+
         self.save_hyperparameters()
-        self._validate_labels()
 
         self.model, self.tokenizer = get_model_and_tokenizer(
             self.hparams["model_name"],
@@ -39,15 +48,6 @@ class RuffleModel(pl.LightningModule):
             num_labels=self.hparams["num_labels"],
         )
         self.model.train()
-
-    def _validate_labels(self) -> None:
-        num_labels = self.hparams["num_labels"]
-        label_names = self.hparams["label_names"]
-
-        if label_names and len(label_names) != num_labels:
-            raise ValueError(
-                f"Length of label_names ({len(label_names)}) must match num_labels ({num_labels})."
-            )
 
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
