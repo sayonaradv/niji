@@ -36,7 +36,7 @@ def log_perf(
         }
     }
 
-    with open(os.path.join(trainer.log_dir, "perf.json"), "w") as perf_file:
+    with open(os.path.join(trainer.log_dir or ".", "perf.json"), "w") as perf_file:
         json.dump(perf, perf_file, indent=4)
 
 

@@ -27,10 +27,16 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pre-commit>=4.3.0",
+    "pyrefly>=0.33.0",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
     "ty>=0.0.1a20",
 ]
+
+[tool.pyrefly]
+python-platform = "darwin"
+python-version = "3.13"
+# python-interpreter = ".venv"
 
 [tool.ty.environment]
 python = "./.venv"

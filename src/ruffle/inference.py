@@ -53,7 +53,7 @@ def load_checkpoint(
         final_path = str(checkpoint_path)
     else:
         # Use remote model - validate model_name
-        if model_name not in AVAILABLE_MODELS:
+        if model_name is None or model_name not in AVAILABLE_MODELS:
             available_models = ", ".join(AVAILABLE_MODELS.keys())
             raise ValueError(
                 f"Unknown model '{model_name}'. Available models: {available_models}"

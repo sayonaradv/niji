@@ -3,6 +3,7 @@ from time import perf_counter
 import lightning.pytorch as pl
 import torch
 from lightning.pytorch.callbacks import (
+    Callback,
     EarlyStopping,
     LearningRateMonitor,
     ModelCheckpoint,
@@ -11,7 +12,6 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch.loggers import TensorBoardLogger
 from pydantic import (
     ConfigDict,
-    Field,
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
@@ -35,7 +35,7 @@ def train(
     data_dir: str = DataConfig.data_dir,
     labels: list[str] | None = None,
     batch_size: PositiveInt = DataConfig.batch_size,
-    val_size: float = Field(default=DataConfig.val_size, gt=0, lt=1),
+    val_size: float = DataConfig.val_size,
     max_token_len: PositiveInt = ModuleConfig.max_token_len,
     lr: PositiveFloat = ModuleConfig.lr,
     warmup_start_lr: PositiveFloat = ModuleConfig.warmup_start_lr,
@@ -69,7 +69,7 @@ def train(
 
     logger = TensorBoardLogger(save_dir="runs", name="training_runs", version=run_name)
 
-    callbacks = [
+    callbacks: list[Callback] = [
         ModelCheckpoint(filename="{epoch:02d}-{val_loss:.4f}"),
         LearningRateMonitor(logging_interval="epoch"),
         RichProgressBar(),

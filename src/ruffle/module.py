@@ -52,10 +52,16 @@ class RuffleModel(pl.LightningModule):
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
 
-    @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
-    def forward(
-        self, text: str | list[str], labels: Tensor | None = None
-    ) -> MODEL_OUTPUT:  # type: ignore[override]
+    def forward(self, *args, **kwargs) -> MODEL_OUTPUT:  # type: ignore[override]
+        if len(args) >= 1:
+            text = args[0]
+            labels = args[1] if len(args) >= 2 else kwargs.get("labels")
+        else:
+            text = kwargs.get("text")
+            labels = kwargs.get("labels")
+
+        if text is None:
+            raise ValueError("text argument is required")
         inputs = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
@@ -112,7 +118,7 @@ class RuffleModel(pl.LightningModule):
             optimizer,
             warmup_epochs=self.hparams["warmup_epochs"],
             warmup_start_lr=self.hparams["warmup_start_lr"],
-            max_epochs=self.trainer.max_epochs,
+            max_epochs=self.trainer.max_epochs or 20,
         )
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
