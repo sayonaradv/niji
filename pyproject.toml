@@ -23,7 +23,7 @@ project-excludes = [
 ]
 
 [project.scripts]
-# ruffle = "ruffle.core:main"
+ruffle = "ruffle.inference:main"
 trainer = "ruffle.training:main"
 tester = "ruffle.tester:main"
 benchmarker = "ruffle.benchmark:main"
