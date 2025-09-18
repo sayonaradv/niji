@@ -4,7 +4,7 @@ from enum import Enum
 import lightning.pytorch as pl
 import pandas as pd
 import torch
-from pydantic import ConfigDict, PositiveInt, validate_call
+from pydantic import ConfigDict, Field, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
 from ruffle.config import DataConfig
@@ -112,7 +112,8 @@ class JigsawDataModule(pl.LightningDataModule):
         self,
         data_dir: str = DataConfig.data_dir,
         batch_size: PositiveInt = DataConfig.batch_size,
-        val_size: float = DataConfig.val_size,
+        # pyrefly: ignore  # no-matching-overload
+        val_size: float = Field(DataConfig.val_size, ge=0, le=1),
         labels: list[str] | None = None,
     ) -> None:
         super().__init__()
@@ -175,3 +176,7 @@ class JigsawDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             drop_last=True,
         )
+
+
+if __name__ == "__main__":
+    dm = JigsawDataModule()

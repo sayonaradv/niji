@@ -1,6 +1,6 @@
 import os
 
-from pydantic import PositiveFloat, PositiveInt
+from pydantic import Field, PositiveFloat, PositiveInt
 from pydantic.dataclasses import dataclass
 
 JIGSAW_DIR: str = "jigsaw-toxic-comment-classification-challenge"
@@ -17,7 +17,8 @@ class Config:
 @dataclass
 class DataConfig:
     batch_size: PositiveInt = 64
-    val_size: float = 0.2
+    # pyrefly: ignore  # no-matching-overload
+    val_size: float = Field(default=0.2, ge=0, le=1)
     data_dir: str = f"./data/{JIGSAW_DIR}"
 
 
