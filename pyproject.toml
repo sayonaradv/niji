@@ -14,6 +14,14 @@ dependencies = [
     "colorama>=0.4.6",
 ]
 
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/*venv/**/*",
+]
+
 [project.scripts]
 # ruffle = "ruffle.core:main"
 trainer = "ruffle.training:main"
@@ -32,10 +40,6 @@ dev = [
     "ruff>=0.12.8",
     "ty>=0.0.1a20",
 ]
-
-[tool.pyrefly]
-python-platform = "darwin"
-python-version = "3.13"
 # python-interpreter = ".venv"
 
 [tool.ty.environment]
