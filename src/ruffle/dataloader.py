@@ -176,7 +176,3 @@ class JigsawDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             drop_last=True,
         )
-
-
-if __name__ == "__main__":
-    dm = JigsawDataModule()
