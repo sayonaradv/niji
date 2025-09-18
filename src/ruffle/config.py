@@ -1,6 +1,6 @@
 import os
 
-from pydantic import Field, PositiveFloat, PositiveInt
+from pydantic import Field, NonNegativeInt, PositiveFloat, PositiveInt
 from pydantic.dataclasses import dataclass
 
 JIGSAW_DIR: str = "jigsaw-toxic-comment-classification-challenge"
@@ -11,7 +11,7 @@ ROOT_DIR: str = os.getcwd()
 class Config:
     cache_dir: str = "./data"
     log_dir: str = "./runs"
-    seed: PositiveInt = 18
+    seed: NonNegativeInt = 18
 
 
 @dataclass
