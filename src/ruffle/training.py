@@ -12,6 +12,7 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch.loggers import TensorBoardLogger
 from pydantic import (
     ConfigDict,
+    Field,
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
@@ -26,8 +27,6 @@ from ruffle.utils import log_perf
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
-CACHE_DIR: str = Config.cache_dir
-
 
 @validate_call(config=ConfigDict(validate_default=True))
 def train(
@@ -35,7 +34,7 @@ def train(
     data_dir: str = DataConfig.data_dir,
     labels: list[str] | None = None,
     batch_size: PositiveInt = DataConfig.batch_size,
-    val_size: float = DataConfig.val_size,
+    val_size: float = Field(default=0.2, ge=0, le=1),  # pyrefly: ignore
     max_token_len: PositiveInt = ModuleConfig.max_token_len,
     lr: PositiveFloat = ModuleConfig.lr,
     warmup_start_lr: PositiveFloat = ModuleConfig.warmup_start_lr,
@@ -45,29 +44,30 @@ def train(
     run_name: str | None = None,
     perf: bool = False,
     fast_dev_run: bool = False,
+    cache_dir: str = Config.cache_dir,
+    log_dir: str = Config.log_dir,
     seed: NonNegativeInt = Config.seed,
 ) -> None:
     pl.seed_everything(seed, workers=True)
 
-    datamodule = JigsawDataModule(
-        data_dir=data_dir,
-        batch_size=batch_size,
-        val_size=val_size,
-        labels=labels,
-    )
+    datamodule = JigsawDataModule(data_dir, batch_size, val_size, labels)
+
+    # If no labels provided, datamodule will automatically use JIGSAW_LABELS
+    labels = datamodule.labels
+    num_labels = len(labels)
 
     model = RuffleModel(
-        model_name=model_name,
-        num_labels=len(datamodule.labels),
-        label_names=datamodule.labels,
-        max_token_len=max_token_len,
-        lr=lr,
-        warmup_start_lr=warmup_start_lr,
-        warmup_epochs=warmup_epochs,
-        cache_dir=CACHE_DIR,
+        model_name,
+        num_labels,
+        labels,
+        max_token_len,
+        lr,
+        warmup_start_lr,
+        warmup_epochs,
+        cache_dir,
     )
 
-    logger = TensorBoardLogger(save_dir="runs", name="training_runs", version=run_name)
+    logger = TensorBoardLogger(save_dir=log_dir, name="training_runs", version=run_name)
 
     callbacks: list[Callback] = [
         ModelCheckpoint(filename="{epoch:02d}-{val_loss:.4f}"),
@@ -88,6 +88,7 @@ def train(
         fast_dev_run=fast_dev_run,
         deterministic=True,
     )
+
     start = perf_counter()
     trainer.fit(model, datamodule=datamodule)
     stop = perf_counter()
