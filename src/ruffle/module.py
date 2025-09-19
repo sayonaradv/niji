@@ -52,16 +52,9 @@ class RuffleModel(pl.LightningModule):
     def configure_model(self) -> None:
         self.model.compile()  # improves training speed
 
-    def forward(self, *args, **kwargs) -> MODEL_OUTPUT:  # type: ignore[override]
-        if len(args) >= 1:
-            text = args[0]
-            labels = args[1] if len(args) >= 2 else kwargs.get("labels")
-        else:
-            text = kwargs.get("text")
-            labels = kwargs.get("labels")
-
-        if text is None:
-            raise ValueError("text argument is required")
+    def forward(
+        self, text: str | list[str], labels: torch.Tensor | None = None
+    ) -> MODEL_OUTPUT:
         inputs = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
@@ -76,20 +69,20 @@ class RuffleModel(pl.LightningModule):
         if labels is not None:
             labels = labels.to(self.model.device)
             loss = F.binary_cross_entropy_with_logits(logits, labels)
+            return logits, loss
         else:
-            loss = None
-        return logits, loss
+            return logits
 
-    def training_step(self, batch: BATCH, batch_idx: int) -> Tensor:  # type: ignore[override]
+    def training_step(self, batch: BATCH, batch_idx: int) -> Tensor:
         _, loss = self(**batch)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
-    def validation_step(self, batch: BATCH, batch_idx: int) -> None:  # type: ignore[override]
+    def validation_step(self, batch: BATCH, batch_idx: int) -> None:
         self._shared_eval_step(batch, stage="val")
         return None
 
-    def test_step(self, batch: BATCH, batch_idx: int) -> None:  # type: ignore[override]
+    def test_step(self, batch: BATCH, batch_idx: int) -> None:
         self._shared_eval_step(batch, stage="test")
         return None
 
