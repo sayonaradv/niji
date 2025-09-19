@@ -7,7 +7,7 @@ import torch
 from pydantic import ConfigDict, Field, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from ruffle.config import DataConfig
+from ruffle.config import DatasetConfig
 from ruffle.types import BATCH
 
 JIGSAW_LABELS: list[str] = [
@@ -109,8 +109,8 @@ class JigsawDataset(Dataset):
     def __init__(
         self,
         split: Split,
-        data_dir: str = DataConfig.data_dir,
-        labels: list[str] | None = None,
+        data_dir: str = DatasetConfig.data_dir,
+        labels: list[str] | None = DatasetConfig.labels,
     ) -> None:
         """Initialize the Jigsaw dataset.
 
@@ -197,11 +197,11 @@ class JigsawDataModule(pl.LightningDataModule):
     @validate_call(config=ConfigDict(validate_default=True))
     def __init__(
         self,
-        data_dir: str = DataConfig.data_dir,
-        batch_size: PositiveInt = DataConfig.batch_size,
+        data_dir: str = DatasetConfig.data_dir,
+        batch_size: PositiveInt = DatasetConfig.batch_size,
         # pyrefly: ignore  # no-matching-overload
-        val_size: float = Field(DataConfig.val_size, ge=0, le=1),
-        labels: list[str] | None = None,
+        val_size: float = Field(default=DatasetConfig.val_size, ge=0, le=1),
+        labels: list[str] | None = DatasetConfig.labels,
     ) -> None:
         """Initialize the Jigsaw DataModule.
 

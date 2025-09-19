@@ -14,11 +14,12 @@ class Config:
 
 
 @dataclass
-class DataConfig:
+class DatasetConfig:
     batch_size: PositiveInt = 64
     # pyrefly: ignore  # no-matching-overload
     val_size: float = Field(default=0.2, ge=0, le=1)
     data_dir: str = f"./data/{JIGSAW_DIR}"
+    labels: list[str] | None = None
 
 
 @dataclass
