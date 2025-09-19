@@ -21,6 +21,14 @@ from ruffle.utils import get_model_and_tokenizer
 
 
 class RuffleModel(pl.LightningModule):
+    """PyTorch Lightning module for fine-tuning transformer models on multi-label text classification.
+
+    This module wraps a Hugging Face transformer model (e.g., BERT) for toxic comment
+    classification or other multi-label text classification tasks. It provides training,
+    validation, and testing steps with metrics, and integrates a custom linear warmup
+    cosine annealing learning rate scheduler.
+    """
+
     @validate_call(config=ConfigDict(validate_default=True))
     def __init__(
         self,
@@ -33,6 +41,21 @@ class RuffleModel(pl.LightningModule):
         warmup_epochs: PositiveInt = 20,
         cache_dir: str | None = "./data",
     ) -> None:
+        """Initialize the RuffleModel.
+
+        Args:
+            model_name: Hugging Face model identifier (e.g., "bert-base-uncased").
+            num_labels: Number of output labels for classification.
+            label_names: Optional list of label names. Must match ``num_labels`` length if provided.
+            max_token_len: Maximum token length for text inputs.
+            lr: Initial learning rate for Adam optimizer.
+            warmup_start_lr: Starting learning rate for warmup phase.
+            warmup_epochs: Number of epochs for learning rate warmup.
+            cache_dir: Directory to cache pretrained models and tokenizers.
+
+        Raises:
+            ValueError: If ``label_names`` is provided and its length does not equal ``num_labels``.
+        """
         super().__init__()
 
         if label_names is not None and len(label_names) != num_labels:
@@ -50,11 +73,29 @@ class RuffleModel(pl.LightningModule):
         self.model.train()
 
     def configure_model(self) -> None:
-        self.model.compile()  # improves training speed
+        """Configure the underlying transformer model.
+
+        Calls ``self.model.compile()`` to optimize training speed.
+        """
+        self.model.compile()
 
     def forward(
         self, text: str | list[str], labels: torch.Tensor | None = None
     ) -> MODEL_OUTPUT:
+        """Forward pass through the model.
+
+        Tokenizes input text, feeds tokens through the transformer model, and optionally
+        computes the binary cross-entropy loss for multi-label classification.
+
+        Args:
+            text: Input text or list of text strings.
+            labels: Optional tensor of shape ``(batch_size, num_labels)`` containing
+                binary label indicators.
+
+        Returns:
+            If ``labels`` is provided: A tuple of ``(logits, loss)``.
+            Otherwise: The raw logits tensor of shape ``(batch_size, num_labels)``.
+        """
         inputs = self.tokenizer(
             text,
             max_length=self.hparams["max_token_len"],
@@ -73,18 +114,43 @@ class RuffleModel(pl.LightningModule):
         else:
             return logits
 
-    def training_step(self, batch: BATCH, batch_idx: int) -> Tensor:
+    def training_step(self, batch: BATCH, batch_idx: int) -> MODEL_OUTPUT:
+        """Run a single training step.
+
+        Args:
+            batch: A batch of training data containing ``"text"`` and ``"labels"``.
+            batch_idx: Index of the current batch.
+
+        Returns:
+            Training loss tensor.
+        """
         _, loss = self(**batch)
         self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
         return loss
 
     def validation_step(self, batch: BATCH, batch_idx: int) -> None:
+        """Run a single validation step.
+
+        Args:
+            batch: A batch of validation data containing ``"text"`` and ``"labels"``.
+            batch_idx: Index of the current batch.
+
+        Returns:
+            None
+        """
         self._shared_eval_step(batch, stage="val")
-        return None
 
     def test_step(self, batch: BATCH, batch_idx: int) -> None:
+        """Run a single test step.
+
+        Args:
+            batch: A batch of test data containing ``"text"`` and ``"labels"``.
+            batch_idx: Index of the current batch.
+
+        Returns:
+            None
+        """
         self._shared_eval_step(batch, stage="test")
-        return None
 
     def _shared_eval_step(self, batch: BATCH, stage: str) -> None:
         if "labels" not in batch:
@@ -104,6 +170,13 @@ class RuffleModel(pl.LightningModule):
         self.log(f"{stage}_acc", acc, prog_bar=True, on_step=False, on_epoch=True)
 
     def configure_optimizers(self) -> OptimizerLRSchedulerConfig:
+        """Configure the optimizer and learning rate scheduler.
+
+        Returns:
+            A dictionary containing:
+                - ``optimizer``: Adam optimizer.
+                - ``lr_scheduler``: Linear warmup cosine annealing scheduler.
+        """
         optimizer: Optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.hparams["lr"]
         )
