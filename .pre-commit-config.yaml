@@ -2,19 +2,19 @@ repos:
   - repo: local
     hooks:
       - id: ruff-check
-        name: Lint with ruff
+        name: Lint with Ruff
         entry: uv run ruff check --fix
         language: system
         types: [python]
         
       - id: ruff-format
-        name: Format with ruff
+        name: Format with Ruff
         entry: uv run ruff format
         language: system
         types: [python]             
  
       - id: pyrefly-check
-        name: Type checking with ty
+        name: Type check with Pyrefly
         entry: uv run pyrefly check
         language: system
         types: [python]
