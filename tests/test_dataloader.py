@@ -164,19 +164,17 @@ class TestJigsawDataModule:
         # Only train and val datasets/dataloaders should be created
         assert isinstance(dm.train_ds, Dataset)
         assert isinstance(dm.val_ds, Dataset)
-        assert dm.test_ds is None
-
         assert isinstance(dm.train_dataloader(), DataLoader)
         assert isinstance(dm.val_dataloader(), DataLoader)
-        with pytest.raises(RuntimeError, match="Test dataset has not been initialized"):
-            dm.test_dataloader()
+        assert dm.test_ds is None
+        assert dm.test_dataloader() is None
 
         # Check dataloader sizes
-        assert dm.train_ds is not None
-        assert dm.val_ds is not None
         assert len(dm.train_dataloader()) == len(dm.train_ds) // batch_size  # type: ignore[arg-type]
         assert len(dm.val_dataloader()) == len(dm.val_ds) // batch_size  # type: ignore[arg-type]
-        assert len(dm.val_dataloader()) == int(len(dm.train_dataloader()) * val_size)
+
+        # Check validation data size
+        assert len(dm.val_dataloader()) == int(len(dm.train_dataloader()) * val_size)  # type: ignore[arg-type]
 
     def test_test_stage(self, mock_data_dir) -> None:
         batch_size = 4
@@ -186,19 +184,10 @@ class TestJigsawDataModule:
         # Only test dataset/dataloader should be created
         assert dm.train_ds is None
         assert dm.val_ds is None
+        assert dm.train_dataloader() is None
+        assert dm.val_dataloader() is None
+
         assert isinstance(dm.test_ds, Dataset)
-
         assert isinstance(dm.test_dataloader(), DataLoader)
-        with pytest.raises(
-            RuntimeError, match="Train dataset has not been initialized"
-        ):
-            dm.train_dataloader()
 
-        with pytest.raises(
-            RuntimeError, match="Validation dataset has not been initialized"
-        ):
-            dm.val_dataloader()
-
-        # Check dataloder size
-        assert dm.test_ds is not None
         assert len(dm.test_dataloader()) == len(dm.test_ds) // batch_size  # type: ignore[arg-type]
