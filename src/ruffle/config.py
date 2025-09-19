@@ -9,7 +9,6 @@ ROOT_DIR: str = os.getcwd()
 
 @dataclass
 class Config:
-    cache_dir: str = "./data"
     log_dir: str = "./runs"
     seed: NonNegativeInt = 18
 
@@ -25,10 +24,12 @@ class DataConfig:
 @dataclass
 class ModuleConfig:
     num_labels: PositiveInt = 6
+    label_names: list[str] | None = None
     max_token_len: PositiveInt = 256
     lr: PositiveFloat = 3e-5
     warmup_start_lr: PositiveFloat = 1e-5
     warmup_epochs: PositiveInt = 5
+    cache_dir: str | None = "./data"
 
 
 @dataclass

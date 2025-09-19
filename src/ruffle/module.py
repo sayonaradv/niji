@@ -15,6 +15,7 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
+from ruffle.config import ModuleConfig
 from ruffle.schedulers import LinearWarmupCosineAnnealingLR
 from ruffle.types import BATCH, MODEL_OUTPUT
 from ruffle.utils import get_model_and_tokenizer
@@ -33,13 +34,13 @@ class RuffleModel(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
-        num_labels: PositiveInt = 6,
-        label_names: list[str] | None = None,
-        max_token_len: PositiveInt = 256,
-        lr: PositiveFloat = 3e-5,
-        warmup_start_lr: PositiveFloat = 1e-5,
-        warmup_epochs: PositiveInt = 20,
-        cache_dir: str | None = "./data",
+        num_labels: PositiveInt = ModuleConfig.num_labels,
+        label_names: list[str] | None = ModuleConfig.label_names,
+        max_token_len: PositiveInt = ModuleConfig.max_token_len,
+        lr: PositiveFloat = ModuleConfig.lr,
+        warmup_start_lr: PositiveFloat = ModuleConfig.warmup_start_lr,
+        warmup_epochs: PositiveInt = ModuleConfig.warmup_epochs,
+        cache_dir: str | None = ModuleConfig.cache_dir,
     ) -> None:
         """Initialize the RuffleModel.
 
