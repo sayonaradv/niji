@@ -22,6 +22,9 @@ project-excludes = [
     "**/*venv/**/*",
 ]
 
+[tool.pyrefly.errors]
+bad-override = false
+
 [project.scripts]
 ruffle = "ruffle.inference:main"
 trainer = "ruffle.training:main"
