@@ -149,12 +149,8 @@ def predict(
     model.eval()
 
     with torch.no_grad():
-        logits = model(text)
-
-        if return_logits:
-            predictions = logits.detach()
-        else:
-            predictions = torch.sigmoid(logits).detach()
+        logits = model(text).detach()
+        predictions = logits if return_logits else torch.sigmoid(logits)
 
     if verbose:
         label_names = model.hparams["label_names"]
