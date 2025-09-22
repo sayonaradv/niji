@@ -7,9 +7,9 @@ import torch
 from colorama import Fore, Style, init
 from lightning.pytorch.loggers import TensorBoardLogger
 
-from ruffle.config import DataConfig
 from ruffle.dataloader import JigsawDataModule
 from ruffle.module import RuffleModel
+from ruffle.training import DATA_DIR
 from ruffle.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
@@ -66,10 +66,10 @@ def load_checkpoint(
 def test(
     model_name: str | None = None,
     ckpt_path: str | None = None,
-    data_dir: str = DataConfig.data_dir,
-    batch_size: int = DataConfig.batch_size,
-    run_name: str | None = None,
+    data_dir: str = DATA_DIR,
+    batch_size: int = 64,
     perf: bool = True,
+    run_name: str | None = None,
 ) -> Mapping[str, float]:
     """Evaluate a fine-tuned model on the test dataset.
 

@@ -19,34 +19,37 @@ from pydantic import (
     validate_call,
 )
 
-from ruffle.config import Config, DataConfig, ModuleConfig, TrainerConfig
-from ruffle.dataloader import JigsawDataModule
+from ruffle.dataloader import JIGSAW_HANDLE, JigsawDataModule
 from ruffle.module import RuffleModel
 from ruffle.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
+CACHE_DIR: str = "./data"
+DATA_DIR: str = f"{CACHE_DIR}/{JIGSAW_HANDLE}"
+LOG_DIR: str = "./runs"
+
 
 @validate_call(config=ConfigDict(validate_default=True))
 def train(
     model_name: str,
-    data_dir: str = DataConfig.data_dir,
+    data_dir: str = DATA_DIR,
     labels: list[str] | None = None,
-    batch_size: PositiveInt = DataConfig.batch_size,
-    val_size: float = Field(default=0.2, ge=0, le=1),  # pyrefly: ignore
-    max_token_len: PositiveInt = ModuleConfig.max_token_len,
-    lr: PositiveFloat = ModuleConfig.lr,
-    warmup_start_lr: PositiveFloat = ModuleConfig.warmup_start_lr,
-    warmup_epochs: PositiveInt = ModuleConfig.warmup_epochs,
-    max_epochs: PositiveInt = TrainerConfig.max_epochs,
-    patience: PositiveInt = TrainerConfig.patience,
+    batch_size: PositiveInt = 64,
+    val_size: float = Field(default=0.2, ge=0, le=1),
+    max_token_len: PositiveInt = 256,
+    lr: PositiveFloat = 3e-5,
+    warmup_start_lr: PositiveFloat = 1e-5,
+    warmup_epochs: PositiveInt = 5,
+    max_epochs: PositiveInt = 20,
+    patience: PositiveInt = 3,
     run_name: str | None = None,
     perf: bool = False,
     fast_dev_run: bool = False,
-    cache_dir: str = Config.cache_dir,
-    log_dir: str = Config.log_dir,
-    seed: NonNegativeInt = Config.seed,
+    cache_dir: str | None = CACHE_DIR,
+    log_dir: str = LOG_DIR,
+    seed: NonNegativeInt = 18,
 ) -> None:
     pl.seed_everything(seed, workers=True)
 
