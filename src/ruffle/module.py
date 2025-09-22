@@ -212,10 +212,3 @@ class RuffleModel(pl.LightningModule):
         )
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
-
-
-if __name__ == "__main__":
-    model = RuffleModel(
-        "google/bert_uncased_L-4_H-256_A-4", label_names=["toxic", "threat"]
-    )
-    print(model.hparams)
