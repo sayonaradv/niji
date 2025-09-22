@@ -1,4 +1,5 @@
 from time import perf_counter
+from typing import Annotated
 
 import lightning.pytorch as pl
 import torch
@@ -37,7 +38,7 @@ def train(
     data_dir: str = DATA_DIR,
     labels: list[str] | None = None,
     batch_size: PositiveInt = 64,
-    val_size: float = Field(default=0.2, ge=0, le=1),
+    val_size: Annotated[float, Field(ge=0, le=1)] = 0.2,  # Changed this line
     max_token_len: PositiveInt = 256,
     lr: PositiveFloat = 3e-5,
     warmup_start_lr: PositiveFloat = 1e-5,

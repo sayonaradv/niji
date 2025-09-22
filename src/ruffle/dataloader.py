@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from typing import Annotated
 
 import lightning.pytorch as pl
 import pandas as pd
@@ -19,6 +20,8 @@ JIGSAW_LABELS: list[str] = [
 ]
 
 JIGSAW_HANDLE: str = "jigsaw-toxic-comment-classification-challenge"
+
+DATA_DIR: str = f"./data/{JIGSAW_HANDLE}"
 
 
 class Split(Enum):
@@ -250,7 +253,7 @@ class JigsawDataModule(pl.LightningDataModule):
         self,
         data_dir: str,
         batch_size: PositiveInt = 64,
-        val_size: float = Field(default=0.2, ge=0, le=1),
+        val_size: Annotated[float, Field(ge=0, le=1)] = 0.2,
         labels: list[str] | None = None,
     ) -> None:
         """Initialize the Jigsaw DataModule.
