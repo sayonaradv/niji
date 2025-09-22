@@ -32,13 +32,27 @@ DATA_DIR: str = f"{CACHE_DIR}/{JIGSAW_HANDLE}"
 LOG_DIR: str = "./runs"
 
 
+def _validate_warmup_epochs(warmup_epochs: int, max_epochs: int) -> None:
+    if warmup_epochs >= max_epochs:
+        raise ValueError(
+            f"warmup_epochs ({warmup_epochs}) must be less than max_epochs ({max_epochs})"
+        )
+
+
+def _validate_warmup_lr(warmup_start_lr: float, peak_lr: float) -> None:
+    if warmup_start_lr >= peak_lr:
+        raise ValueError(
+            f"warmup_start_lr ({warmup_start_lr}) must be less than the peak lr ({peak_lr})"
+        )
+
+
 @validate_call(config=ConfigDict(validate_default=True))
 def train(
     model_name: str,
     data_dir: str = DATA_DIR,
     labels: list[str] | None = None,
     batch_size: PositiveInt = 64,
-    val_size: Annotated[float, Field(ge=0, le=1)] = 0.2,  # Changed this line
+    val_size: Annotated[float, Field(ge=0, le=1)] = 0.2,
     max_token_len: PositiveInt = 256,
     lr: PositiveFloat = 3e-5,
     warmup_start_lr: PositiveFloat = 1e-5,
@@ -125,6 +139,9 @@ def train(
         >>> # Fast development run for debugging
         >>> train("bert-tiny", fast_dev_run=True)
     """
+    _validate_warmup_epochs(warmup_epochs, max_epochs)
+    _validate_warmup_lr(warmup_start_lr, lr)
+
     pl.seed_everything(seed, workers=True)
 
     datamodule = JigsawDataModule(data_dir, batch_size, val_size, labels)
