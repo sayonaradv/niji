@@ -149,7 +149,7 @@ def predict(
     model.eval()
 
     with torch.no_grad():
-        logits, _ = model(text)
+        logits = model(text)
 
         if return_logits:
             predictions = logits.detach()
