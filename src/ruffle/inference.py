@@ -21,6 +21,10 @@ AVAILABLE_MODELS = {
     "distilbert": f"{DOWNLOAD_BASE_URL}v0.0.1alpha4/finetuned-distilbert.ckpt",
 }
 
+TEST_CKPT_PATH: str = (
+    "runs/training_runs/bert-tiny/checkpoints/epoch=01-val_loss=0.0726.ckpt"
+)
+
 
 def load_checkpoint(
     model_name: str | None = None,
@@ -112,7 +116,7 @@ def test(
 def predict(
     text: str | list[str],
     model_name: str | None = None,
-    ckpt_path: str | None = None,
+    ckpt_path: str | None = TEST_CKPT_PATH,
     threshold: float = 0.5,
     device: str | None = "cpu",
     verbose: bool = True,

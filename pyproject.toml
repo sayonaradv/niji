@@ -27,7 +27,7 @@ project-excludes = [
 bad-override = false
 
 [project.scripts]
-ruffle = "ruffle.cli:cli_main"
+ruffle = "ruffle.cli:main"
 
 [build-system]
 requires = ["hatchling"]
