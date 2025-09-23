@@ -1,10 +1,11 @@
 from jsonargparse import auto_cli
 
-from ruffle.training import train
+from ruffle import inference, training
 
 
 def cli_main() -> None:
-    auto_cli(train)
+    commands = [training.train, inference.test, inference.predict]
+    auto_cli(commands)
 
 
 if __name__ == "__main__":

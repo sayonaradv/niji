@@ -27,10 +27,7 @@ project-excludes = [
 bad-override = false
 
 [project.scripts]
-ruffle = "ruffle.inference:main"
-trainer = "ruffle.training:main"
-tester = "ruffle.tester:main"
-benchmarker = "ruffle.benchmark:main"
+ruffle = "ruffle.cli:cli_main"
 
 [build-system]
 requires = ["hatchling"]
