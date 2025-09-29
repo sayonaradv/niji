@@ -20,7 +20,7 @@ from blanki.types import BATCH, MODEL_OUTPUT
 from blanki.utils import get_model_and_tokenizer
 
 
-class RuffleModel(pl.LightningModule):
+class Classifier(pl.LightningModule):
     """PyTorch Lightning module for fine-tuning transformer models on multi-label classification.
 
     This module wraps a Hugging Face transformer model for toxic comment classification
@@ -29,7 +29,7 @@ class RuffleModel(pl.LightningModule):
     learning rate scheduler.
 
     Example:
-        >>> model = RuffleModel(
+        >>> model = Classifier(
         ...     model_name="bert-base-uncased",
         ...     label_names=["toxic", "severe_toxic", "obscene"]
         ... )
@@ -49,7 +49,7 @@ class RuffleModel(pl.LightningModule):
         warmup_epochs: PositiveInt = 5,
         cache_dir: str | None = "./data",
     ) -> None:
-        """Initialize the RuffleModel.
+        """Initialize the Classifier.
 
         Args:
             model_name (str): Hugging Face model identifier (e.g., "bert-base-uncased").

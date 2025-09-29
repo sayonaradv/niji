@@ -8,7 +8,7 @@ from colorama import Fore, Style, init
 from lightning.pytorch.loggers import TensorBoardLogger
 
 from blanki.dataloader import JigsawDataModule
-from blanki.module import RuffleModel
+from blanki.module import Classifier
 from blanki.training import DATA_DIR
 from blanki.utils import log_perf
 
@@ -30,8 +30,8 @@ def load_checkpoint(
     model_name: str | None = None,
     ckpt_path: str | None = None,
     device: str | None = None,
-) -> RuffleModel:
-    """Load a RuffleModel from checkpoint, either locally or from remote location.
+) -> Classifier:
+    """Load a Classifier from checkpoint, either locally or from remote location.
 
     Args:
         model_name (str, optional): Name of available model to download remotely.
@@ -39,7 +39,7 @@ def load_checkpoint(
         device (str, optional): Device to load model on (e.g., 'cuda', 'cpu').
 
     Returns:
-        RuffleModel: The loaded model instance.
+        Classifier: The loaded model instance.
 
     Raises:
         ValueError: If neither model_name nor ckpt_path is provided, or if
@@ -64,7 +64,7 @@ def load_checkpoint(
             )
         final_path = AVAILABLE_MODELS[model_name]
 
-    return RuffleModel.load_from_checkpoint(final_path, map_location=device)
+    return Classifier.load_from_checkpoint(final_path, map_location=device)
 
 
 def test(

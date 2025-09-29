@@ -21,7 +21,7 @@ from pydantic import (
 )
 
 from blanki.dataloader import JIGSAW_HANDLE, JigsawDataModule
-from blanki.module import RuffleModel
+from blanki.module import Classifier
 from blanki.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
@@ -69,7 +69,7 @@ def train(
     """Train a transformer model for toxicity classification on the Jigsaw dataset.
 
 
-    Sets up and trains a RuffleModel on the Jigsaw toxicity dataset with configurable
+    Sets up and trains a Classifier on the Jigsaw toxicity dataset with configurable
     hyperparameters, data splitting, and training options. Uses PyTorch Lightning for
     training orchestration with automatic checkpointing, early stopping, and logging.
 
@@ -151,7 +151,7 @@ def train(
     labels = datamodule.labels
     num_labels = len(labels)
 
-    model = RuffleModel(
+    model = Classifier(
         model_name,
         num_labels,
         labels,
