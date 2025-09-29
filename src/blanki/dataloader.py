@@ -8,7 +8,7 @@ import torch
 from pydantic import ConfigDict, Field, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from ruffle.types import BATCH
+from blanki.types import BATCH
 
 JIGSAW_LABELS: list[str] = [
     "toxic",
@@ -20,6 +20,7 @@ JIGSAW_LABELS: list[str] = [
 ]
 
 JIGSAW_HANDLE: str = "jigsaw-toxic-comment-classification-challenge"
+
 
 DATA_DIR: str = f"./data/{JIGSAW_HANDLE}"
 

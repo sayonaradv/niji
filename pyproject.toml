@@ -1,6 +1,6 @@
 [project]
-name = "ruffle"
-version = "0.0.1a3"
+name = "blanki"
+version = "0.0.1a4"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -27,7 +27,7 @@ project-excludes = [
 bad-override = false
 
 [project.scripts]
-ruffle = "ruffle.cli:main"
+blanki = "blanki.cli:main"
 
 [build-system]
 requires = ["hatchling"]

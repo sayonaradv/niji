@@ -98,6 +98,53 @@ wheels = [
 ]
 
 [[package]]
+name = "blanki"
+version = "0.0.1a4"
+source = { editable = "." }
+dependencies = [
+    { name = "colorama" },
+    { name = "datasets" },
+    { name = "jsonargparse", extra = ["signatures"] },
+    { name = "lightning" },
+    { name = "litserve" },
+    { name = "pydantic" },
+    { name = "rich" },
+    { name = "tensorboard" },
+    { name = "transformers" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "pyrefly" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "colorama", specifier = ">=0.4.6" },
+    { name = "datasets", specifier = ">=4.0.0" },
+    { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.40.0" },
+    { name = "lightning", specifier = ">=2.5.3" },
+    { name = "litserve", specifier = ">=0.2.15" },
+    { name = "pydantic", specifier = ">=2.11.9" },
+    { name = "rich", specifier = ">=14.1.0" },
+    { name = "tensorboard", specifier = ">=2.20.0" },
+    { name = "transformers", specifier = ">=4.55.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.3.0" },
+    { name = "pyrefly", specifier = ">=0.33.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "ruff", specifier = ">=0.12.8" },
+    { name = "ty", specifier = ">=0.0.1a20" },
+]
+
+[[package]]
 name = "certifi"
 version = "2025.8.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1380,53 +1427,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/37/54/6177a0dc10bce6f43e392a2192e6018755473283d0cf43cc7e6afc182aea/ruff-0.13.1-py3-none-win32.whl", hash = "sha256:55e9efa692d7cb18580279f1fbb525146adc401f40735edf0aaeabd93099f9a0", size = 12178448, upload-time = "2025-09-18T19:52:35.545Z" },
     { url = "https://files.pythonhosted.org/packages/64/51/c6a3a33d9938007b8bdc8ca852ecc8d810a407fb513ab08e34af12dc7c24/ruff-0.13.1-py3-none-win_amd64.whl", hash = "sha256:3a3fb595287ee556de947183489f636b9f76a72f0fa9c028bdcabf5bab2cc5e5", size = 13286458, upload-time = "2025-09-18T19:52:38.198Z" },
     { url = "https://files.pythonhosted.org/packages/fd/04/afc078a12cf68592345b1e2d6ecdff837d286bac023d7a22c54c7a698c5b/ruff-0.13.1-py3-none-win_arm64.whl", hash = "sha256:c0bae9ffd92d54e03c2bf266f466da0a65e145f298ee5b5846ed435f6a00518a", size = 12437893, upload-time = "2025-09-18T19:52:41.283Z" },
-]
-
-[[package]]
-name = "ruffle"
-version = "0.0.1a3"
-source = { editable = "." }
-dependencies = [
-    { name = "colorama" },
-    { name = "datasets" },
-    { name = "jsonargparse", extra = ["signatures"] },
-    { name = "lightning" },
-    { name = "litserve" },
-    { name = "pydantic" },
-    { name = "rich" },
-    { name = "tensorboard" },
-    { name = "transformers" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-    { name = "pyrefly" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "ty" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "colorama", specifier = ">=0.4.6" },
-    { name = "datasets", specifier = ">=4.0.0" },
-    { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.40.0" },
-    { name = "lightning", specifier = ">=2.5.3" },
-    { name = "litserve", specifier = ">=0.2.15" },
-    { name = "pydantic", specifier = ">=2.11.9" },
-    { name = "rich", specifier = ">=14.1.0" },
-    { name = "tensorboard", specifier = ">=2.20.0" },
-    { name = "transformers", specifier = ">=4.55.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pre-commit", specifier = ">=4.3.0" },
-    { name = "pyrefly", specifier = ">=0.33.0" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "ruff", specifier = ">=0.12.8" },
-    { name = "ty", specifier = ">=0.0.1a20" },
 ]
 
 [[package]]

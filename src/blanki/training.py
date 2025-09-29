@@ -20,9 +20,9 @@ from pydantic import (
     validate_call,
 )
 
-from ruffle.dataloader import JIGSAW_HANDLE, JigsawDataModule
-from ruffle.module import RuffleModel
-from ruffle.utils import log_perf
+from blanki.dataloader import JIGSAW_HANDLE, JigsawDataModule
+from blanki.module import RuffleModel
+from blanki.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
@@ -66,7 +66,8 @@ def train(
     log_dir: str = LOG_DIR,
     seed: NonNegativeInt = 18,
 ) -> None:
-    """Train a transformer model for multi-label toxicity classification.
+    """Train a transformer model for toxicity classification on the Jigsaw dataset.
+
 
     Sets up and trains a RuffleModel on the Jigsaw toxicity dataset with configurable
     hyperparameters, data splitting, and training options. Uses PyTorch Lightning for

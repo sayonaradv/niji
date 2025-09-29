@@ -1,6 +1,6 @@
 import pytest
 
-from ruffle.inference import load_checkpoint
+from blanki.inference import load_checkpoint
 
 
 class TestLoadCheckpoint:

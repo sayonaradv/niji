@@ -15,9 +15,9 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from ruffle.schedulers import LinearWarmupCosineAnnealingLR
-from ruffle.types import BATCH, MODEL_OUTPUT
-from ruffle.utils import get_model_and_tokenizer
+from blanki.schedulers import LinearWarmupCosineAnnealingLR
+from blanki.types import BATCH, MODEL_OUTPUT
+from blanki.utils import get_model_and_tokenizer
 
 
 class RuffleModel(pl.LightningModule):

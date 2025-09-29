@@ -4,7 +4,7 @@ import torch
 from pydantic import ValidationError
 from torch.utils.data import DataLoader, Dataset
 
-from ruffle.dataloader import JIGSAW_LABELS, JigsawDataModule, JigsawDataset, Split
+from blanki.dataloader import JIGSAW_LABELS, JigsawDataModule, JigsawDataset, Split
 
 
 @pytest.fixture

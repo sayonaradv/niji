@@ -7,15 +7,15 @@ import torch
 from colorama import Fore, Style, init
 from lightning.pytorch.loggers import TensorBoardLogger
 
-from ruffle.dataloader import JigsawDataModule
-from ruffle.module import RuffleModel
-from ruffle.training import DATA_DIR
-from ruffle.utils import log_perf
+from blanki.dataloader import JigsawDataModule
+from blanki.module import RuffleModel
+from blanki.training import DATA_DIR
+from blanki.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
-DOWNLOAD_BASE_URL = "https://github.com/zuzo-sh/ruffle/releases/download/"
+DOWNLOAD_BASE_URL = "https://github.com/sudojayder/blanki/releases/download/"
 AVAILABLE_MODELS = {
     "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha4/finetuned-bert-tiny.ckpt",
     "distilbert": f"{DOWNLOAD_BASE_URL}v0.0.1alpha4/finetuned-distilbert.ckpt",
@@ -75,7 +75,7 @@ def test(
     perf: bool = True,
     run_name: str | None = None,
 ) -> Mapping[str, float]:
-    """Evaluate a fine-tuned model on the test dataset.
+    """Evaluate a trained model on the Jigsaw test dataset.
 
     Args:
         model_name (str, optional): Name of available model to download remotely.
@@ -122,7 +122,7 @@ def predict(
     verbose: bool = True,
     return_logits: bool = False,
 ) -> torch.Tensor:
-    """Make predictions on raw text using a fine-tuned model.
+    """Predict the toxicity of text using a trained model.
 
     Args:
         text (str or list[str]): Input text(s) to classify.
