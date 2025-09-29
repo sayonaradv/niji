@@ -1,5 +1,5 @@
 """
-Ruffle CLI - A command-line interface for toxicity classification model training and inference.
+Blanki CLI - A command-line interface for toxicity classification model training and inference.
 
 This CLI provides three main commands:
 - train: Fine-tune transformer models on the Jigsaw toxicity dataset

@@ -58,10 +58,10 @@ pip install -e ".[dev]"
 Get started with toxicity detection in just a few lines:
 
 ```python
-from blanki import Ruffle
+from blanki import Blanki
 
 # Load a pre-trained model
-blanki = Ruffle(model_name="bert-tiny")
+blanki = Blanki(model_name="bert-tiny")
 
 # Detect toxicity in text
 result = blanki.predict("This is a sample comment to analyze")
@@ -97,7 +97,7 @@ See the [documentation](https://blanki.readthedocs.io) for comprehensive guides 
 
 ## 📊 Detection Categories
 
-Ruffle detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
+Blanki detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
 
 | Category | Description |
 |----------|-------------|
