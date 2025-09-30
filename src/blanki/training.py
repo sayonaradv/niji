@@ -64,6 +64,7 @@ def train(
     fast_dev_run: bool = False,
     cache_dir: str | None = CACHE_DIR,
     log_dir: str = LOG_DIR,
+    num_workers: NonNegativeInt | None = None,
     seed: NonNegativeInt = 18,
 ) -> None:
     """Train a transformer model for toxicity classification on the Jigsaw dataset.
@@ -113,6 +114,9 @@ def train(
             If None, uses the default transformers cache directory. Defaults to "./data".
         log_dir (str): Directory for saving TensorBoard logs and checkpoints.
             Defaults to "./runs".
+        num_workers (NonNegativeInt | None): Number of worker processes for data loading.
+            If None, defaults to the number of CPU cores. If 0, uses single-threaded
+            data loading. Must be non-negative. Defaults to None.
         seed (NonNegativeInt): Random seed for reproducibility across PyTorch,
             NumPy, and Python random number generators. Must be non-negative.
             Defaults to 18.
@@ -145,11 +149,11 @@ def train(
 
     pl.seed_everything(seed, workers=True)
 
-    datamodule = JigsawDataModule(data_dir, batch_size, val_size, labels)
+    datamodule = JigsawDataModule(data_dir, batch_size, val_size, labels, num_workers)
 
     # If no labels provided, datamodule will automatically use JIGSAW_LABELS
     labels = datamodule.labels
-    num_labels = len(labels)
+    num_labels: int = len(labels)
 
     model = Classifier(
         model_name,
@@ -184,9 +188,9 @@ def train(
         deterministic=True,
     )
 
-    start = perf_counter()
+    start: float = perf_counter()
     trainer.fit(model, datamodule=datamodule)
-    stop = perf_counter()
+    stop: float = perf_counter()
 
     if perf:
         log_perf(start, stop, trainer)
