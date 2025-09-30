@@ -9,6 +9,7 @@ from lightning.pytorch.callbacks import RichProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 
 from blanki.dataloader import JigsawDataModule
+from blanki.exceptions import ModelNotFoundError
 from blanki.module import Classifier
 from blanki.training import DATA_DIR
 from blanki.utils import log_perf
@@ -45,7 +46,7 @@ def load_checkpoint(
     Raises:
         ValueError: If neither model_name nor ckpt_path is provided, or if
             model_name is not in AVAILABLE_MODELS.
-        FileNotFoundError: If the local checkpoint file doesn't exist.
+        ModelNotFoundError: If the local checkpoint file doesn't exist.
     """
     if not (model_name or ckpt_path):
         raise ValueError("Must provide either 'model_name' or 'ckpt_path'.")
@@ -54,7 +55,7 @@ def load_checkpoint(
         # Use local checkpoint - validate it exists
         checkpoint_path = Path(ckpt_path)
         if not checkpoint_path.is_file():
-            raise FileNotFoundError(f"Checkpoint file does not exist: {ckpt_path}")
+            raise ModelNotFoundError(f"Checkpoint file does not exist: {ckpt_path}")
         final_path = str(checkpoint_path)
     else:
         # Use remote model - validate model_name
@@ -95,7 +96,7 @@ def test(
 
     Raises:
         ValueError: If neither model_name nor ckpt_path is provided.
-        FileNotFoundError: If checkpoint file doesn't exist.
+        ModelNotFoundError: If checkpoint file doesn't exist.
     """
     model: Classifier = load_checkpoint(model_name, ckpt_path)
     model.eval()
