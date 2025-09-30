@@ -5,6 +5,7 @@ from time import perf_counter
 import lightning.pytorch as pl
 import torch
 from colorama import Fore, Style, init
+from lightning.pytorch.callbacks import RichProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 
 from blanki.dataloader import JigsawDataModule
@@ -58,20 +59,21 @@ def load_checkpoint(
     else:
         # Use remote model - validate model_name
         if model_name is None or model_name not in AVAILABLE_MODELS:
-            available_models = ", ".join(AVAILABLE_MODELS.keys())
+            available_models: str = ", ".join(AVAILABLE_MODELS.keys())
             raise ValueError(
                 f"Unknown model '{model_name}'. Available models: {available_models}"
             )
-        final_path = AVAILABLE_MODELS[model_name]
+        final_path: str = AVAILABLE_MODELS[model_name]
 
     return Classifier.load_from_checkpoint(final_path, map_location=device)
 
 
 def test(
     model_name: str | None = None,
-    ckpt_path: str | None = None,
+    ckpt_path: str | None = TEST_CKPT_PATH,
     data_dir: str = DATA_DIR,
     batch_size: int = 64,
+    num_workers: int | None = None,
     perf: bool = True,
     run_name: str | None = None,
 ) -> Mapping[str, float]:
@@ -82,6 +84,9 @@ def test(
         ckpt_path (str, optional): Path to local checkpoint file.
         data_dir (str): Directory containing the test data. Defaults to DataConfig.data_dir.
         batch_size (int): Batch size for evaluation. Defaults to DataConfig.batch_size.
+        num_workers (int, optional): Number of worker processes for data loading.
+            If None, defaults to the number of CPU cores. If 0, uses single-threaded
+            data loading. Must be non-negative. Defaults to None.
         run_name (str, optional): Name of the experiment for logging.
         perf (bool): Whether to log performance metrics. Defaults to True.
 
@@ -92,23 +97,26 @@ def test(
         ValueError: If neither model_name nor ckpt_path is provided.
         FileNotFoundError: If checkpoint file doesn't exist.
     """
-    model = load_checkpoint(model_name, ckpt_path)
+    model: Classifier = load_checkpoint(model_name, ckpt_path)
     model.eval()
 
     datamodule = JigsawDataModule(
-        data_dir, batch_size=batch_size, labels=model.hparams["label_names"]
+        data_dir,
+        batch_size=batch_size,
+        labels=model.hparams["label_names"],
+        num_workers=num_workers,
     )
 
     logger = TensorBoardLogger(save_dir="runs", name="test_runs", version=run_name)
-    trainer = pl.Trainer(logger=logger)
+    trainer = pl.Trainer(logger=logger, callbacks=[RichProgressBar()])
 
     if perf:
-        start_time = perf_counter()
-        metrics = trainer.test(model, datamodule=datamodule)[0]
-        end_time = perf_counter()
+        start_time: float = perf_counter()
+        metrics: Mapping[str, float] = trainer.test(model, datamodule=datamodule)[0]
+        end_time: float = perf_counter()
         log_perf(start_time, end_time, trainer)
     else:
-        metrics = trainer.test(model, datamodule=datamodule)[0]
+        metrics: Mapping[str, float] = trainer.test(model, datamodule=datamodule)[0]
 
     return metrics
 
@@ -144,20 +152,20 @@ def predict(
     """
     if isinstance(text, str):
         is_single_input = True
-        text_batch = [text]
+        text_batch: list[str] = [text]
     else:
         is_single_input = False
         text_batch = text
 
-    model = load_checkpoint(model_name, ckpt_path, device)
+    model: Classifier = load_checkpoint(model_name, ckpt_path, device)
     model.eval()
 
     with torch.no_grad():
-        logits = model(text).detach()
-        predictions = logits if return_logits else torch.sigmoid(logits)
+        logits: torch.Tensor = model(text).detach()
+        predictions: torch.Tensor = logits if return_logits else torch.sigmoid(logits)
 
     if verbose:
-        label_names = model.hparams["label_names"]
+        label_names: list[str] = model.hparams["label_names"]
         _print_results(text_batch, predictions, label_names, threshold)
 
     if is_single_input:
@@ -185,14 +193,14 @@ def _print_results(
     init(autoreset=True)  # Auto-reset colors after each print
 
     # Color definitions
-    POSITIVE_COLOR = Fore.RED + Style.BRIGHT
-    NEGATIVE_COLOR = Fore.GREEN + Style.DIM
-    TEXT_COLOR = Fore.CYAN + Style.BRIGHT
-    SEPARATOR_COLOR = Fore.BLUE + Style.BRIGHT
-    SUMMARY_COLOR = Fore.YELLOW + Style.BRIGHT
-    RESET = Style.RESET_ALL
+    POSITIVE_COLOR: int = Fore.RED + Style.BRIGHT
+    NEGATIVE_COLOR: int = Fore.GREEN + Style.DIM
+    TEXT_COLOR: int = Fore.CYAN + Style.BRIGHT
+    SEPARATOR_COLOR: int = Fore.BLUE + Style.BRIGHT
+    SUMMARY_COLOR: int = Fore.YELLOW + Style.BRIGHT
+    RESET: int = Style.RESET_ALL
 
-    separator = f"{SEPARATOR_COLOR}{'=' * 80}{RESET}"
+    separator: str = f"{SEPARATOR_COLOR}{'=' * 80}{RESET}"
 
     for i, (text, pred_vector) in enumerate(zip(text_batch, predictions, strict=True)):
         # Add spacing between samples (except for the first one)
@@ -205,10 +213,10 @@ def _print_results(
 
         if label_names:
             # Print predictions with named labels
-            positive_labels = []
+            positive_labels: list[str] = []
             for pred_score, label in zip(pred_vector, label_names, strict=True):
                 if pred_score > threshold:
-                    color = POSITIVE_COLOR
+                    color: int = POSITIVE_COLOR
                     icon = "✓"
                     status = "POSITIVE"
                     positive_labels.append(label)
@@ -222,7 +230,7 @@ def _print_results(
             # Summary line for quick reference
             print()  # Add spacing before summary
             if positive_labels:
-                labels_str = ", ".join(positive_labels)
+                labels_str: str = ", ".join(positive_labels)
                 print(
                     f"{SUMMARY_COLOR}Predicted labels:{RESET} {POSITIVE_COLOR}{labels_str}{RESET}"
                 )
@@ -232,7 +240,7 @@ def _print_results(
                 )
         else:
             # Print predictions with indices when no label names available
-            positive_indices = []
+            positive_indices: list[str] = []
             for idx, pred_score in enumerate(pred_vector):
                 if pred_score > threshold:
                     color = POSITIVE_COLOR
@@ -251,7 +259,7 @@ def _print_results(
             # Summary line for quick reference
             print()  # Add spacing before summary
             if positive_indices:
-                indices_str = ", ".join(positive_indices)
+                indices_str: str = ", ".join(positive_indices)
                 print(
                     f"{SUMMARY_COLOR}📋 Positive indices:{RESET} {POSITIVE_COLOR}{indices_str}{RESET}"
                 )
@@ -264,5 +272,5 @@ def _print_results(
 if __name__ == "__main__":
     ckpt_path = "runs/training_runs/bert-tiny/checkpoints/epoch=01-val_loss=0.0726.ckpt"
 
-    sample_text = ["i hate you", "you're a dumbass!", "have fun guys"]
-    preds = predict(sample_text, ckpt_path=ckpt_path)
+    sample_text: list[str] = ["i hate you", "you're a dumbass!", "have fun guys"]
+    preds: torch.Tensor = predict(sample_text, ckpt_path=ckpt_path)
