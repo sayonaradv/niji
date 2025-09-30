@@ -122,7 +122,7 @@ def train(
             Defaults to 18.
 
     Raises:
-        FileNotFoundError: If the data directory doesn't exist or required CSV files
+        DataNotFoundError: If the data directory doesn't exist or required CSV files
             are missing.
         ValueError: If specified labels are not found in the dataset columns, or if
             validation parameters are invalid.
