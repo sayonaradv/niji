@@ -17,21 +17,10 @@ from pydantic import ValidationError
 from rich.console import Console
 
 from blanki import __version__, inference, training
+from blanki.exceptions import DataNotFoundError, ModelNotFoundError
 
 # Global console instance for consistent styling
 console = Console()
-
-
-class BlankiError(Exception):
-    """Base exception for Blanki CLI errors."""
-
-
-class ModelNotFoundError(BlankiError):
-    """Raised when a model or checkpoint cannot be found."""
-
-
-class DataNotFoundError(BlankiError):
-    """Raised when required data files are missing."""
 
 
 def create_parser() -> ArgumentParser:
@@ -107,7 +96,7 @@ def run_train(**kwargs) -> None:
             training.train(**kwargs)
 
         console.print("[bold green]Training completed successfully![/bold green]")
-    except FileNotFoundError as e:
+    except DataNotFoundError as e:
         console.print(f"[bold red]Data not found:[/bold red] {e}")
         sys.exit(2)
     except Exception as e:
@@ -123,15 +112,15 @@ def run_test(**kwargs) -> None:
             inference.test(**kwargs)
         console.print("[bold green]Evaluation completed successfully![/bold green]")
 
-    except FileNotFoundError as e:
+    except DataNotFoundError as e:
+        console.print(f"[bold red]Data not found:[/bold red] {e}")
+        sys.exit(2)
+
+    except ModelNotFoundError as e:
         console.print(f"[bold red]Model not found:[/bold red] {e}")
-        console.print(
-            "[yellow]Make sure the model checkpoint exists or use a valid model name.[/yellow]"
-        )
         sys.exit(2)
     except ValueError as e:
         console.print(f"[bold red]Invalid configuration:[/bold red] {e}")
-        console.print("[yellow]Check your test parameters and try again.[/yellow]")
         sys.exit(3)
     except Exception as e:
         console.print(f"[bold red]Testing failed:[/bold red] {e}")
@@ -161,7 +150,7 @@ def run_predict(**kwargs) -> None:
         console.print(f"[bold red]Invalid input:[/bold red] {e}")
         console.print("[yellow]Please provide valid text for prediction.[/yellow]")
         sys.exit(3)
-    except FileNotFoundError as e:
+    except ModelNotFoundError as e:
         console.print(f"[bold red]Model not found:[/bold red] {e}")
         console.print(
             "[yellow]Make sure the model checkpoint exists or use a valid model name.[/yellow]"
@@ -196,7 +185,7 @@ def main() -> None:
             sys.exit(1)
     except KeyboardInterrupt:
         console.print("\n[yellow]Operation cancelled by user[/yellow]")
-        sys.exit(130)
+        sys.exit(1)
     except Exception as e:
         console.print(f"[bold red]Unexpected error:[/bold red] {e}")
         sys.exit(1)
