@@ -5,7 +5,7 @@ from typing import Annotated
 import lightning.pytorch as pl
 import pandas as pd
 import torch
-from pydantic import ConfigDict, Field, PositiveInt, validate_call
+from pydantic import ConfigDict, Field, NonNegativeInt, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
 from blanki.types import BATCH
@@ -20,8 +20,6 @@ JIGSAW_LABELS: list[str] = [
 ]
 
 JIGSAW_HANDLE: str = "jigsaw-toxic-comment-classification-challenge"
-
-
 DATA_DIR: str = f"./data/{JIGSAW_HANDLE}"
 
 
@@ -84,16 +82,16 @@ class Split(Enum):
         Raises:
             FileNotFoundError: If required CSV files are not found in data_dir.
         """
-        inputs_path = os.path.join(data_dir, self.inputs_file)
+        inputs_path: str = os.path.join(data_dir, self.inputs_file)
 
         if self.labels_file is None:
             # Train data: everything in one file
             return pd.read_csv(inputs_path)
         else:
             # Test data: merge inputs and labels
-            labels_path = os.path.join(data_dir, self.labels_file)
-            inputs_df = pd.read_csv(inputs_path)
-            labels_df = pd.read_csv(labels_path)
+            labels_path: str = os.path.join(data_dir, self.labels_file)
+            inputs_df: pd.DataFrame = pd.read_csv(inputs_path)
+            labels_df: pd.DataFrame = pd.read_csv(labels_path)
             return (
                 inputs_df.merge(labels_df, on="id")
                 .query("toxic != -1")
@@ -231,12 +229,6 @@ class JigsawDataModule(pl.LightningDataModule):
         - test.csv: Test inputs with 'comment_text' column
         - test_labels.csv: Test labels with 'id' and label columns
 
-    Attributes:
-        data_dir (str): Path to directory containing dataset files.
-        labels (list[str]): List of label column names to include.
-        batch_size (int): Batch size for DataLoaders.
-        val_size (float): Fraction of training data to use for validation.
-
     Example:
         >>> dm = JigsawDataModule(
         ...     data_dir="/path/to/jigsaw/data",
@@ -256,6 +248,7 @@ class JigsawDataModule(pl.LightningDataModule):
         batch_size: PositiveInt = 64,
         val_size: Annotated[float, Field(ge=0, le=1)] = 0.2,
         labels: list[str] | None = None,
+        num_workers: NonNegativeInt | None = None,
     ) -> None:
         """Initialize the Jigsaw DataModule.
 
@@ -269,6 +262,9 @@ class JigsawDataModule(pl.LightningDataModule):
             labels (list[str] | None): List of label column names to include in outputs.
                 If None, uses all available Jigsaw labels (toxic, severe_toxic, obscene,
                 threat, insult, identity_hate).
+            num_workers (NonNegativeInt | None): Number of worker processes for data loading.
+                If None, defaults to the number of CPU cores. If 0, uses single-threaded
+                data loading. Must be non-negative.
         """
         super().__init__()
 
@@ -276,6 +272,9 @@ class JigsawDataModule(pl.LightningDataModule):
         self.labels = JIGSAW_LABELS if labels is None else labels
         self.batch_size = batch_size
         self.val_size = val_size
+        self.num_workers = (
+            num_workers if num_workers is not None else os.cpu_count() or 1
+        )
 
         self.train_ds: Dataset | None = None
         self.val_ds: Dataset | None = None
@@ -297,16 +296,36 @@ class JigsawDataModule(pl.LightningDataModule):
                 - None: Sets up datasets for all stages
         """
         if stage == "fit" or stage is None:
-            lengths = [1 - self.val_size, self.val_size]
-            full_train_ds = JigsawDataset(
+            lengths: list[float] = [1 - self.val_size, self.val_size]
+            full_train_ds: Dataset = JigsawDataset(
                 Split.TRAIN, data_dir=self.data_dir, labels=self.labels
             )
             self.train_ds, self.val_ds = random_split(full_train_ds, lengths)
 
         if stage == "test" or stage is None:
-            self.test_ds = JigsawDataset(
+            self.test_ds: Dataset = JigsawDataset(
                 Split.TEST, data_dir=self.data_dir, labels=self.labels
             )
+
+    def _make_dataloader(self, dataset: Dataset, shuffle: bool = False) -> DataLoader:
+        """Make a DataLoader from a PyTorch Dataset.
+
+        Args:
+            dataset (Dataset): The PyTorch Dataset to make a DataLoader from.
+            shuffle (bool): Whether to shuffle the dataset.
+
+        Returns:
+            DataLoader: A DataLoader configured for the dataset.
+        """
+        persistent_workers: bool = self.num_workers > 0
+        return DataLoader(
+            dataset,
+            drop_last=True,
+            shuffle=shuffle,
+            persistent_workers=persistent_workers,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+        )
 
     def train_dataloader(self) -> DataLoader | None:
         """Create the training DataLoader.
@@ -320,12 +339,7 @@ class JigsawDataModule(pl.LightningDataModule):
         return (
             None
             if self.train_ds is None
-            else DataLoader(
-                self.train_ds,
-                batch_size=self.batch_size,
-                drop_last=True,
-                shuffle=True,
-            )
+            else self._make_dataloader(self.train_ds, shuffle=True)
         )
 
     def val_dataloader(self) -> DataLoader | None:
@@ -340,12 +354,7 @@ class JigsawDataModule(pl.LightningDataModule):
         return (
             None
             if self.val_ds is None
-            else DataLoader(
-                self.val_ds,
-                batch_size=self.batch_size,
-                drop_last=True,
-                shuffle=False,
-            )
+            else self._make_dataloader(self.val_ds, shuffle=False)
         )
 
     def test_dataloader(self) -> DataLoader | None:
@@ -360,10 +369,5 @@ class JigsawDataModule(pl.LightningDataModule):
         return (
             None
             if self.test_ds is None
-            else DataLoader(
-                self.test_ds,
-                batch_size=self.batch_size,
-                drop_last=True,
-                shuffle=False,
-            )
+            else self._make_dataloader(self.test_ds, shuffle=False)
         )
