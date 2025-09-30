@@ -8,38 +8,43 @@ This CLI provides three main commands:
 """
 
 import sys
+from argparse import Namespace
+from collections.abc import Callable
+from typing import Literal
 
 from jsonargparse import ArgumentParser
+from pydantic import ValidationError
+from rich.console import Console
 
-from blanki import inference, training
+from blanki import __version__, inference, training
+
+# Global console instance for consistent styling
+console = Console()
 
 
-def print_welcome_msg() -> None:
-    """Print ASCII art welcome message."""
-    msg = """
- .o8       oooo                        oooo         o8o
-"888       `888                        `888         `"'
- 888oooo.   888   .oooo.   ooo. .oo.    888  oooo  oooo
- d88' `88b  888  `P  )88b  `888P"Y88b   888 .8P'   `888
- 888   888  888   .oP"888   888   888   888888.     888
- 888   888  888  d8(  888   888   888   888 `88b.   888
- `Y8bod8P' o888o `Y888""8o o888o o888o o888o o888o o888o
-    """
-    print(msg)
+class BlankiError(Exception):
+    """Base exception for Blanki CLI errors."""
+
+
+class ModelNotFoundError(BlankiError):
+    """Raised when a model or checkpoint cannot be found."""
+
+
+class DataNotFoundError(BlankiError):
+    """Raised when required data files are missing."""
 
 
 def create_parser() -> ArgumentParser:
     """Create and configure the main argument parser with subcommands."""
-
-    # Main parser
     parser = ArgumentParser(
         prog="blanki",
-        description="Multi-label toxicity classification with transformer models",
+        description="⚡ Lightning-fast toxicity classification with transformer models.",
+        version=__version__,
     )
 
-    train_subparser = create_subparser("train")
-    test_subparser = create_subparser("test")
-    predict_subparser = create_subparser("predict")
+    train_subparser: ArgumentParser = create_subparser("train")
+    test_subparser: ArgumentParser = create_subparser("test")
+    predict_subparser: ArgumentParser = create_subparser("predict")
 
     # Create subcommands
     subcommands = parser.add_subcommands()
@@ -64,80 +69,136 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
-def create_subparser(subcommand: str) -> ArgumentParser:
-    map = {
+def create_subparser(subcommand: Literal["train", "test", "predict"]) -> ArgumentParser:
+    """Create a subparser for the given subcommand.
+
+    Args:
+        subcommand: The subcommand name, must be one of "train", "test", or "predict"
+
+    Returns:
+        ArgumentParser configured for the specified subcommand
+
+    Raises:
+        ValueError: If subcommand is not one of the valid options
+    """
+    # Define the mapping with explicit validation
+    command_map: dict[Literal["train", "test", "predict"], Callable] = {
         "train": training.train,
         "test": inference.test,
         "predict": inference.predict,
     }
 
+    # This check is redundant with Literal type but provides clear error message
+    if subcommand not in command_map:
+        valid_commands: str = ", ".join(f'"{cmd}"' for cmd in command_map)
+        raise ValueError(
+            f"Invalid subcommand '{subcommand}'. Must be one of: {valid_commands}"
+        )
+
     parser = ArgumentParser()
-    parser.add_function_arguments(map[subcommand])
+    parser.add_function_arguments(command_map[subcommand])
     return parser
 
 
-def run_train(args) -> None:
+def run_train(**kwargs) -> None:
     """Execute the train command."""
     try:
-        # Call training.train with the arguments directly
-        # jsonargparse already matched the function signature
-        training.train(**vars(args))
+        with console.status("[bold blue]Training model...", spinner="aesthetic"):
+            training.train(**kwargs)
+
+        console.print("[bold green]Training completed successfully![/bold green]")
+    except FileNotFoundError as e:
+        console.print(f"[bold red]Data not found:[/bold red] {e}")
+        sys.exit(2)
     except Exception as e:
-        print(f"Error during training: {e}", file=sys.stderr)
+        console.print(f"[bold red]Training failed:[/bold red] {e}")
+        console.print_exception()
         sys.exit(1)
 
 
-def run_test(args) -> None:
+def run_test(**kwargs) -> None:
     """Execute the test command."""
     try:
-        # Call inference.test with the arguments directly
-        metrics = inference.test(**vars(args))
+        with console.status("[bold blue]Evaluating model...", spinner="aesthetic"):
+            inference.test(**kwargs)
+        console.print("[bold green]Evaluation completed successfully![/bold green]")
 
-        # Print results to stdout
-        print("\n=== Test Results ===")
-        for metric, value in metrics.items():
-            print(f"{metric}: {value:.4f}")
-
+    except FileNotFoundError as e:
+        console.print(f"[bold red]Model not found:[/bold red] {e}")
+        console.print(
+            "[yellow]Make sure the model checkpoint exists or use a valid model name.[/yellow]"
+        )
+        sys.exit(2)
+    except ValueError as e:
+        console.print(f"[bold red]Invalid configuration:[/bold red] {e}")
+        console.print("[yellow]Check your test parameters and try again.[/yellow]")
+        sys.exit(3)
     except Exception as e:
-        print(f"Error during testing: {e}", file=sys.stderr)
+        console.print(f"[bold red]Testing failed:[/bold red] {e}")
+        console.print_exception()
         sys.exit(1)
 
 
-def run_predict(args) -> None:
+def run_predict(**kwargs) -> None:
     """Execute the predict command."""
     try:
-        # Call inference.predict with the arguments directly
-        predictions = inference.predict(**vars(args))
+        text: str | list[str] | None = kwargs.get("text")
+        if not text:
+            raise ValidationError("No text provided for prediction.")
 
-        # If not verbose, we might want to output the raw predictions
-        if not getattr(args, "verbose", True):
-            if isinstance(args.text, str):
-                print("Predictions:", predictions.tolist())
-            else:
-                print("Batch predictions:")
-                for i, pred in enumerate(predictions):
-                    print(f"  Text {i + 1}: {pred.tolist()}")
+        if isinstance(text, str) and not text.strip():
+            raise ValidationError("Empty text provided for prediction.")
 
+        if isinstance(text, list) and len(text) == 0:
+            raise ValidationError("Empty list provided for prediction.")
+
+        with console.status("[bold blue]Classifying text...", spinner="aesthetic"):
+            inference.predict(**kwargs)
+
+        console.print("[bold green]Prediction completed successfully![/bold green]")
+
+    except ValidationError as e:
+        console.print(f"[bold red]Invalid input:[/bold red] {e}")
+        console.print("[yellow]Please provide valid text for prediction.[/yellow]")
+        sys.exit(3)
+    except FileNotFoundError as e:
+        console.print(f"[bold red]Model not found:[/bold red] {e}")
+        console.print(
+            "[yellow]Make sure the model checkpoint exists or use a valid model name.[/yellow]"
+        )
+        sys.exit(2)
+    except ValueError as e:
+        console.print(f"[bold red]Invalid configuration:[/bold red] {e}")
+        console.print(
+            "[yellow]Check your prediction parameters and try again.[/yellow]"
+        )
+        sys.exit(3)
     except Exception as e:
-        print(f"Error during prediction: {e}", file=sys.stderr)
+        console.print(f"[bold red]Prediction failed:[/bold red] {e}")
+        console.print_exception()
         sys.exit(1)
 
 
 def main() -> None:
     """Main CLI entry point."""
-    print_welcome_msg()
-    parser = create_parser()
-    args = parser.parse_args()
+    parser: ArgumentParser = create_parser()
+    args: Namespace = parser.parse_args()
 
-    # Route to appropriate command handler
-    if hasattr(args, "train"):
-        run_train(args.train)
-    elif hasattr(args, "test"):
-        run_test(args.test)
-    elif hasattr(args, "predict"):
-        run_predict(args.predict)
-    else:
-        parser.print_help()
+    try:
+        if args.subcommand == "train":
+            run_train(**args.train)
+        elif args.subcommand == "test":
+            run_test(**args.test)
+        elif args.subcommand == "predict":
+            run_predict(**args.predict)
+        else:
+            parser.print_help()
+            sys.exit(1)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled by user[/yellow]")
+        sys.exit(130)
+    except Exception as e:
+        console.print(f"[bold red]Unexpected error:[/bold red] {e}")
         sys.exit(1)
 
 
