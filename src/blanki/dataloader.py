@@ -8,6 +8,7 @@ import torch
 from pydantic import ConfigDict, Field, NonNegativeInt, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
+from blanki.exceptions import DataNotFoundError
 from blanki.types import BATCH
 
 JIGSAW_LABELS: list[str] = [
@@ -80,23 +81,26 @@ class Split(Enum):
                 with columns including 'id', 'comment_text', and toxicity label columns.
 
         Raises:
-            FileNotFoundError: If required CSV files are not found in data_dir.
+            DataNotFoundError: If required CSV files are not found in data_dir.
         """
         inputs_path: str = os.path.join(data_dir, self.inputs_file)
 
-        if self.labels_file is None:
-            # Train data: everything in one file
-            return pd.read_csv(inputs_path)
-        else:
-            # Test data: merge inputs and labels
-            labels_path: str = os.path.join(data_dir, self.labels_file)
-            inputs_df: pd.DataFrame = pd.read_csv(inputs_path)
-            labels_df: pd.DataFrame = pd.read_csv(labels_path)
-            return (
-                inputs_df.merge(labels_df, on="id")
-                .query("toxic != -1")
-                .reset_index(drop=True)
-            )
+        try:
+            if self.labels_file is None:
+                # Train data: everything in one file
+                return pd.read_csv(inputs_path)
+            else:
+                # Test data: merge inputs and labels
+                labels_path: str = os.path.join(data_dir, self.labels_file)
+                inputs_df: pd.DataFrame = pd.read_csv(inputs_path)
+                labels_df: pd.DataFrame = pd.read_csv(labels_path)
+                return (
+                    inputs_df.merge(labels_df, on="id")
+                    .query("toxic != -1")
+                    .reset_index(drop=True)
+                )
+        except FileNotFoundError as e:
+            raise DataNotFoundError(f"Required data file not found: {e}") from e
 
 
 class JigsawDataset(Dataset):
@@ -145,7 +149,7 @@ class JigsawDataset(Dataset):
                 (toxic, severe_toxic, obscene, threat, insult, identity_hate).
 
         Raises:
-            FileNotFoundError: If the data directory doesn't exist or required CSV files
+            DataNotFoundError: If the data directory doesn't exist or required CSV files
                 are missing.
             ValueError: If specified labels are not found in the dataset columns.
         """
@@ -160,10 +164,10 @@ class JigsawDataset(Dataset):
         """Validate that the data directory exists.
 
         Raises:
-            FileNotFoundError: If the data directory doesn't exist.
+            DataNotFoundError: If the data directory doesn't exist.
         """
         if not os.path.exists(self.data_dir):
-            raise FileNotFoundError(
+            raise DataNotFoundError(
                 f"Data directory not found: '{self.data_dir}'. "
                 f"Please ensure the directory exists and contains the Jigsaw dataset files."
             )
