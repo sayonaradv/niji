@@ -1,5 +1,6 @@
 import pytest
 
+from blanki.exceptions import ModelNotFoundError
 from blanki.inference import load_checkpoint
 
 
@@ -18,5 +19,5 @@ class TestLoadCheckpoint:
 
     def test_raises_error_for_nonexistent_checkpoint_file(self) -> None:
         nonexistent_path = "/path/that/does/not/exist.ckpt"
-        with pytest.raises(FileNotFoundError, match="Checkpoint file does not exist:"):
+        with pytest.raises(ModelNotFoundError, match="Checkpoint file does not exist:"):
             load_checkpoint(ckpt_path=nonexistent_path)

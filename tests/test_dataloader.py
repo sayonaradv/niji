@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from torch.utils.data import DataLoader, Dataset
 
 from blanki.dataloader import JIGSAW_LABELS, JigsawDataModule, JigsawDataset, Split
+from blanki.exceptions import DataNotFoundError
 
 
 @pytest.fixture
@@ -136,7 +137,7 @@ class TestJigsawDataset:
 
     def test_check_data_dir(self) -> None:
         data_dir = "nonexistant/data_dir"
-        with pytest.raises(FileNotFoundError, match="Data directory not found"):
+        with pytest.raises(DataNotFoundError, match="Data directory not found"):
             JigsawDataset(Split.TRAIN, data_dir=data_dir)
 
 
