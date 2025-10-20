@@ -1,59 +1,34 @@
 import torch
-from fastapi import Request
-from litserve import LitAPI, LitServer
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-from blanki import inference
+from blanki.inference import TEST_CKPT_PATH, load_checkpoint
+
+app = FastAPI()
+
+model = load_checkpoint(ckpt_path=TEST_CKPT_PATH)
+model.eval()
+
+# Get labels from model checkpoint
+labels = model.hparams["label_names"]
 
 
-class BlankiAPI(LitAPI):
-    def setup(self, device: str) -> None:
-        ckpt_path: str = inference.TEST_CKPT_PATH
-        self.model = inference.load_checkpoint(ckpt_path=ckpt_path)
-        self.model.eval()
+class PredictRequest(BaseModel):
+    input: str | list[str]
 
-    def decode_request(self, request: Request) -> str | list[str]:
-        return request["text"]
 
-    def predict(self, x: str | list[str]) -> torch.Tensor:
-        with torch.no_grad():
-            output: torch.Tensor = self.model(x)
-        return output
+@app.post("/predict")
+def predict(request: PredictRequest):
+    with torch.no_grad():
+        logits = model(request.input).detach().cpu()
+        probabilities = torch.sigmoid(logits)
 
-    def encode_response(
-        self, output: torch.Tensor
-    ) -> list[float] | dict | list[dict[str, float]]:
-        probabilities: torch.Tensor = torch.sigmoid(output).detach().cpu()
+    # Map labels to probabilities
+    result = dict(zip(labels, probabilities, strict=True))
 
-        if self.model.hparams["label_names"] is not None:
-            # Handle batch inputs (multiple texts)
-            if probabilities.dim() > 1:
-                # Convert 2D tensor to list of dictionaries
-                result: list[dict[str, float]] = []
-                for i in range(probabilities.shape[0]):
-                    result.append(
-                        dict(
-                            zip(
-                                self.model.hparams["label_names"],
-                                probabilities[i].tolist(),
-                                strict=True,
-                            )
-                        )
-                    )
-                return result
-            else:
-                # Single input
-                return dict(
-                    zip(
-                        self.model.hparams["label_names"],
-                        probabilities.tolist(),
-                        strict=True,
-                    )
-                )
-        else:
-            # Return raw probabilities
-            return probabilities.tolist()
+    return result
 
 
 if __name__ == "__main__":
-    server = LitServer(BlankiAPI())
-    server.run(port=8000)
+    uvicorn.run(app, port=8000)
