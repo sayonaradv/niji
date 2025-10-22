@@ -15,9 +15,9 @@ from torch.nn import functional as F
 from torch.optim import Optimizer
 from torchmetrics.functional.classification import multilabel_accuracy
 
-from blanki.schedulers import LinearWarmupCosineAnnealingLR
-from blanki.types import BATCH, MODEL_OUTPUT
-from blanki.utils import get_model_and_tokenizer
+from niji.schedulers import LinearWarmupCosineAnnealingLR
+from niji.types import BATCH, MODEL_OUTPUT
+from niji.utils import get_model_and_tokenizer
 
 
 class Classifier(pl.LightningModule):

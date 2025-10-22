@@ -1,7 +1,7 @@
 import pytest
 
-from blanki.exceptions import ModelNotFoundError
-from blanki.inference import load_checkpoint
+from niji.exceptions import ModelNotFoundError
+from niji.inference import load_checkpoint
 
 
 class TestLoadCheckpoint:

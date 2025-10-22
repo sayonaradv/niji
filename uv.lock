@@ -98,55 +98,6 @@ wheels = [
 ]
 
 [[package]]
-name = "blanki"
-version = "0.0.1a4"
-source = { editable = "." }
-dependencies = [
-    { name = "colorama" },
-    { name = "datasets" },
-    { name = "jsonargparse", extra = ["signatures"] },
-    { name = "lightning" },
-    { name = "litserve" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-    { name = "rich" },
-    { name = "tensorboard" },
-    { name = "transformers" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-    { name = "pyrefly" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "ty" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "colorama", specifier = ">=0.4.6" },
-    { name = "datasets", specifier = ">=4.0.0" },
-    { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.40.0" },
-    { name = "lightning", specifier = ">=2.5.3" },
-    { name = "litserve", specifier = ">=0.2.15" },
-    { name = "pydantic", specifier = ">=2.11.9" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
-    { name = "rich", specifier = ">=14.1.0" },
-    { name = "tensorboard", specifier = ">=2.20.0" },
-    { name = "transformers", specifier = ">=4.55.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pre-commit", specifier = ">=4.3.0" },
-    { name = "pyrefly", specifier = ">=0.33.0" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "ruff", specifier = ">=0.12.8" },
-    { name = "ty", specifier = ">=0.0.1a20" },
-]
-
-[[package]]
 name = "certifi"
 version = "2025.8.3"
 source = { registry = "https://pypi.org/simple" }
@@ -720,6 +671,55 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/8d/776adee7bbf76365fdd7f2552710282c79a4ead5d2a46408c9043a2b70ba/networkx-3.5-py3-none-any.whl", hash = "sha256:0030d386a9a06dee3565298b4a734b68589749a544acbb6c412dc9e2489ec6ec", size = 2034406, upload-time = "2025-05-29T11:35:04.961Z" },
+]
+
+[[package]]
+name = "niji"
+version = "0.0.1a4"
+source = { editable = "." }
+dependencies = [
+    { name = "colorama" },
+    { name = "datasets" },
+    { name = "jsonargparse", extra = ["signatures"] },
+    { name = "lightning" },
+    { name = "litserve" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "tensorboard" },
+    { name = "transformers" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "pyrefly" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "colorama", specifier = ">=0.4.6" },
+    { name = "datasets", specifier = ">=4.0.0" },
+    { name = "jsonargparse", extras = ["signatures"], specifier = ">=4.40.0" },
+    { name = "lightning", specifier = ">=2.5.3" },
+    { name = "litserve", specifier = ">=0.2.15" },
+    { name = "pydantic", specifier = ">=2.11.9" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "rich", specifier = ">=14.1.0" },
+    { name = "tensorboard", specifier = ">=2.20.0" },
+    { name = "transformers", specifier = ">=4.55.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.3.0" },
+    { name = "pyrefly", specifier = ">=0.33.0" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "ruff", specifier = ">=0.12.8" },
+    { name = "ty", specifier = ">=0.0.1a20" },
 ]
 
 [[package]]

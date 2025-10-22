@@ -4,8 +4,8 @@ import torch
 from pydantic import ValidationError
 from torch.utils.data import DataLoader, Dataset
 
-from blanki.dataloader import JIGSAW_LABELS, JigsawDataModule, JigsawDataset, Split
-from blanki.exceptions import DataNotFoundError
+from niji.dataloader import JIGSAW_LABELS, JigsawDataModule, JigsawDataset, Split
+from niji.exceptions import DataNotFoundError
 
 
 @pytest.fixture

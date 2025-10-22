@@ -1,4 +1,4 @@
-# blanki
+# niji
 
 An extremely fast and accurate Python library for detecting toxic and harmful content in text using state-of-the-art transformer models.
 
@@ -13,7 +13,7 @@ An extremely fast and accurate Python library for detecting toxic and harmful co
 - 🔧 **Flexible Configuration**: YAML-based configuration system for easy experimentation
 - 📊 **Rich Monitoring**: Built-in progress tracking, logging, and model checkpointing
 
-blanki provides both high-level prediction APIs for quick content moderation and comprehensive training tools for custom model development.
+niji provides both high-level prediction APIs for quick content moderation and comprehensive training tools for custom model development.
 
 ---
 
@@ -21,16 +21,16 @@ blanki provides both high-level prediction APIs for quick content moderation and
 
 ### Quick Installation
 
-Install blanki using uv (recommended):
+Install niji using uv (recommended):
 
 ```bash
-uv add blanki
+uv add niji
 ```
 
 Or using pip:
 
 ```bash
-pip install blanki
+pip install niji
 ```
 
 ### Development Installation
@@ -39,8 +39,8 @@ For training custom models or contributing to development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/sudojayder/blanki.git
-cd blanki
+git clone https://github.com/sudojayder/niji.git
+cd niji
 
 # Install with development dependencies using uv
 uv sync
@@ -58,13 +58,13 @@ pip install -e ".[dev]"
 Get started with toxicity detection in just a few lines:
 
 ```python
-from blanki import Blanki
+from niji import Niji
 
 # Load a pre-trained model
-blanki = Blanki(model_name="bert-tiny")
+niji = Niji(model_name="bert-tiny")
 
 # Detect toxicity in text
-result = blanki.predict("This is a sample comment to analyze")
+result = niji.predict("This is a sample comment to analyze")
 print(result)
 
 # Process multiple texts efficiently  
@@ -73,31 +73,31 @@ texts = [
     "Another piece of text to check", 
     "Batch processing is supported"
 ]
-results = blanki.predict(texts)
+results = niji.predict(texts)
 ```
 
 ### CLI
 
-Or run blanki directly from the command line:
+Or run niji directly from the command line:
 
 ```bash
 # Classify single text
-blanki --texts "Hello world" --threshold 0.7
+niji --texts "Hello world" --threshold 0.7
 
 # Classify multiple texts  
-blanki --texts '["Text 1", "Text 2"]' --model_name bert-tiny
+niji --texts '["Text 1", "Text 2"]' --model_name bert-tiny
 
 # Use custom checkpoint
-blanki "Sample text" --checkpoint_path model.ckpt
+niji "Sample text" --checkpoint_path model.ckpt
 ```
 
-See the [documentation](https://blanki.readthedocs.io) for comprehensive guides and API reference.
+See the [documentation](https://niji.readthedocs.io) for comprehensive guides and API reference.
 
 ---
 
 ## 📊 Detection Categories
 
-Blanki detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
+Niji detects six categories of toxicity based on the Jigsaw Toxic Comment Classification dataset:
 
 | Category | Description |
 |----------|-------------|
@@ -136,7 +136,7 @@ Example output:
     
     You must specifiy a `model_name` that is available on https://huggingface.co/models, e.g. `distilbert/distilbert-base-uncased`, `google-bert/bert-base-uncased`.
 
-    Run the help command (`uv run -m blanki trainer --help`) to get a list of available training options like `batch_size`, `val_size`, `max_epochs`, `lr` and more.
+    Run the help command (`uv run -m niji trainer --help`) to get a list of available training options like `batch_size`, `val_size`, `max_epochs`, `lr` and more.
 
 3. Run the training script with your configuration file:
 
@@ -164,8 +164,8 @@ Example output:
 
 ```bash
 # Clone repository
-git clone https://github.com/zuzo-sh/blanki.git
-cd blanki
+git clone https://github.com/zuzo-sh/niji.git
+cd niji
 
 # Install with development dependencies
 uv sync
@@ -175,11 +175,11 @@ uv sync
 
 ## 📚 Documentation
 
-- **[Getting Started Guide](https://blanki.readthedocs.io/getting-started/)** - Basic usage and installation
-- **[Training Guide](https://blanki.readthedocs.io/training/)** - Custom model training and fine-tuning  
-- **[API Reference](https://blanki.readthedocs.io/api/)** - Complete API documentation
-- **[Configuration Guide](https://blanki.readthedocs.io/configuration/)** - YAML configuration options
-- **[Production Deployment](https://blanki.readthedocs.io/production/)** - Performance optimization and scaling
+- **[Getting Started Guide](https://niji.readthedocs.io/getting-started/)** - Basic usage and installation
+- **[Training Guide](https://niji.readthedocs.io/training/)** - Custom model training and fine-tuning  
+- **[API Reference](https://niji.readthedocs.io/api/)** - Complete API documentation
+- **[Configuration Guide](https://niji.readthedocs.io/configuration/)** - YAML configuration options
+- **[Production Deployment](https://niji.readthedocs.io/production/)** - Performance optimization and scaling
 
 ---
 
@@ -215,4 +215,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-**blanki** - Professional toxicity detection for safer digital spaces.
+**niji** - Professional toxicity detection for safer digital spaces.

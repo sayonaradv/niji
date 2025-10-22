@@ -21,9 +21,9 @@ from pydantic import (
     model_validator,
 )
 
-from blanki.dataloader import JIGSAW_HANDLE, JigsawDataModule
-from blanki.module import Classifier
-from blanki.utils import log_perf
+from niji.dataloader import JIGSAW_HANDLE, JigsawDataModule
+from niji.module import Classifier
+from niji.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")

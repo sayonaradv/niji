@@ -8,8 +8,8 @@ import torch
 from pydantic import ConfigDict, Field, NonNegativeInt, PositiveInt, validate_call
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from blanki.exceptions import DataNotFoundError
-from blanki.types import BATCH
+from niji.exceptions import DataNotFoundError
+from niji.types import BATCH
 
 JIGSAW_LABELS: list[str] = [
     "toxic",

@@ -3,9 +3,9 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from blanki.inference import TEST_CKPT_PATH, load_checkpoint
+from niji.inference import TEST_CKPT_PATH, load_checkpoint
 
-app = FastAPI(title="Blanki Inference API")
+app = FastAPI(title="Niji Inference API")
 
 model = load_checkpoint(ckpt_path=TEST_CKPT_PATH)
 model.eval()

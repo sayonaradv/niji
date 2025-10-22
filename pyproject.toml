@@ -1,5 +1,5 @@
 [project]
-name = "blanki"
+name = "niji"
 version = "0.0.1a4"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -28,7 +28,7 @@ project-excludes = [
 bad-override = false
 
 [project.scripts]
-blanki = "blanki.cli:main"
+niji = "niji.cli:main"
 
 [build-system]
 requires = ["hatchling"]

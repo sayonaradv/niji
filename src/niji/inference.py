@@ -7,16 +7,16 @@ import torch
 from lightning.pytorch.callbacks import RichProgressBar
 from lightning.pytorch.loggers import TensorBoardLogger
 
-from blanki.dataloader import JigsawDataModule
-from blanki.exceptions import ModelNotFoundError
-from blanki.module import Classifier
-from blanki.training import DATA_DIR
-from blanki.utils import log_perf
+from niji.dataloader import JigsawDataModule
+from niji.exceptions import ModelNotFoundError
+from niji.module import Classifier
+from niji.training import DATA_DIR
+from niji.utils import log_perf
 
 # See https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html
 torch.set_float32_matmul_precision("medium")
 
-DOWNLOAD_BASE_URL = "https://github.com/sudojayder/blanki/releases/download/"
+DOWNLOAD_BASE_URL = "https://github.com/sudojayder/niji/releases/download/"
 AVAILABLE_MODELS = {
     "bert-tiny": f"{DOWNLOAD_BASE_URL}v0.0.1alpha4/finetuned-bert-tiny.ckpt",
     "distilbert": f"{DOWNLOAD_BASE_URL}v0.0.1alpha4/finetuned-distilbert.ckpt",
