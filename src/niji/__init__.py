@@ -1,3 +1,5 @@
+import torch
+
 from .exceptions import DataNotFoundError, ModelNotFoundError, NijiError
 from .inference import load_checkpoint
 from .setup import env_vars, logging
@@ -24,12 +26,15 @@ class Niji:
 
     def predict(self, text: str | list[str]) -> dict:
         """Predict toxicity scores for text(s)."""
-        # Placeholder implementation
-        labels = dict.fromkeys(self.model.hparams["label_names"], 0.0)
-        if isinstance(text, str):
-            return {text: labels}
-        else:
-            return dict.fromkeys(text, labels)
+        texts = [text] if isinstance(text, str) else text
+        logits = self.model(texts)
+        probs = torch.sigmoid(logits).detach().cpu()
+        labels = self.model.hparams["label_names"]
+        results = {}
+        for i, txt in enumerate(texts):
+            scores = {label: probs[i, j].item() for j, label in enumerate(labels)}
+            results[txt] = scores
+        return results
 
 
 def main() -> None:
