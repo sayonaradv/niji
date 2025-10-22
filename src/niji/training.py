@@ -12,13 +12,11 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch.loggers import TensorBoardLogger
 from pydantic import (
-    BaseModel,
     Field,
     NonNegativeInt,
     PositiveFloat,
     PositiveInt,
-    ValidationError,
-    model_validator,
+    validate_call,
 )
 
 from niji.dataloader import JIGSAW_HANDLE, JigsawDataModule
@@ -33,47 +31,7 @@ DATA_DIR: str = f"{CACHE_DIR}/{JIGSAW_HANDLE}"
 LOG_DIR: str = "./runs"
 
 
-class _TrainParams(BaseModel):
-    """Private Pydantic model for validating all train function parameters."""
-
-    model_name: str
-    data_dir: str
-    labels: list[str] | None
-    batch_size: PositiveInt
-    val_size: Annotated[float, Field(ge=0, le=1)]
-    max_token_len: PositiveInt
-    lr: PositiveFloat
-    warmup_start_lr: PositiveFloat
-    warmup_epochs: PositiveInt
-    max_epochs: PositiveInt
-    patience: PositiveInt
-    run_name: str | None
-    perf: bool
-    fast_dev_run: bool
-    cache_dir: str | None
-    log_dir: str
-    num_workers: NonNegativeInt | None
-    seed: NonNegativeInt
-
-    @model_validator(mode="after")
-    def validate_warmup_epochs(self) -> "_TrainParams":
-        """Validate that warmup_epochs is less than max_epochs."""
-        if self.warmup_epochs >= self.max_epochs:
-            raise ValueError(
-                f"warmup_epochs ({self.warmup_epochs}) must be less than max_epochs ({self.max_epochs})"
-            )
-        return self
-
-    @model_validator(mode="after")
-    def validate_warmup_lr(self) -> "_TrainParams":
-        """Validate that warmup_start_lr is less than peak lr."""
-        if self.warmup_start_lr >= self.lr:
-            raise ValueError(
-                f"warmup_start_lr ({self.warmup_start_lr}) must be less than the peak lr ({self.lr})"
-            )
-        return self
-
-
+@validate_call
 def train(
     model_name: str,
     data_dir: str = DATA_DIR,
@@ -171,36 +129,24 @@ def train(
         >>> # Fast development run for debugging
         >>> train("bert-tiny", fast_dev_run=True)
     """
-    # Validate all parameters using Pydantic model
-    params = _TrainParams(
-        model_name=model_name,
-        data_dir=data_dir,
-        labels=labels,
-        batch_size=batch_size,
-        val_size=val_size,
-        max_token_len=max_token_len,
-        lr=lr,
-        warmup_start_lr=warmup_start_lr,
-        warmup_epochs=warmup_epochs,
-        max_epochs=max_epochs,
-        patience=patience,
-        run_name=run_name,
-        perf=perf,
-        fast_dev_run=fast_dev_run,
-        cache_dir=cache_dir,
-        log_dir=log_dir,
-        num_workers=num_workers,
-        seed=seed,
-    )
+    # Validate cross-field constraints
+    if warmup_epochs >= max_epochs:
+        raise ValueError(
+            f"warmup_epochs ({warmup_epochs}) must be less than max_epochs ({max_epochs})"
+        )
+    if warmup_start_lr >= lr:
+        raise ValueError(
+            f"warmup_start_lr ({warmup_start_lr}) must be less than the peak lr ({lr})"
+        )
 
-    pl.seed_everything(params.seed, workers=True)
+    pl.seed_everything(seed, workers=True)
 
     datamodule = JigsawDataModule(
-        params.data_dir,
-        params.batch_size,
-        params.val_size,
-        params.labels,
-        params.num_workers,
+        data_dir,
+        batch_size,
+        val_size,
+        labels,
+        num_workers,
     )
 
     # If no labels provided, datamodule will automatically use JIGSAW_LABELS
@@ -208,19 +154,17 @@ def train(
     num_labels: int = len(labels)
 
     model = Classifier(
-        params.model_name,
+        model_name,
         num_labels,
         labels,
-        params.max_token_len,
-        params.lr,
-        params.warmup_start_lr,
-        params.warmup_epochs,
-        params.cache_dir,
+        max_token_len,
+        lr,
+        warmup_start_lr,
+        warmup_epochs,
+        cache_dir,
     )
 
-    logger = TensorBoardLogger(
-        save_dir=params.log_dir, name="training_runs", version=params.run_name
-    )
+    logger = TensorBoardLogger(save_dir=log_dir, name="training_runs", version=run_name)
 
     callbacks: list[Callback] = [
         ModelCheckpoint(filename="{epoch:02d}-{val_loss:.4f}"),
@@ -229,16 +173,16 @@ def train(
     ]
 
     # do not use EarlyStopping if getting perf benchmark
-    if not params.perf:
+    if not perf:
         callbacks.append(
-            EarlyStopping(monitor="val_loss", patience=params.patience),
+            EarlyStopping(monitor="val_loss", patience=patience),
         )
 
     trainer = pl.Trainer(
-        max_epochs=params.max_epochs,
+        max_epochs=max_epochs,
         logger=logger,
         callbacks=callbacks,
-        fast_dev_run=params.fast_dev_run,
+        fast_dev_run=fast_dev_run,
         deterministic=True,
     )
 
@@ -246,7 +190,7 @@ def train(
     trainer.fit(model, datamodule=datamodule)
     stop: float = perf_counter()
 
-    if params.perf:
+    if perf:
         log_perf(start, stop, trainer)
 
 
@@ -260,5 +204,5 @@ if __name__ == "__main__":
             max_epochs=10,
             warmup_epochs=20,
         )
-    except ValidationError as e:
+    except ValueError as e:
         print(e)
