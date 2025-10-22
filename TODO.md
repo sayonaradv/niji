@@ -2,10 +2,7 @@
 
 ## High Priority
 
-- **Fix placeholder code**: Implement actual prediction logic in `Niji.predict` using the loaded model's forward pass and sigmoid activation.
-- **Call model compilation**: In `module.py`, `configure_model` is defined but never invoked. Call it in `__init__` or a setup method to enable `torch.compile`.
 - **Correct invalid examples**: The main block in `training.py` has `warmup_epochs=20` and `max_epochs=10`, violating the constraint. Update to valid values.
-- **Add evaluation separation**: Move testing logic from `inference.py` to a new `eval.py` module.
 
 ## Medium Priority
 

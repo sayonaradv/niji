@@ -192,17 +192,3 @@ def train(
 
     if perf:
         log_perf(start, stop, trainer)
-
-
-if __name__ == "__main__":
-    try:
-        train(
-            model_name="google/bert_uncased_L-2_H-128_A-2",
-            labels=["toxic", "severe_toxic"],
-            batch_size=32,
-            lr=2e-5,
-            max_epochs=10,
-            warmup_epochs=20,
-        )
-    except ValueError as e:
-        print(e)
